@@ -22,18 +22,18 @@ const horizontalAxis = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
 
 const Chessboard = () => {
-  
+
   const chessboardRef = useRef(null);
-  
+
   const [activePiece, setActivePiece] = useState(null);
   const [gridX, setGridX] = useState(0);
   const [gridY, setGridY] = useState(0);
   const [pieces, setPieces] = useState([]);
-  
+
   let board = [];
-  
+
   const referee = new Referee();
-  
+
   useEffect(() => {
     for (let i = 0; i < 2; i++) {
       const teamType = (i === 0) ? TeamType.BLACK : TeamType.WHITE;
@@ -116,28 +116,38 @@ const Chessboard = () => {
       const x = Math.floor((e.clientX - chessboard.offsetLeft) / 100);
       const y = Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - 800) / 100));
 
-      
-      
-      // updates piece position
-      setPieces(value => {
-        const pieces = value.map(p => {
-          if (p.x === gridX && p.y === gridY) {
-            // check if valid move
-            const validMove = referee.isValidMove(gridX, gridY, x, y, p.type, p.teamType);
-            
-            if (validMove) {
-              p.x = x;
-              p.y = y;
-            } else {
-              activePiece.style.position = 'relative';
-              activePiece.style.removeProperty('top');
-              activePiece.style.removeProperty('left');
+      const currentPiece = pieces.find((p) => p.x === gridX && p.y == gridY);
+      const attackedPiece = pieces.find((p) => p.x === x && p.y === y);
+
+      if (currentPiece) {
+        const validMove = referee.isValidMove(gridX, gridY, x, y, currentPiece.type, currentPiece.teamType, pieces);
+
+        if (validMove) {
+          // updates piece position, if piece attacked, remove it
+          const updatedPieces = pieces.reduce((results, piece) => {
+            if (piece.x === currentPiece.x && piece.y === currentPiece.y) {
+              piece.x = x;
+              piece.y = y;
+              results.push(piece);
+            } else if (!(piece.x === x && piece.y === y)) {
+              results.push(piece);
             }
-          }
-          return p;
-        })
-        return pieces;
-      })
+
+            return results;
+          }, []);
+
+          console.log(updatedPieces)
+
+          setPieces(updatedPieces);
+        } else {
+          console.log('INVALID')
+          // resets piece position
+          activePiece.style.position = 'relative';
+          activePiece.style.removeProperty('top');
+          activePiece.style.removeProperty('left');
+        }
+      }
+
       setActivePiece(null);
     }
   }
