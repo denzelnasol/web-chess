@@ -6,6 +6,7 @@ import { isValidPawnPosition } from "referee/Rules/PawnRules";
 import { isValidKnightPosition } from "referee/Rules/KnightRules";
 import { isValidBishopPosition } from "referee/Rules/BishopRules";
 import { isValidRookPosition } from "referee/Rules/RookRules";
+import { isValidQueenPosition } from "referee/Rules/QueenRules";
 
 export default class Referee {
 
@@ -19,6 +20,8 @@ export default class Referee {
       isValidPosition = isValidBishopPosition(grabPosition, newPosition, teamType, boardState);
     } else if (type === PieceType.ROOK) {
       isValidPosition = isValidRookPosition(grabPosition, newPosition, teamType, boardState);
+    } else if (type === PieceType.QUEEN) {
+      isValidPosition = isValidQueenPosition(grabPosition, newPosition, teamType, boardState);
     }
     return isValidPosition;
   }
