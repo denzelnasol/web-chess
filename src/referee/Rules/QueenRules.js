@@ -8,50 +8,21 @@ import { tileIsOccupied, tileIsEmptyOrOccupiedByOpponent } from "referee/Rules/G
 import Position from "objects/Position";
 
 export function isValidQueenPosition(grabPosition, newPosition, teamType, boardState) {
+  const multiplierX = (newPosition.x < grabPosition.x) ? -1 : (newPosition.x > grabPosition.x) ? 1 : 0;
+  const multiplierY = (newPosition.y < grabPosition.y) ? -1 : (newPosition.y > grabPosition.y) ? 1 : 0;
+
   // ** MOVEMENT/ATTACK LOGIC ** //
   for (let i = 1; i < 8; i++) {
-    if (newPosition.x > grabPosition.x && newPosition.y > grabPosition.y) {
-      const passedPosition = new Position(grabPosition.x + i, grabPosition.y + i);
-      if (lastQueenTileIsValid(newPosition, passedPosition, boardState, teamType)) return true;
-      if (tileIsOccupied(passedPosition, boardState)) break;
-    } else if (newPosition.x > grabPosition.x && newPosition.y < grabPosition.y) {
-      const passedPosition = new Position(grabPosition.x + i, grabPosition.y - i);
-      if (lastQueenTileIsValid(newPosition, passedPosition, boardState, teamType)) return true;
-      if (tileIsOccupied(passedPosition, boardState)) break;
-    } else if (newPosition.x < grabPosition.x && newPosition.y < grabPosition.y) {
-      const passedPosition = new Position(grabPosition.x - i, grabPosition.y - i);
-      if (lastQueenTileIsValid(newPosition, passedPosition, boardState, teamType)) return true;
-      if (tileIsOccupied(passedPosition, boardState)) break;
-    } else if (newPosition.x < grabPosition.x && newPosition.y > grabPosition.y) {
-      const passedPosition = new Position(grabPosition.x - i, grabPosition.y + i);
-      if (lastQueenTileIsValid(newPosition, passedPosition, boardState, teamType)) return true;
-      if (tileIsOccupied(passedPosition, boardState)) break;
-    } else if (newPosition.x > grabPosition.x && sameRow(newPosition, grabPosition)) {
-      const passedPosition = new Position(grabPosition.x + i, grabPosition.y);
-      if (lastQueenTileIsValid(newPosition, passedPosition, boardState, teamType)) return true;
-      if (tileIsOccupied(passedPosition, boardState)) break;
-    } else if (newPosition.x < grabPosition.x && sameRow(newPosition, grabPosition)) {
-      const passedPosition = new Position(grabPosition.x - i, grabPosition.y);
-      if (lastQueenTileIsValid(newPosition, passedPosition, boardState, teamType)) return true;
-      if (tileIsOccupied(passedPosition, boardState)) break;
-    } else if (sameColumn(newPosition, grabPosition) && newPosition.y > grabPosition.y) {
-      const passedPosition = new Position(grabPosition.x, grabPosition.y + i);
-      if (lastQueenTileIsValid(newPosition, passedPosition, boardState, teamType)) return true;
-      if (tileIsOccupied(passedPosition, boardState)) break;
-    } else if (sameColumn(newPosition, grabPosition) && newPosition.y < grabPosition.y) {
-      const passedPosition = new Position(grabPosition.x, grabPosition.y - i);
-      if (lastQueenTileIsValid(newPosition, passedPosition, boardState, teamType)) return true;
-      if (tileIsOccupied(passedPosition, boardState)) break;
-    }
-  }
+    const passedPosition = new Position(grabPosition.x + (i * multiplierX), grabPosition.y + (i * multiplierY));
 
-  return false;
-}
-
-function lastQueenTileIsValid(newPosition, passedPosition, boardState, teamType) {
-  if (samePosition(newPosition, passedPosition)) {
-    if (tileIsEmptyOrOccupiedByOpponent(passedPosition, boardState, teamType)) {
-      return true;
+    if (samePosition(newPosition, passedPosition)) {
+      if (tileIsEmptyOrOccupiedByOpponent(passedPosition, boardState, teamType)) {
+        return true;
+      }
+    } else {
+      if (tileIsOccupied(passedPosition, boardState)) {
+        break;
+      }
     }
   }
 
