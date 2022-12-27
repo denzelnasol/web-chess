@@ -14,7 +14,6 @@ export default class Referee {
   /** @TODO
    * Prevent king from moving into danger
    * Castling
-   * Pawn promotion
    * Add checkmate
    * Add checks
    * Add stalemate

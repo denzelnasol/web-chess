@@ -198,7 +198,7 @@ const Chessboard = () => {
   }
 
   const promotionTeamType = () => {
-    return (promotionPawn.team === TeamType.WHITE) ? 'w' : 'b';
+    return (promotionPawn?.teamType === TeamType.WHITE) ? 'w' : 'b';
   }
 
   const promotePawn = (pieceType) => {
@@ -223,10 +223,10 @@ const Chessboard = () => {
       <div className="pawn-promotion-modal hidden" ref={modalRef}>
         <div className="modal-body">
           {/* Pawn Promotion Modal! */}
-          <img onClick={() => promotePawn(PieceType.ROOK)} src={`images/${() => promotionTeamType()}-rook.png`} />
-          <img onClick={() => promotePawn(PieceType.BISHOP)} src={`images/${() =>promotionTeamType()}-bishop.png`} />
-          <img onClick={() => promotePawn(PieceType.KNIGHT)} src={`images/${() =>promotionTeamType()}-knight.png`} />
-          <img onClick={() => promotePawn(PieceType.QUEEN)} src={`images/${() =>promotionTeamType()}-queen.png`} />
+          <img onClick={() => promotePawn(PieceType.ROOK)} src={`images/${promotionTeamType()}-rook.png`} />
+          <img onClick={() => promotePawn(PieceType.BISHOP)} src={`images/${promotionTeamType()}-bishop.png`} />
+          <img onClick={() => promotePawn(PieceType.KNIGHT)} src={`images/${promotionTeamType()}-knight.png`} />
+          <img onClick={() => promotePawn(PieceType.QUEEN)} src={`images/${promotionTeamType()}-queen.png`} />
         </div>
       </div>
 
