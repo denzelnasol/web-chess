@@ -9,26 +9,6 @@ import Position from "objects/Position";
 
 export function isValidRookPosition(grabPosition, newPosition, teamType, boardState) {
   // ** MOVEMENT/ATTACK LOGIC ** //
-  // for (let i = 1; i < 8; i++) {
-  //   if (newPosition.x > grabPosition.x && newPosition.y > grabPosition.y) {
-  //     const passedPosition = new Position(grabPosition.x + i, grabPosition.y + i);
-  //     if (lastBishopTileIsValid(newPosition, passedPosition, boardState, teamType)) return true;
-  //     if (tileIsOccupied(passedPosition, boardState)) break;
-  //   } else if (newPosition.x > grabPosition.x && newPosition.y < grabPosition.y) {
-  //     const passedPosition = new Position(grabPosition.x + i, grabPosition.y - i);
-  //     if (lastBishopTileIsValid(newPosition, passedPosition, boardState, teamType)) return true;
-  //     if (tileIsOccupied(passedPosition, boardState)) break;
-  //   } else if (newPosition.x < grabPosition.x && newPosition.y < grabPosition.y) {
-  //     const passedPosition = new Position(grabPosition.x - i, grabPosition.y - i);
-  //     if (lastBishopTileIsValid(newPosition, passedPosition, boardState, teamType)) return true;
-  //     if (tileIsOccupied(passedPosition, boardState)) break;
-  //   } else if (newPosition.x < grabPosition.x && newPosition.y > grabPosition.y) {
-  //     const passedPosition = new Position(grabPosition.x - i, grabPosition.y + i);
-  //     if (lastBishopTileIsValid(newPosition, passedPosition, boardState, teamType)) return true;
-  //     if (tileIsOccupied(passedPosition, boardState)) break;
-  //   }
-  // }
-
   for (let i = 1; i < 8; i++) {
     if (newPosition.x > grabPosition.x && sameRow(newPosition, grabPosition)) {
       const passedPosition = new Position(grabPosition.x + i, grabPosition.y);

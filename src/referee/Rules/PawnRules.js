@@ -11,19 +11,27 @@ import { tileIsOccupied, tileIsOccupiedByOpponent } from "referee/Rules/GeneralR
 // Objects
 import Position from "objects/Position";
 
-export function isEnPassantMove(grabPosition, newPosition, boardState, type, teamType) {
+export function moveIsEnpassant(grabPosition, newPosition, boardState, type, teamType) {
   const pawnDirection = teamType === TeamType.WHITE ? 1 : -1;
   const xDifference = getPositionPointDifference(newPosition.x, grabPosition.x);
   const yDifference = getPositionPointDifference(newPosition.y, grabPosition.y);
+  if (type !== PieceType.PAWN) return false;
 
-  if (type === PieceType.PAWN) {
-    if ((xDifference === -1 || xDifference === 1) && yDifference === pawnDirection) {
-      const piece = boardState.find((piece) =>
-        samePosition(piece.position, new Position(newPosition.x, newPosition.y - pawnDirection)) && piece.enPassant
-      );
-      if (piece) return true;
-    }
+  if ((xDifference === -1 || xDifference === 1) && yDifference === pawnDirection) {
+    const piece = boardState.find((piece) =>
+      samePosition(piece.position, new Position(newPosition.x, newPosition.y - pawnDirection)) && piece.enPassant
+    );
+    if (piece) return true;
   }
+  return false;
+}
+
+export function moveIsPawnPromotion(newPosition, type, teamType) {
+  const promotionRow = teamType === TeamType.WHITE ? 7 : 0;
+
+  if (type !== PieceType.PAWN) return false;
+  if (newPosition.y === promotionRow) return true;
+
   return false;
 }
 
