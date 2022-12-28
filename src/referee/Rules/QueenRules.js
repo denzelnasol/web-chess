@@ -28,3 +28,10 @@ export function isValidQueenPosition(grabPosition, newPosition, teamType, boardS
 
   return false;
 }
+
+export function getPossibleQueenMoves(queen, boardState) {
+  const possibleMoves = [];
+
+
+  return possibleMoves;
+}

@@ -17,3 +17,10 @@ export function isValidKingPosition(grabPosition, newPosition, teamType, boardSt
 
   return false;
 }
+
+export function getPossibleKingMoves(king, boardState) {
+  const possibleMoves = [];
+
+
+  return possibleMoves;
+}

@@ -19,6 +19,7 @@ import Referee from 'referee/Referee';
 
 // Rules
 import { moveIsEnpassant, moveIsPawnPromotion } from 'referee/Rules/PawnRules';
+import { tileIsOccupiedByOpponent } from 'referee/Rules/GeneralRules';
 
 // Utilities
 import { samePosition } from 'utilities/Position';
@@ -64,9 +65,20 @@ const Chessboard = () => {
     }
   }, []);
 
+  const updateValidMoves = () => {
+    setPieces((currentPieces) => {
+      return currentPieces.map((piece) => {
+        piece.possibleMoves = referee.getPossibleMoves(piece, pieces);
+        return piece;
+      });
+    });
+  };
+
   const grabPiece = (e) => {
     const element = e.target;
     const chessboard = chessboardRef.current;
+
+    updateValidMoves();
 
     if (e.target.classList.contains('chess-piece') && chessboard) {
       const grabPositionX = Math.floor((e.clientX - chessboard.offsetLeft) / GRID_SIZE);
@@ -188,12 +200,18 @@ const Chessboard = () => {
       const number = j + i + 2;
       const piece = pieces.find((piece) => (samePosition(piece.position, new Position(i, j))));
 
-      let image = undefined;
-      if (piece) {
-        image = piece.image;
-      }
+      const image = piece ? piece.image : undefined;
 
-      board.push(<Tile key={`${j},${i}`} number={number} image={image} />);
+      const currentPiece = activePiece !== null ? pieces.find((piece) => samePosition(piece.position, grabPosition)) : undefined;
+      const highlight = currentPiece?.possibleMoves ? (
+        currentPiece.possibleMoves.some((piece) => samePosition(piece, new Position(i, j)))
+      ) : false;
+
+      const enemyHighlight = currentPiece?.possibleMoves ? (
+        currentPiece.possibleMoves.some((piece) => samePosition(piece, new Position(i, j))) && tileIsOccupiedByOpponent(new Position(i, j), pieces, currentPiece.teamType)
+      ) : false;
+
+      board.push(<Tile key={`${j},${i}`} number={number} image={image} highlight={highlight} enemyHighlight={enemyHighlight} />);
     }
   }
 

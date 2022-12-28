@@ -41,3 +41,10 @@ function lastRookTileIsValid(newPosition, passedPosition, boardState, teamType) 
 
   return false;
 }
+
+export function getPossibleRookMoves(rook, boardState) {
+  const possibleMoves = [];
+
+
+  return possibleMoves;
+}

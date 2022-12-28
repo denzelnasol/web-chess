@@ -41,3 +41,10 @@ function lastBishopTileIsValid(newPosition, passedPosition, boardState, teamType
 
   return false;
 }
+
+export function getPossibleBishopMoves(bishop, boardState) {
+  const possibleMoves = [];
+
+
+  return possibleMoves;
+}

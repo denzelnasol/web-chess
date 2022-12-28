@@ -17,3 +17,10 @@ export function isValidKnightPosition(grabPosition, newPosition, teamType, board
 
   return false;
 }
+
+export function getPossibleKnightMoves(knight, boardState) {
+  const possibleMoves = [];
+
+
+  return possibleMoves;
+}

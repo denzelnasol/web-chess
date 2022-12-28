@@ -2,12 +2,12 @@
 import { PieceType } from "enums/PieceType";
 
 // Rules
-import { isValidPawnPosition } from "referee/Rules/PawnRules";
-import { isValidKnightPosition } from "referee/Rules/KnightRules";
-import { isValidBishopPosition } from "referee/Rules/BishopRules";
-import { isValidRookPosition } from "referee/Rules/RookRules";
-import { isValidQueenPosition } from "referee/Rules/QueenRules";
-import { isValidKingPosition } from "referee/Rules/KingRules";
+import { getPossiblePawnMoves, isValidPawnPosition } from "referee/Rules/PawnRules";
+import { getPossibleKnightMoves, isValidKnightPosition } from "referee/Rules/KnightRules";
+import { getPossibleBishopMoves, isValidBishopPosition } from "referee/Rules/BishopRules";
+import { getPossibleRookMoves, isValidRookPosition } from "referee/Rules/RookRules";
+import { getPossibleQueenMoves, isValidQueenPosition } from "referee/Rules/QueenRules";
+import { getPossibleKingMoves, isValidKingPosition } from "referee/Rules/KingRules";
 
 export default class Referee {
 
@@ -20,19 +20,51 @@ export default class Referee {
    */
   isValidMove(grabPosition, newPosition, type, teamType, boardState) {
     let isValidPosition = false;
-    if (type === PieceType.PAWN) {
-      isValidPosition = isValidPawnPosition(grabPosition, newPosition, teamType, boardState);
-    } else if (type === PieceType.KNIGHT) {
-      isValidPosition = isValidKnightPosition(grabPosition, newPosition, teamType, boardState);
-    } else if (type === PieceType.BISHOP) {
-      isValidPosition = isValidBishopPosition(grabPosition, newPosition, teamType, boardState);
-    } else if (type === PieceType.ROOK) {
-      isValidPosition = isValidRookPosition(grabPosition, newPosition, teamType, boardState);
-    } else if (type === PieceType.QUEEN) {
-      isValidPosition = isValidQueenPosition(grabPosition, newPosition, teamType, boardState);
-    } else if (type === PieceType.KING) {
-      isValidPosition = isValidKingPosition(grabPosition, newPosition, teamType, boardState);
+    switch (type) {
+      case PieceType.PAWN:
+        isValidPosition = isValidPawnPosition(grabPosition, newPosition, teamType, boardState);
+        break;
+      case PieceType.KNIGHT:
+        isValidPosition = isValidKnightPosition(grabPosition, newPosition, teamType, boardState);
+        break;
+      case PieceType.BISHOP:
+        isValidPosition = isValidBishopPosition(grabPosition, newPosition, teamType, boardState);
+        break;
+      case PieceType.ROOK:
+        isValidPosition = isValidRookPosition(grabPosition, newPosition, teamType, boardState);
+        break;
+      case PieceType.QUEEN:
+        isValidPosition = isValidQueenPosition(grabPosition, newPosition, teamType, boardState);
+        break;
+      case PieceType.KING:
+        isValidPosition = isValidKingPosition(grabPosition, newPosition, teamType, boardState);
     }
     return isValidPosition;
+  }
+
+  getPossibleMoves(piece, boardState) {
+    let possibleMoves = [];
+
+    switch (piece.type) {
+      case PieceType.PAWN:
+        possibleMoves = getPossiblePawnMoves(piece, boardState);
+        break;
+      case PieceType.KNIGHT:
+        possibleMoves = getPossibleKnightMoves(piece, boardState);
+        break;
+      case PieceType.BISHOP:
+        possibleMoves = getPossibleBishopMoves(piece, boardState);
+        break;
+      case PieceType.ROOK:
+        possibleMoves = getPossibleRookMoves(piece, boardState);
+        break;
+      case PieceType.QUEEN:
+        possibleMoves = getPossibleQueenMoves(piece, boardState);
+        break;
+      case PieceType.KING:
+        possibleMoves = getPossibleKingMoves(piece, boardState);
+    }
+
+    return possibleMoves;
   }
 }

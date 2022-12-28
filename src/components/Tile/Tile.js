@@ -4,19 +4,18 @@ import React from 'react';
 import './style.scss';
 
 const Tile = ({ ...props }) => {
-  if (props.number % 2 === 0) {
-    return (
-      <div className='tile black-tile'>
-        {props.image && <div style={{ backgroundImage: `url(${props.image})` }} className='chess-piece' />}
-      </div>
-    );
-  } else {
-    return (
-      <div className='tile white-tile'>
-        {props.image && <div style={{ backgroundImage: `url(${props.image})` }} className='chess-piece' />}
-      </div>
-    );
-  }
+  const className = ['tile',
+    props.number % 2 === 0 && 'black-tile',
+    props.number % 2 !== 0 && 'white-tile',
+    props.enemyHighlight && 'tile-enemy-highlight',
+    props.highlight && !props.enemyHighlight && 'tile-highlight'
+  ].filter(Boolean).join(' ');
+
+  return (
+    <div className={className}>
+      {props.image && <div style={{ backgroundImage: `url(${props.image})` }} className='chess-piece' />}
+    </div>
+  );
 };
 
 export default Tile;
