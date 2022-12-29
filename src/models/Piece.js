@@ -1,11 +1,12 @@
 export default class Piece {
-  constructor(position, type, teamType, possibleMoves = []) {
+  constructor(position, type, teamType, possibleMoves = [], castleAvailable = false) {
     this.image = `images/${teamType}-${type.toLowerCase()}.png`;
     this.position = position;
     this.type = type;
     this.teamType = teamType;
     this.enPassant = false;
     this.possibleMoves = possibleMoves;
+    this.castleAvailable = castleAvailable;
   }
 
   clone() {

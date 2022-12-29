@@ -2,7 +2,7 @@
 import { samePosition } from "utilities/Position";
 
 // Rules
-import { tileIsOccupied, tileIsEmptyOrOccupiedByOpponent } from "referee/Rules/GeneralRules";
+import { tileIsOccupied, tileIsEmptyOrOccupiedByOpponent, tileIsOccupiedByOpponent } from "referee/Rules/GeneralRules";
 
 // Objects
 import Position from "models/Position";
@@ -44,6 +44,58 @@ function lastBishopTileIsValid(newPosition, passedPosition, boardState, teamType
 
 export function getPossibleBishopMoves(bishop, boardState) {
   const possibleMoves = [];
+
+  for (let i = 1; i < 8; i ++) {
+    const passedPosition = new Position(bishop.position.x + i, bishop.position.y + i);
+
+    if (!tileIsOccupied(passedPosition, boardState)) {
+      possibleMoves.push(passedPosition);
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, bishop.teamType)) {
+      possibleMoves.push(passedPosition);
+      break;
+    } else {
+      break;
+    }
+  }
+
+  for (let i = 1; i < 8; i ++) {
+    const passedPosition = new Position(bishop.position.x + i, bishop.position.y - i);
+
+    if (!tileIsOccupied(passedPosition, boardState)) {
+      possibleMoves.push(passedPosition);
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, bishop.teamType)) {
+      possibleMoves.push(passedPosition);
+      break;
+    } else {
+      break;
+    }
+  }
+
+  for (let i = 1; i < 8; i ++) {
+    const passedPosition = new Position(bishop.position.x - i, bishop.position.y - i);
+
+    if (!tileIsOccupied(passedPosition, boardState)) {
+      possibleMoves.push(passedPosition);
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, bishop.teamType)) {
+      possibleMoves.push(passedPosition);
+      break;
+    } else {
+      break;
+    }
+  }
+
+  for (let i = 1; i < 8; i ++) {
+    const passedPosition = new Position(bishop.position.x - i, bishop.position.y + i);
+
+    if (!tileIsOccupied(passedPosition, boardState)) {
+      possibleMoves.push(passedPosition);
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, bishop.teamType)) {
+      possibleMoves.push(passedPosition);
+      break;
+    } else {
+      break;
+    }
+  }
 
 
   return possibleMoves;

@@ -2,7 +2,7 @@
 import { sameColumn, samePosition, sameRow } from "utilities/Position";
 
 // Rules
-import { tileIsOccupied, tileIsEmptyOrOccupiedByOpponent } from "referee/Rules/GeneralRules";
+import { tileIsOccupied, tileIsEmptyOrOccupiedByOpponent, tileIsOccupiedByOpponent } from "referee/Rules/GeneralRules";
 
 // Objects
 import Position from "models/Position";
@@ -45,6 +45,57 @@ function lastRookTileIsValid(newPosition, passedPosition, boardState, teamType) 
 export function getPossibleRookMoves(rook, boardState) {
   const possibleMoves = [];
 
+  for (let i = 1; i < 8; i ++) {
+    const passedPosition = new Position(rook.position.x, rook.position.y + i);
+
+    if (!tileIsOccupied(passedPosition, boardState)) {
+      possibleMoves.push(passedPosition);
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, rook.teamType)) {
+      possibleMoves.push(passedPosition);
+      break;
+    } else {
+      break;
+    }
+  }
+
+  for (let i = 1; i < 8; i ++) {
+    const passedPosition = new Position(rook.position.x + i, rook.position.y);
+
+    if (!tileIsOccupied(passedPosition, boardState)) {
+      possibleMoves.push(passedPosition);
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, rook.teamType)) {
+      possibleMoves.push(passedPosition);
+      break;
+    } else {
+      break;
+    }
+  }
+
+  for (let i = 1; i < 8; i ++) {
+    const passedPosition = new Position(rook.position.x, rook.position.y - i);
+
+    if (!tileIsOccupied(passedPosition, boardState)) {
+      possibleMoves.push(passedPosition);
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, rook.teamType)) {
+      possibleMoves.push(passedPosition);
+      break;
+    } else {
+      break;
+    }
+  }
+
+  for (let i = 1; i < 8; i ++) {
+    const passedPosition = new Position(rook.position.x - i, rook.position.y);
+
+    if (!tileIsOccupied(passedPosition, boardState)) {
+      possibleMoves.push(passedPosition);
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, rook.teamType)) {
+      possibleMoves.push(passedPosition);
+      break;
+    } else {
+      break;
+    }
+  }
 
   return possibleMoves;
 }

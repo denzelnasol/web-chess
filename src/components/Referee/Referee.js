@@ -24,6 +24,13 @@ import { isValidRookPosition } from "referee/Rules/RookRules";
 import { isValidQueenPosition } from "referee/Rules/QueenRules";
 import { isValidKingPosition } from "referee/Rules/KingRules";
 
+/** @TODO
+ * Prevent king from moving into danger
+ * Castling
+ * Add checkmate
+ * Add checks
+ * Add stalemate
+ */
 const Referee = () => {
 
   const modalRef = useRef(null);
