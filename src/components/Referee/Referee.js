@@ -39,6 +39,10 @@ const Referee = () => {
     board.calculateAllMoves();
   }
 
+  const updatePromotionPawn = (pawn) => {
+    setPromotionPawn(pawn);
+  }
+
   const playMove = (piece, newPosition) => {
     let isPlayedMoveValid = false;
 
@@ -47,13 +51,13 @@ const Referee = () => {
     const isPawnPromotionMove = moveIsPawnPromotion(newPosition, piece.type, piece.teamType);
 
     setBoard((previousBoard) => {
-      isPlayedMoveValid = board.playMove(isEnPassantMove, isValidMove, piece, newPosition);
+      isPlayedMoveValid = board.playMove(isEnPassantMove, isValidMove, isPawnPromotionMove, piece, newPosition, updatePromotionPawn);
       return board.clone();
     })
 
-    if (isPawnPromotionMove) {
+    if (isPawnPromotionMove && isPlayedMoveValid) {
       modalRef.current?.classList.remove('hidden');
-      setPromotionPawn(piece);
+      // setPromotionPawn(piece);
     }
 
     return isPlayedMoveValid;
@@ -99,23 +103,16 @@ const Referee = () => {
   }
 
   const promotionTeamType = () => {
-    return (promotionPawn?.teamType === TeamType.WHITE) ? 'white' : 'black';
+    return (promotionPawn?.teamType === TeamType.WHITE) ? TeamType.WHITE.toLowerCase() : TeamType.BLACK.toLowerCase();
   }
 
   const promotePawn = (pieceType) => {
     if (!promotionPawn) return;
-    board.pieces = board.pieces.reduce((results, piece) => {
-      if (samePosition(piece.position, promotionPawn.position)) {
-        const teamType = (piece.teamType === TeamType.WHITE) ? 'w' : 'b';
-        piece.image = `images/${teamType}-${pieceType.toLowerCase()}.png`;
-        piece.type = pieceType;
-      }
+    setBoard((previousBoard) => {
+      board.promotePawn(pieceType, promotionPawn.clone());
+      return board.clone();
+    })
 
-      results.push(piece);
-      return results;
-    }, []);
-
-    updatePossibleMoves();
     modalRef.current?.classList.add('hidden');
   }
 

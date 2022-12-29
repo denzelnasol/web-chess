@@ -4,6 +4,7 @@ import { TeamType } from 'enums/TeamType';
 
 // Models
 import Position from 'models/Position';
+import Piece from "models/Piece";
 
 // Utilities
 import { samePosition } from "utilities/Position";
@@ -53,7 +54,7 @@ export default class Board {
     return possibleMoves;
   }
 
-  playMove(isEnpassantMove, isValidMove, piece, newPosition) {
+  playMove(isEnpassantMove, isValidMove, isPawnPromotionMove, piece, newPosition, updatePromotionPawn) {
     const pawnDirection = piece.team === TeamType.OUR ? 1 : -1;
 
     if (isEnpassantMove) {
@@ -76,18 +77,18 @@ export default class Board {
 
       this.calculateAllMoves();
     } else if (isValidMove) {
-      //UPDATES THE PIECE POSITION
-      //AND IF A PIECE IS ATTACKED, REMOVES IT
       this.pieces = this.pieces.reduce((results, currentPiece) => {
         if (samePosition(currentPiece.position, piece.position)) {
-          // SPECIAL MOVE
           if (currentPiece.type === PieceType.PAWN) {
             currentPiece.enPassant = Math.abs(piece.position.y - newPosition.y) === 2 && currentPiece.type === PieceType.PAWN;
-            console.log(currentPiece.enPassant)
           }
-            currentPiece.position.x = newPosition.x;
-            currentPiece.position.y = newPosition.y;
-            results.push(currentPiece);
+          currentPiece.position.x = newPosition.x;
+          currentPiece.position.y = newPosition.y;
+
+          if (isPawnPromotionMove) {
+            updatePromotionPawn(currentPiece);
+          }
+          results.push(currentPiece);
         } else if (!samePosition(currentPiece.position, newPosition)) {
           if (currentPiece.type === PieceType.PAWN) {
             currentPiece.enPassant = false;
@@ -104,6 +105,20 @@ export default class Board {
     }
 
     return true;
+  }
+
+  promotePawn(pieceType, promotionPawn) {
+    this.pieces = this.pieces.reduce((results, currentPiece) => {
+      if (samePosition(currentPiece.position, promotionPawn.position)) {
+        const teamType = (currentPiece.teamType === TeamType.WHITE) ? TeamType.WHITE.toLowerCase() : TeamType.BLACK.toLowerCase();
+        currentPiece = new Piece(currentPiece.position, pieceType, teamType);
+      }
+
+      results.push(currentPiece);
+      return results;
+    }, []);
+
+    this.calculateAllMoves();
   }
 
   clone() {
