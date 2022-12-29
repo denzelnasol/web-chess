@@ -5,7 +5,7 @@ import { sameColumn, samePosition, sameRow } from "utilities/Position";
 import { tileIsOccupied, tileIsEmptyOrOccupiedByOpponent } from "referee/Rules/GeneralRules";
 
 // Objects
-import Position from "objects/Position";
+import Position from "models/Position";
 
 export function isValidRookPosition(grabPosition, newPosition, teamType, boardState) {
   // ** MOVEMENT/ATTACK LOGIC ** //

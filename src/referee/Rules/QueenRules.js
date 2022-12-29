@@ -5,7 +5,7 @@ import { samePosition, sameColumn, sameRow } from "utilities/Position";
 import { tileIsOccupied, tileIsEmptyOrOccupiedByOpponent } from "referee/Rules/GeneralRules";
 
 // Objects
-import Position from "objects/Position";
+import Position from "models/Position";
 
 export function isValidQueenPosition(grabPosition, newPosition, teamType, boardState) {
   const multiplierX = (newPosition.x < grabPosition.x) ? -1 : (newPosition.x > grabPosition.x) ? 1 : 0;
