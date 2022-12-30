@@ -10,6 +10,6 @@ export default class Piece {
   }
 
   clone() {
-    return new Piece(this.position.clone(), this.type, this.teamType, this.possibleMoves?.map((move) => move.clone()));
+    return new Piece(this.position.clone(), this.type, this.teamType, this.possibleMoves?.map((move) => move.clone()), this.castleAvailable);
   }
 }

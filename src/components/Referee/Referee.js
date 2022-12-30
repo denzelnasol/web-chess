@@ -23,10 +23,10 @@ import { isValidBishopPosition } from "referee/Rules/BishopRules";
 import { isValidRookPosition } from "referee/Rules/RookRules";
 import { isValidQueenPosition } from "referee/Rules/QueenRules";
 import { isValidKingPosition } from "referee/Rules/KingRules";
+import { tileIsOccupied } from "referee/Rules/GeneralRules";
 
 /** @TODO
  * Prevent king from moving into danger
- * Castling
  * Add checkmate
  * Add checks
  * Add stalemate
@@ -53,24 +53,24 @@ const Referee = () => {
   const playMove = (piece, newPosition) => {
     let isPlayedMoveValid = false;
 
-    const isValidMove = moveIsValid(piece.position, newPosition, piece.type, piece.teamType);
+    const isValidMove = moveIsValid(piece.position, newPosition, piece.type, piece.teamType, piece.castleAvailable);
     const isEnPassantMove = moveIsEnpassant(piece.position, newPosition, piece.type, piece.teamType);
     const isPawnPromotionMove = moveIsPawnPromotion(newPosition, piece.type, piece.teamType);
+    const isCastleMove = moveIsCastle(piece.position, newPosition, piece.type, piece.teamType, piece.castleAvailable);
 
     setBoard((previousBoard) => {
-      isPlayedMoveValid = board.playMove(isEnPassantMove, isValidMove, isPawnPromotionMove, piece, newPosition, updatePromotionPawn);
+      isPlayedMoveValid = board.playMove(isEnPassantMove, isValidMove, isPawnPromotionMove, isCastleMove, piece, newPosition, updatePromotionPawn);
       return board.clone();
     })
 
     if (isPawnPromotionMove && isPlayedMoveValid) {
       modalRef.current?.classList.remove('hidden');
-      // setPromotionPawn(piece);
     }
 
     return isPlayedMoveValid;
   }
 
-  const moveIsValid = (grabPosition, newPosition, type, teamType) => {
+  const moveIsValid = (grabPosition, newPosition, type, teamType, castleAvailable) => {
     let isValidPosition = false;
     switch (type) {
       case PieceType.PAWN:
@@ -89,7 +89,7 @@ const Referee = () => {
         isValidPosition = isValidQueenPosition(grabPosition, newPosition, teamType, board.pieces);
         break;
       case PieceType.KING:
-        isValidPosition = isValidKingPosition(grabPosition, newPosition, teamType, board.pieces);
+        isValidPosition = isValidKingPosition(grabPosition, newPosition, teamType, board.pieces, castleAvailable);
     }
     return isValidPosition;
   }
@@ -106,6 +106,40 @@ const Referee = () => {
       );
       if (piece) return true;
     }
+    return false;
+  }
+
+  const moveIsCastle = (grabPosition, newPosition, type, teamType, castleAvailable) => {
+    const kingRow = teamType === TeamType.WHITE ? 0 : 7;
+    if (type !== PieceType.KING) return false;
+
+    const isKingInPosition = samePosition(grabPosition, new Position(3, kingRow));
+    const isLeftKnightPositionEmpty = !tileIsOccupied(new Position(1, kingRow), board.pieces);
+    const isLeftBishopPositionEmpty = !tileIsOccupied(new Position(2, kingRow), board.pieces);
+    const isLeftNewPositionCorrect = samePosition(newPosition, new Position(1, kingRow));
+
+    // Left Castle
+    if (isKingInPosition && isLeftKnightPositionEmpty && isLeftBishopPositionEmpty && isLeftNewPositionCorrect && castleAvailable) {
+      const rook = board.pieces.find((piece) =>
+        samePosition(new Position(0, kingRow), piece.position) && piece.castleAvailable
+      );
+
+      if (rook) return true;
+    }
+
+    const isRightKnightPositionEmpty = !tileIsOccupied(new Position(6, kingRow), board.pieces);
+    const isRightBishopPositionEmpty = !tileIsOccupied(new Position(5, kingRow), board.pieces);
+    const isQueenPositionEmpty = !tileIsOccupied(new Position(4, kingRow), board.pieces);
+    const isRightNewPositionCorrect = samePosition(newPosition, new Position(5, kingRow));
+
+    // Right Castle
+    if (isKingInPosition && isRightKnightPositionEmpty && isRightBishopPositionEmpty && isQueenPositionEmpty && isRightNewPositionCorrect && castleAvailable) {
+      const rook = board.pieces.find((piece) =>
+        samePosition(new Position(7, kingRow), piece.position) && piece.castleAvailable
+      );
+      if (rook) return true;
+    }
+
     return false;
   }
 

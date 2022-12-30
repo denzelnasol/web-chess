@@ -54,8 +54,9 @@ export default class Board {
     return possibleMoves;
   }
 
-  playMove(isEnpassantMove, isValidMove, isPawnPromotionMove, piece, newPosition, updatePromotionPawn) {
-    const pawnDirection = piece.team === TeamType.OUR ? 1 : -1;
+  playMove(isEnpassantMove, isValidMove, isPawnPromotionMove, isCastleMove, piece, newPosition, updatePromotionPawn) {
+    const pawnDirection = piece.teamType === TeamType.WHITE ? 1 : -1;
+    const kingRow = piece.teamType === TeamType.WHITE ? 0 : 7;
 
     if (isEnpassantMove) {
       this.pieces = this.pieces.reduce((results, currentPiece) => {
@@ -78,16 +79,50 @@ export default class Board {
       this.calculateAllMoves();
     } else if (isValidMove) {
       this.pieces = this.pieces.reduce((results, currentPiece) => {
+        // Check if given piece is the same
         if (samePosition(currentPiece.position, piece.position)) {
+          // Check if enpassant move
           if (currentPiece.type === PieceType.PAWN) {
             currentPiece.enPassant = Math.abs(piece.position.y - newPosition.y) === 2 && currentPiece.type === PieceType.PAWN;
           }
+          
+          // Check if castle move
+          if (isCastleMove && piece.castleAvailable) {
+            // Left Castle
+            if (samePosition(newPosition, new Position(1, kingRow))) {
+              const rook = this.pieces.find((piece) =>
+                samePosition(piece.position, new Position(0, kingRow))
+              );
+
+              if (rook) {
+                rook.position = new Position(2, kingRow);
+                rook.castleAvailable = false;
+              }
+            }
+
+            // Right Castle
+            if (samePosition(newPosition, new Position(5, kingRow))) {
+              const rook = this.pieces.find((piece) =>
+                samePosition(piece.position, new Position(7, kingRow))
+              );
+
+              if (rook) {
+                rook.position = new Position(4, kingRow);
+                rook.castleAvailable = false;
+              }
+            }
+          }
+
+          // Update piece position
           currentPiece.position.x = newPosition.x;
           currentPiece.position.y = newPosition.y;
+          currentPiece.castleAvailable = false;
 
+          // Update promotion pawn
           if (isPawnPromotionMove) {
             updatePromotionPawn(currentPiece);
           }
+
           results.push(currentPiece);
         } else if (!samePosition(currentPiece.position, newPosition)) {
           if (currentPiece.type === PieceType.PAWN) {
