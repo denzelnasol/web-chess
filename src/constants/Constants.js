@@ -2,7 +2,7 @@
 import Piece from 'models/Piece';
 import Board from "models/Board";
 import Position from 'models/Position';
-import { Pawn } from 'models/Pawn';
+import Pawn from 'models/Pawn';
 
 // Enums
 import { PieceType } from 'enums/PieceType';

@@ -3,12 +3,14 @@ import { getPositionPointDifference, samePosition } from "utilities/Position";
 
 // Rules
 import { tileIsEmptyOrOccupiedByOpponent, tileIsOccupied, tileIsOccupiedByOpponent } from "referee/Rules/GeneralRules";
+import { getPossiblePawnAttackMoves } from "referee/Rules/PawnRules";
 
 // Models
 import Position from "models/Position";
 
 // Enums
 import { TeamType } from "enums/TeamType";
+import { PieceType } from "enums/PieceType";
 
 export function isValidKingPosition(grabPosition, newPosition, teamType, boardState, castleAvailable) {
   const kingRow = teamType === TeamType.WHITE ? 0 : 7;
@@ -16,13 +18,20 @@ export function isValidKingPosition(grabPosition, newPosition, teamType, boardSt
   const yDifference = Math.abs(getPositionPointDifference(newPosition.y, grabPosition.y));
 
   // ** MOVEMENT/ATTACK LOGIC ** //
+  const kingAttackedMoves = getKingAttackedMoves(teamType, boardState);
+  const isPositionAttacked = kingAttackedMoves.find((move) => 
+    samePosition(move, newPosition)
+  );
+  if (isPositionAttacked) return false;
+
   if ((xDifference === 1 && yDifference === 0) || (yDifference === 1 && xDifference === 0) || (yDifference === 1 && xDifference === 1)) {
     if (tileIsEmptyOrOccupiedByOpponent(newPosition, boardState, teamType)) {
       return true;
     }
   }
 
-  const isKingInPosition = samePosition(grabPosition,new Position(3, kingRow));
+
+  const isKingInPosition = samePosition(grabPosition, new Position(3, kingRow));
   const isLeftKnightPositionEmpty = !tileIsOccupied(new Position(1, kingRow), boardState);
   const isLeftBishopPositionEmpty = !tileIsOccupied(new Position(2, kingRow), boardState);
   const isLeftNewPositionCorrect = samePosition(newPosition, new Position(1, kingRow));
@@ -52,7 +61,7 @@ export function isValidKingPosition(grabPosition, newPosition, teamType, boardSt
 }
 
 export function getPossibleKingMoves(king, boardState) {
-  const possibleMoves = [];
+  let possibleMoves = [];
   const kingRow = king.teamType === TeamType.WHITE ? 0 : 7;
 
   // Top movement
@@ -198,5 +207,26 @@ export function getPossibleKingMoves(king, boardState) {
     }
   }
 
+  // Filter out positions being attacked
+  const possibleAttackedMoves = getKingAttackedMoves(king.teamType, boardState);
+  possibleMoves = possibleMoves.filter((move) =>
+    !possibleAttackedMoves.some((attackMove) => samePosition(move, attackMove))
+  );
+
   return possibleMoves;
+}
+
+function getKingAttackedMoves(teamType, boardState) {
+  const possibleAttackMoves = [];
+  for (const piece of boardState) {
+    if (piece.teamType !== teamType) {
+      let attackMoves = [];
+      if (piece.type === PieceType.PAWN) attackMoves = getPossiblePawnAttackMoves(piece);
+      else attackMoves = piece.possibleMoves;
+
+      for (const move of attackMoves) possibleAttackMoves.push(move);
+    }
+  }
+
+  return possibleAttackMoves;
 }

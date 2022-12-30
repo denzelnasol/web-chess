@@ -24,7 +24,13 @@ export default class Board {
 
   calculateAllMoves() {
     for (const piece of this.pieces) {
-      piece.possibleMoves = this.getPossibleMoves(piece, this.pieces)
+      if (piece.type === PieceType.KING) continue;
+      piece.possibleMoves = this.getPossibleMoves(piece, this.pieces);
+    }
+
+    for (const piece of this.pieces) {
+      if (piece.type !== PieceType.KING) continue;
+      piece.possibleMoves = this.getPossibleMoves(piece, this.pieces);
     }
   }
 
@@ -85,7 +91,7 @@ export default class Board {
           if (currentPiece.type === PieceType.PAWN) {
             currentPiece.enPassant = Math.abs(piece.position.y - newPosition.y) === 2 && currentPiece.type === PieceType.PAWN;
           }
-          
+
           // Check if castle move
           if (isCastleMove && piece.castleAvailable) {
             // Left Castle

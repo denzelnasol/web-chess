@@ -26,7 +26,6 @@ import { isValidKingPosition } from "referee/Rules/KingRules";
 import { tileIsOccupied } from "referee/Rules/GeneralRules";
 
 /** @TODO
- * Prevent king from moving into danger
  * Add checkmate
  * Add checks
  * Add stalemate

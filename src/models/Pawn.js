@@ -4,7 +4,7 @@ import { PieceType } from 'enums/PieceType';
 // Models
 import Piece from 'models/Piece';
 
-export class Pawn extends Piece {
+export default class Pawn extends Piece {
   constructor(position, teamType, enPassant, possibleMoves = []) {
     super(position, PieceType.PAWN, teamType, possibleMoves);
     this.enPassant = enPassant;

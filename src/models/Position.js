@@ -6,5 +6,5 @@ export default class Position {
 
   clone() {
     return new Position(this.x, this.y);
-}
+  }
 }

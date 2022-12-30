@@ -88,6 +88,17 @@ export function getPossiblePawnMoves(pawn, boardState) {
       possibleMoves.push(upperRightAttack);
     }
   }
-
   return possibleMoves;
+}
+
+export const getPossiblePawnAttackMoves = (pawn) => {
+  const possibleMoves = [];
+  const pawnDirection = (pawn.teamType === TeamType.WHITE ? 1 : -1);
+  const upperLeftAttack = new Position(pawn.position.x - 1, pawn.position.y + pawnDirection);
+  const upperRightAttack = new Position(pawn.position.x + 1, pawn.position.y + pawnDirection);
+
+  possibleMoves.push(upperLeftAttack);
+  possibleMoves.push(upperRightAttack);
+
+  return possibleMoves
 }
