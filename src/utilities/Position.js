@@ -1,3 +1,5 @@
+import { TeamType } from "enums/TeamType";
+
 export function samePosition(positionOne, positionTwo) {
   return positionOne.x === positionTwo.x && positionOne.y === positionTwo.y;
 }
@@ -12,4 +14,8 @@ export function sameColumn(positionOne, positionTwo) {
 
 export function sameRow(positionOne, positionTwo) {
   return positionOne.y === positionTwo.y;
+}
+
+export function getOppositeTeamType(teamType) {
+  return teamType === TeamType.BLACK ? TeamType.WHITE : TeamType.BLACK;
 }

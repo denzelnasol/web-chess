@@ -7,7 +7,7 @@ import Position from 'models/Position';
 import Piece from "models/Piece";
 
 // Utilities
-import { samePosition } from "utilities/Position";
+import { getOppositeTeamType, samePosition } from "utilities/Position";
 
 // Rules
 import { getPossiblePawnMoves } from "referee/Rules/PawnRules";
@@ -15,7 +15,7 @@ import { getPossibleKnightMoves } from "referee/Rules/KnightRules";
 import { getPossibleBishopMoves } from "referee/Rules/BishopRules";
 import { getPossibleRookMoves } from "referee/Rules/RookRules";
 import { getPossibleQueenMoves } from "referee/Rules/QueenRules";
-import { getPossibleKingMoves } from "referee/Rules/KingRules";
+import { getPossibleKingMoves, kingIsThreatened } from "referee/Rules/KingRules";
 
 export default class Board {
   constructor(pieces) {
@@ -141,11 +141,33 @@ export default class Board {
       }, []);
 
       this.calculateAllMoves();
+      this.opponentKingInCheck(piece.teamType)
     } else {
       return false;
     }
 
     return true;
+  }
+
+  opponentKingInCheck(teamType) {
+    const oppositeTeamType = getOppositeTeamType(teamType);
+    const isOpponentKingThreatened = kingIsThreatened(oppositeTeamType, this.pieces);
+    if (!isOpponentKingThreatened) return;
+
+    const king = this.pieces.find((currentPiece) =>
+      currentPiece.type === PieceType.KING && currentPiece.teamType !== teamType
+    );
+
+    this.pieces = this.pieces.reduce((results, currentPiece) => {
+      if (samePosition(king.position, currentPiece.position)) {
+        currentPiece.inCheck = true;
+        results.push(currentPiece);
+      } else {
+        results.push(currentPiece);
+      }
+
+      return results;
+    }, []);
   }
 
   promotePawn(pieceType, promotionPawn) {

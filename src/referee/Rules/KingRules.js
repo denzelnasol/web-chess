@@ -230,3 +230,16 @@ function getKingAttackedMoves(teamType, boardState) {
 
   return possibleAttackMoves;
 }
+
+export const kingIsThreatened = (teamType, boardState) => {
+  const king = boardState.find((piece) =>
+    piece.type === PieceType.KING && piece.teamType === teamType
+  );
+
+  const attackedMoves = getKingAttackedMoves(teamType, boardState);
+  const isKingAttacked = attackedMoves.find((move) => {
+    return samePosition(move, king.position)
+  }
+  );
+  return isKingAttacked;
+}

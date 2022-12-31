@@ -17,6 +17,7 @@ import { samePosition } from 'utilities/Position';
 
 // Styles
 import './style.scss';
+import { TeamType } from 'enums/TeamType';
 
 function Chessboard(props) {
   const chessboardRef = useRef(null);
@@ -93,9 +94,20 @@ function Chessboard(props) {
       activePiece.style.removeProperty('top');
       activePiece.style.removeProperty('left');
     }
+
+    // const isWhiteKingThreatened = props.kingIsThreatened(TeamType.WHITE);
+    // const isBlackKingThreatened = props.kingIsThreatened(TeamType.BLACK);
+    // // console.log(isWhiteKingThreatened);
+    // if (isBlackKingThreatened) {
+    //   console.log("BLACK KING THREATENED");
+    // }
+
+    // if (isWhiteKingThreatened) {
+    //   console.log("WHITE KING THREATENED");
+    // }
     setActivePiece(null);
   }
-
+  // console.log(props.pieces);
   let board = [];
 
   for (let j = VERTICAL_AXIS.length - 1; j >= 0; j--) {
