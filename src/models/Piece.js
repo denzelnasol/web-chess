@@ -13,4 +13,20 @@ export default class Piece {
   clone() {
     return new Piece(this.position.clone(), this.type, this.teamType, this.possibleMoves?.map((move) => move.clone()), this.castleAvailable, this.inCheck);
   }
+
+  abovePiece(otherPiece) {
+    return this.position.y > otherPiece.position.y;
+  }
+
+  belowPiece(otherPiece) {
+    return this.position.y < otherPiece.position.y;
+  }
+
+  rightOfPiece(otherPiece) {
+    return this.position.x > otherPiece.position.x;
+  }
+
+  leftOfPiece(otherPiece) {
+    return this.position.x < otherPiece.position.x;
+  }
 }
