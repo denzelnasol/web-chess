@@ -47,6 +47,7 @@ export function getPossibleBishopMoves(bishop, boardState) {
 
   for (let i = 1; i < 8; i ++) {
     const passedPosition = new Position(bishop.position.x + i, bishop.position.y + i);
+    if (passedPosition.outOfBounds()) continue;
 
     if (!tileIsOccupied(passedPosition, boardState)) {
       possibleMoves.push(passedPosition);
@@ -60,6 +61,7 @@ export function getPossibleBishopMoves(bishop, boardState) {
 
   for (let i = 1; i < 8; i ++) {
     const passedPosition = new Position(bishop.position.x + i, bishop.position.y - i);
+    if (passedPosition.outOfBounds()) continue;
 
     if (!tileIsOccupied(passedPosition, boardState)) {
       possibleMoves.push(passedPosition);
@@ -73,6 +75,7 @@ export function getPossibleBishopMoves(bishop, boardState) {
 
   for (let i = 1; i < 8; i ++) {
     const passedPosition = new Position(bishop.position.x - i, bishop.position.y - i);
+    if (passedPosition.outOfBounds()) continue;
 
     if (!tileIsOccupied(passedPosition, boardState)) {
       possibleMoves.push(passedPosition);
@@ -86,6 +89,7 @@ export function getPossibleBishopMoves(bishop, boardState) {
 
   for (let i = 1; i < 8; i ++) {
     const passedPosition = new Position(bishop.position.x - i, bishop.position.y + i);
+    if (passedPosition.outOfBounds()) continue;
 
     if (!tileIsOccupied(passedPosition, boardState)) {
       possibleMoves.push(passedPosition);
@@ -105,6 +109,7 @@ export function getPossibleBishopAttackMoves(bishop, boardState) {
 
   for (let i = 1; i < 8; i ++) {
     const passedPosition = new Position(bishop.position.x + i, bishop.position.y + i);
+    if (passedPosition.outOfBounds()) continue;
 
     if (!tileIsOccupied(passedPosition, boardState) || tileIsOccupiedByOpponentKing(passedPosition, boardState, bishop.teamType)) {
       possibleMoves.push(passedPosition);
@@ -118,6 +123,7 @@ export function getPossibleBishopAttackMoves(bishop, boardState) {
 
   for (let i = 1; i < 8; i ++) {
     const passedPosition = new Position(bishop.position.x + i, bishop.position.y - i);
+    if (passedPosition.outOfBounds()) continue;
 
     if (!tileIsOccupied(passedPosition, boardState) || tileIsOccupiedByOpponentKing(passedPosition, boardState, bishop.teamType)) {
       possibleMoves.push(passedPosition);
@@ -131,6 +137,7 @@ export function getPossibleBishopAttackMoves(bishop, boardState) {
 
   for (let i = 1; i < 8; i ++) {
     const passedPosition = new Position(bishop.position.x - i, bishop.position.y - i);
+    if (passedPosition.outOfBounds()) continue;
 
     if (!tileIsOccupied(passedPosition, boardState) || tileIsOccupiedByOpponentKing(passedPosition, boardState, bishop.teamType)) {
       possibleMoves.push(passedPosition);
@@ -144,6 +151,7 @@ export function getPossibleBishopAttackMoves(bishop, boardState) {
 
   for (let i = 1; i < 8; i ++) {
     const passedPosition = new Position(bishop.position.x - i, bishop.position.y + i);
+    if (passedPosition.outOfBounds()) continue;
 
     if (!tileIsOccupied(passedPosition, boardState) || tileIsOccupiedByOpponentKing(passedPosition, boardState, bishop.teamType)) {
       possibleMoves.push(passedPosition);

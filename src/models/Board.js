@@ -7,7 +7,8 @@ import Position from 'models/Position';
 import Piece from "models/Piece";
 
 // Utilities
-import { getOppositeTeamType, samePosition } from "utilities/Position";
+import { samePosition } from "utilities/Position";
+import { getOppositeTeamType } from "utilities/TeamType";
 
 // Rules
 import { getPossiblePawnMoves } from "referee/Rules/PawnRules";
@@ -15,7 +16,7 @@ import { getPossibleKnightMoves } from "referee/Rules/KnightRules";
 import { getPossibleBishopMoves } from "referee/Rules/BishopRules";
 import { getPossibleRookMoves } from "referee/Rules/RookRules";
 import { getPossibleQueenMoves } from "referee/Rules/QueenRules";
-import { getPossibleKingMoves, kingIsThreatened } from "referee/Rules/KingRules";
+import { getPossibleKingMoves, kingIsThreatened, kingIsSafe, getKing } from "referee/Rules/KingRules";
 
 export default class Board {
   constructor(pieces) {
@@ -83,7 +84,42 @@ export default class Board {
       }, []);
 
       this.calculateAllMoves();
-    } else if (isValidMove) {
+    } 
+    // else if (isKingThreatened && isValidMove) {
+    //   // Check if king is threatened
+    //   this.pieces = this.pieces.reduce((results, currentPiece) => {
+    //     // Check if given piece is the same
+    //     if (samePosition(currentPiece.position, piece.position)) {
+    //       const updatedBoardState = this.pieces.filter((tempPiece) =>
+    //         samePosition(tempPiece.position, piece.position)
+    //       );
+    //       const updatedPiece = piece;
+    //       piece.position = newPosition;
+    //       updatedBoardState.push(updatedPiece);
+
+    //       const isKingSafe = kingIsSafe(updatedBoardState, updatedPiece, newPosition);
+    //       // const isKingSafe = true;
+    //       if (isKingSafe) {
+    //         const king = getKing(piece.teamType, this.pieces);
+    //         // Update piece position
+    //         currentPiece.position.x = newPosition.x;
+    //         currentPiece.position.y = newPosition.y;
+    //         currentPiece.castleAvailable = false;
+    //         king.inCheck = false;
+    //       }
+    //       results.push(currentPiece);
+    //     } else if (!samePosition(currentPiece.position, newPosition)) {
+    //       results.push(currentPiece);
+    //     }
+
+    //     return results;
+    //   }, []);
+
+    //   this.calculateAllMoves();
+    //   this.opponentKingInCheck(piece.teamType);
+
+    // } 
+    else if (isValidMove) {
       this.pieces = this.pieces.reduce((results, currentPiece) => {
         // Check if given piece is the same
         if (samePosition(currentPiece.position, piece.position)) {
@@ -119,9 +155,6 @@ export default class Board {
             }
           }
 
-          // Check if king is still threatened
-          // if (isKingThreatened) return false; 
-
           // Update piece position
           currentPiece.position.x = newPosition.x;
           currentPiece.position.y = newPosition.y;
@@ -144,7 +177,7 @@ export default class Board {
       }, []);
 
       this.calculateAllMoves();
-      this.opponentKingInCheck(piece.teamType)
+      this.opponentKingInCheck(piece.teamType);
     } else {
       return false;
     }
@@ -157,10 +190,7 @@ export default class Board {
     const isOpponentKingThreatened = kingIsThreatened(oppositeTeamType, this.pieces);
     if (!isOpponentKingThreatened) return;
 
-    const king = this.pieces.find((currentPiece) =>
-      currentPiece.type === PieceType.KING && currentPiece.teamType !== teamType
-    );
-
+    const king = getKing(teamType, this.pieces);
     this.pieces = this.pieces.reduce((results, currentPiece) => {
       if (samePosition(king.position, currentPiece.position)) {
         currentPiece.inCheck = true;
@@ -171,6 +201,8 @@ export default class Board {
 
       return results;
     }, []);
+
+    this.calculateAllMoves();
   }
 
   promotePawn(pieceType, promotionPawn) {

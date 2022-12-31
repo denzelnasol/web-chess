@@ -2,11 +2,7 @@
 import { getPositionPointDifference, samePosition } from "utilities/Position";
 
 // Rules
-import { tileIsEmptyOrOccupiedByOpponent, tileIsOccupied, tileIsOccupiedByOpponent } from "referee/Rules/GeneralRules";
-import { getPossiblePawnAttackMoves } from "referee/Rules/PawnRules";
-import { getPossibleRookAttackMoves } from "referee/Rules/RookRules";
-import { getPossibleBishopAttackMoves } from "referee/Rules/BishopRules";
-import { getPossibleQueenAttackMoves } from "referee/Rules/QueenRules";
+import { tileIsEmptyOrOccupiedByOpponent, tileIsOccupied, tileIsOccupiedByOpponent, getOpponentAttackMoves, getPieceAttackMoves } from "referee/Rules/GeneralRules";
 
 // Models
 import Position from "models/Position";
@@ -15,20 +11,20 @@ import Position from "models/Position";
 import { TeamType } from "enums/TeamType";
 import { PieceType } from "enums/PieceType";
 
-export function isValidKingPosition(grabPosition, newPosition, teamType, boardState, castleAvailable) {
+export function isValidKingPosition(grabPosition, passedPosition, teamType, boardState, castleAvailable) {
   const kingRow = teamType === TeamType.WHITE ? 0 : 7;
-  const xDifference = Math.abs(getPositionPointDifference(newPosition.x, grabPosition.x));
-  const yDifference = Math.abs(getPositionPointDifference(newPosition.y, grabPosition.y));
+  const xDifference = Math.abs(getPositionPointDifference(passedPosition.x, grabPosition.x));
+  const yDifference = Math.abs(getPositionPointDifference(passedPosition.y, grabPosition.y));
 
   // ** MOVEMENT/ATTACK LOGIC ** //
-  const kingAttackedMoves = getKingAttackedMoves(teamType, boardState);
+  const kingAttackedMoves = getOpponentAttackMoves(teamType, boardState);
   const isPositionAttacked = kingAttackedMoves.find((move) =>
-    samePosition(move, newPosition)
+    samePosition(move, passedPosition)
   );
   if (isPositionAttacked) return false;
 
   if ((xDifference === 1 && yDifference === 0) || (yDifference === 1 && xDifference === 0) || (yDifference === 1 && xDifference === 1)) {
-    if (tileIsEmptyOrOccupiedByOpponent(newPosition, boardState, teamType)) {
+    if (tileIsEmptyOrOccupiedByOpponent(passedPosition, boardState, teamType)) {
       return true;
     }
   }
@@ -37,7 +33,7 @@ export function isValidKingPosition(grabPosition, newPosition, teamType, boardSt
   const isKingInPosition = samePosition(grabPosition, new Position(3, kingRow));
   const isLeftKnightPositionEmpty = !tileIsOccupied(new Position(1, kingRow), boardState);
   const isLeftBishopPositionEmpty = !tileIsOccupied(new Position(2, kingRow), boardState);
-  const isLeftNewPositionCorrect = samePosition(newPosition, new Position(1, kingRow));
+  const isLeftNewPositionCorrect = samePosition(passedPosition, new Position(1, kingRow));
 
   // Left Castle
   if (isKingInPosition && isLeftKnightPositionEmpty && isLeftBishopPositionEmpty && isLeftNewPositionCorrect && castleAvailable) {
@@ -50,7 +46,7 @@ export function isValidKingPosition(grabPosition, newPosition, teamType, boardSt
   const isRightKnightPositionEmpty = !tileIsOccupied(new Position(6, kingRow), boardState);
   const isRightBishopPositionEmpty = !tileIsOccupied(new Position(5, kingRow), boardState);
   const isQueenPositionEmpty = !tileIsOccupied(new Position(4, kingRow), boardState);
-  const isRightNewPositionCorrect = samePosition(newPosition, new Position(5, kingRow));
+  const isRightNewPositionCorrect = samePosition(passedPosition, new Position(5, kingRow));
 
   // Right Castle
   if (isKingInPosition && isRightKnightPositionEmpty && isRightBishopPositionEmpty && isQueenPositionEmpty && isRightNewPositionCorrect && castleAvailable) {
@@ -69,12 +65,13 @@ export function getPossibleKingMoves(king, boardState) {
 
   // Top movement
   for (let i = 1; i < 2; i++) {
-    const destination = new Position(king.position.x, king.position.y + i);
+    const passedPosition = new Position(king.position.x, king.position.y + i);
+    if (passedPosition.outOfBounds()) continue;
 
-    if (!tileIsOccupied(destination, boardState)) {
-      possibleMoves.push(destination);
-    } else if (tileIsOccupiedByOpponent(destination, boardState, king.teamType)) {
-      possibleMoves.push(destination);
+    if (!tileIsOccupied(passedPosition, boardState)) {
+      possibleMoves.push(passedPosition);
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, king.teamType)) {
+      possibleMoves.push(passedPosition);
       break;
     } else {
       break;
@@ -83,12 +80,13 @@ export function getPossibleKingMoves(king, boardState) {
 
   // Bottom movement
   for (let i = 1; i < 2; i++) {
-    const destination = new Position(king.position.x, king.position.y - i);
+    const passedPosition = new Position(king.position.x, king.position.y - i);
+    if (passedPosition.outOfBounds()) continue;
 
-    if (!tileIsOccupied(destination, boardState)) {
-      possibleMoves.push(destination);
-    } else if (tileIsOccupiedByOpponent(destination, boardState, king.teamType)) {
-      possibleMoves.push(destination);
+    if (!tileIsOccupied(passedPosition, boardState)) {
+      possibleMoves.push(passedPosition);
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, king.teamType)) {
+      possibleMoves.push(passedPosition);
       break;
     } else {
       break;
@@ -97,12 +95,13 @@ export function getPossibleKingMoves(king, boardState) {
 
   // Left movement
   for (let i = 1; i < 2; i++) {
-    const destination = new Position(king.position.x - i, king.position.y);
+    const passedPosition = new Position(king.position.x - i, king.position.y);
+    if (passedPosition.outOfBounds()) continue;
 
-    if (!tileIsOccupied(destination, boardState)) {
-      possibleMoves.push(destination);
-    } else if (tileIsOccupiedByOpponent(destination, boardState, king.teamType)) {
-      possibleMoves.push(destination);
+    if (!tileIsOccupied(passedPosition, boardState)) {
+      possibleMoves.push(passedPosition);
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, king.teamType)) {
+      possibleMoves.push(passedPosition);
       break;
     } else {
       break;
@@ -111,12 +110,13 @@ export function getPossibleKingMoves(king, boardState) {
 
   // Right movement
   for (let i = 1; i < 2; i++) {
-    const destination = new Position(king.position.x + i, king.position.y);
+    const passedPosition = new Position(king.position.x + i, king.position.y);
+    if (passedPosition.outOfBounds()) continue;
 
-    if (!tileIsOccupied(destination, boardState)) {
-      possibleMoves.push(destination);
-    } else if (tileIsOccupiedByOpponent(destination, boardState, king.teamType)) {
-      possibleMoves.push(destination);
+    if (!tileIsOccupied(passedPosition, boardState)) {
+      possibleMoves.push(passedPosition);
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, king.teamType)) {
+      possibleMoves.push(passedPosition);
       break;
     } else {
       break;
@@ -125,12 +125,13 @@ export function getPossibleKingMoves(king, boardState) {
 
   // Upper right movement
   for (let i = 1; i < 2; i++) {
-    const destination = new Position(king.position.x + i, king.position.y + i);
+    const passedPosition = new Position(king.position.x + i, king.position.y + i);
+    if (passedPosition.outOfBounds()) continue;
 
-    if (!tileIsOccupied(destination, boardState)) {
-      possibleMoves.push(destination);
-    } else if (tileIsOccupiedByOpponent(destination, boardState, king.teamType)) {
-      possibleMoves.push(destination);
+    if (!tileIsOccupied(passedPosition, boardState)) {
+      possibleMoves.push(passedPosition);
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, king.teamType)) {
+      possibleMoves.push(passedPosition);
       break;
     } else {
       break;
@@ -139,12 +140,13 @@ export function getPossibleKingMoves(king, boardState) {
 
   // Bottom right movement
   for (let i = 1; i < 2; i++) {
-    const destination = new Position(king.position.x + i, king.position.y - i);
+    const passedPosition = new Position(king.position.x + i, king.position.y - i);
+    if (passedPosition.outOfBounds()) continue;
 
-    if (!tileIsOccupied(destination, boardState)) {
-      possibleMoves.push(destination);
-    } else if (tileIsOccupiedByOpponent(destination, boardState, king.teamType)) {
-      possibleMoves.push(destination);
+    if (!tileIsOccupied(passedPosition, boardState)) {
+      possibleMoves.push(passedPosition);
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, king.teamType)) {
+      possibleMoves.push(passedPosition);
       break;
     } else {
       break;
@@ -153,12 +155,13 @@ export function getPossibleKingMoves(king, boardState) {
 
   // Bottom left movement
   for (let i = 1; i < 2; i++) {
-    const destination = new Position(king.position.x - i, king.position.y - i);
+    const passedPosition = new Position(king.position.x - i, king.position.y - i);
+    if (passedPosition.outOfBounds()) continue;
 
-    if (!tileIsOccupied(destination, boardState)) {
-      possibleMoves.push(destination);
-    } else if (tileIsOccupiedByOpponent(destination, boardState, king.teamType)) {
-      possibleMoves.push(destination);
+    if (!tileIsOccupied(passedPosition, boardState)) {
+      possibleMoves.push(passedPosition);
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, king.teamType)) {
+      possibleMoves.push(passedPosition);
       break;
     } else {
       break;
@@ -167,12 +170,13 @@ export function getPossibleKingMoves(king, boardState) {
 
   // Top left movement
   for (let i = 1; i < 2; i++) {
-    const destination = new Position(king.position.x - i, king.position.y + i);
+    const passedPosition = new Position(king.position.x - i, king.position.y + i);
+    if (passedPosition.outOfBounds()) continue;
 
-    if (!tileIsOccupied(destination, boardState)) {
-      possibleMoves.push(destination);
-    } else if (tileIsOccupiedByOpponent(destination, boardState, king.teamType)) {
-      possibleMoves.push(destination);
+    if (!tileIsOccupied(passedPosition, boardState)) {
+      possibleMoves.push(passedPosition);
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, king.teamType)) {
+      possibleMoves.push(passedPosition);
       break;
     } else {
       break;
@@ -189,8 +193,8 @@ export function getPossibleKingMoves(king, boardState) {
     );
 
     if (rook) {
-      const destination = new Position(1, kingRow);
-      possibleMoves.push(destination);
+      const passedPosition = new Position(1, kingRow);
+      possibleMoves.push(passedPosition);
     }
   }
 
@@ -205,13 +209,13 @@ export function getPossibleKingMoves(king, boardState) {
     );
 
     if (rook) {
-      const destination = new Position(5, kingRow);
-      possibleMoves.push(destination);
+      const passedPosition = new Position(5, kingRow);
+      possibleMoves.push(passedPosition);
     }
   }
 
   // Filter out positions being attacked
-  const possibleAttackedMoves = getKingAttackedMoves(king.teamType, boardState);
+  const possibleAttackedMoves = getOpponentAttackMoves(king.teamType, boardState);
   possibleMoves = possibleMoves.filter((move) =>
     !possibleAttackedMoves.some((attackMove) => samePosition(move, attackMove))
   );
@@ -219,44 +223,47 @@ export function getPossibleKingMoves(king, boardState) {
   return possibleMoves;
 }
 
-function getKingAttackedMoves(teamType, boardState) {
-  const possibleAttackMoves = [];
-  for (const piece of boardState) {
-    if (piece.teamType !== teamType) {
-      let attackMoves = [];
-      switch (piece.type) {
-        case PieceType.PAWN:
-          attackMoves = getPossiblePawnAttackMoves(piece);
-          break;
-        case PieceType.ROOK:
-          attackMoves = getPossibleRookAttackMoves(piece, boardState);
-          break;
-        case PieceType.BISHOP:
-          attackMoves = getPossibleBishopAttackMoves(piece, boardState);
-          break;
-        case PieceType.QUEEN:
-          attackMoves = getPossibleQueenAttackMoves(piece, boardState);
-          break;
-        default:
-          attackMoves = piece.possibleMoves;
-      }
-
-      for (const move of attackMoves) possibleAttackMoves.push(move);
-    }
-  }
-
-  return possibleAttackMoves;
-}
-
 export const kingIsThreatened = (teamType, boardState) => {
-  const king = boardState.find((piece) =>
-    piece.type === PieceType.KING && piece.teamType === teamType
-  );
+  const king = getKing(teamType, boardState);
 
-  const attackedMoves = getKingAttackedMoves(teamType, boardState);
-  const isKingAttacked = attackedMoves.find((move) => {
+  const attackedMoves = getOpponentAttackMoves(teamType, boardState);
+  const isKingThreatened = attackedMoves.find((move) => {
     return samePosition(move, king.position)
   }
   );
-  return isKingAttacked;
+  return isKingThreatened;
+}
+
+export const kingIsSafe = (boardState, piece, passedPosition) => {
+  if (piece.type === PieceType.KING) {
+    // do stuff if king moves to safety
+  }
+
+  // do stuff if piece protects king
+
+  return true;
+}
+
+export const getKing = (teamType, boardState) => {
+  const king = boardState.find((piece) =>
+    piece.type === PieceType.KING && piece.teamType === teamType
+  );
+  return king;
+}
+
+export const getPiecesAttackingKing = (teamType, boardState) => {
+  const pieces = [];
+
+  for (const piece of boardState) {
+    if (teamType === piece.teamType) continue;
+
+    const pieceAttackMoves = getPieceAttackMoves(piece, boardState);
+    const king = getKing(teamType, boardState);
+    const pieceAttackingKing = pieceAttackMoves.some((move) =>
+      samePosition(king.position, move)
+    );
+
+    if (pieceAttackingKing) pieces.push(piece);
+  }
+  return pieces;
 }

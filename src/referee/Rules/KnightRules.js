@@ -30,10 +30,12 @@ export function getPossibleKnightMoves(knight, boardState) {
       const horizontalMove = new Position(knight.position.x + i * 2, knight.position.y + j);
 
       if(tileIsEmptyOrOccupiedByOpponent(verticalMove, boardState, knight.teamType)) {
+        if (verticalMove.outOfBounds()) continue;
         possibleMoves.push(verticalMove);
       }
 
       if(tileIsEmptyOrOccupiedByOpponent(horizontalMove, boardState, knight.teamType)) {
+        if (horizontalMove.outOfBounds()) continue;
         possibleMoves.push(horizontalMove);
       }
     }

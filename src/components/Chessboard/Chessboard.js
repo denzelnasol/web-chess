@@ -17,7 +17,6 @@ import { samePosition } from 'utilities/Position';
 
 // Styles
 import './style.scss';
-import { TeamType } from 'enums/TeamType';
 
 function Chessboard(props) {
   const chessboardRef = useRef(null);

@@ -34,6 +34,7 @@ export function getPossibleQueenMoves(queen, boardState) {
 
   for (let i = 1; i < 8; i ++) {
     const passedPosition = new Position(queen.position.x + i, queen.position.y + i);
+    if (passedPosition.outOfBounds()) continue;
 
     if (!tileIsOccupied(passedPosition, boardState)) {
       possibleMoves.push(passedPosition);
@@ -47,6 +48,8 @@ export function getPossibleQueenMoves(queen, boardState) {
 
   for (let i = 1; i < 8; i ++) {
     const passedPosition = new Position(queen.position.x + i, queen.position.y - i);
+    if (passedPosition.outOfBounds()) continue;
+
 
     if (!tileIsOccupied(passedPosition, boardState)) {
       possibleMoves.push(passedPosition);
@@ -60,6 +63,7 @@ export function getPossibleQueenMoves(queen, boardState) {
 
   for (let i = 1; i < 8; i ++) {
     const passedPosition = new Position(queen.position.x - i, queen.position.y - i);
+    if (passedPosition.outOfBounds()) continue;
 
     if (!tileIsOccupied(passedPosition, boardState)) {
       possibleMoves.push(passedPosition);
@@ -73,6 +77,7 @@ export function getPossibleQueenMoves(queen, boardState) {
 
   for (let i = 1; i < 8; i ++) {
     const passedPosition = new Position(queen.position.x - i, queen.position.y + i);
+    if (passedPosition.outOfBounds()) continue;
 
     if (!tileIsOccupied(passedPosition, boardState)) {
       possibleMoves.push(passedPosition);
@@ -86,6 +91,7 @@ export function getPossibleQueenMoves(queen, boardState) {
 
   for (let i = 1; i < 8; i ++) {
     const passedPosition = new Position(queen.position.x, queen.position.y + i);
+    if (passedPosition.outOfBounds()) continue;
 
     if (!tileIsOccupied(passedPosition, boardState)) {
       possibleMoves.push(passedPosition);
@@ -99,6 +105,7 @@ export function getPossibleQueenMoves(queen, boardState) {
 
   for (let i = 1; i < 8; i ++) {
     const passedPosition = new Position(queen.position.x + i, queen.position.y);
+    if (passedPosition.outOfBounds()) continue;
 
     if (!tileIsOccupied(passedPosition, boardState)) {
       possibleMoves.push(passedPosition);
@@ -112,6 +119,7 @@ export function getPossibleQueenMoves(queen, boardState) {
 
   for (let i = 1; i < 8; i ++) {
     const passedPosition = new Position(queen.position.x, queen.position.y - i);
+    if (passedPosition.outOfBounds()) continue;
 
     if (!tileIsOccupied(passedPosition, boardState)) {
       possibleMoves.push(passedPosition);
@@ -125,6 +133,7 @@ export function getPossibleQueenMoves(queen, boardState) {
 
   for (let i = 1; i < 8; i ++) {
     const passedPosition = new Position(queen.position.x - i, queen.position.y);
+    if (passedPosition.outOfBounds()) continue;
 
     if (!tileIsOccupied(passedPosition, boardState)) {
       possibleMoves.push(passedPosition);
@@ -145,6 +154,7 @@ export function getPossibleQueenAttackMoves(queen, boardState) {
 
   for (let i = 1; i < 8; i ++) {
     const passedPosition = new Position(queen.position.x + i, queen.position.y + i);
+    if (passedPosition.outOfBounds()) continue;
 
     if (!tileIsOccupied(passedPosition, boardState) || tileIsOccupiedByOpponentKing(passedPosition, boardState, queen.teamType)) {
       possibleMoves.push(passedPosition);
@@ -158,6 +168,7 @@ export function getPossibleQueenAttackMoves(queen, boardState) {
 
   for (let i = 1; i < 8; i ++) {
     const passedPosition = new Position(queen.position.x + i, queen.position.y - i);
+    if (passedPosition.outOfBounds()) continue;
 
     if (!tileIsOccupied(passedPosition, boardState) || tileIsOccupiedByOpponentKing(passedPosition, boardState, queen.teamType)) {
       possibleMoves.push(passedPosition);
@@ -171,6 +182,7 @@ export function getPossibleQueenAttackMoves(queen, boardState) {
 
   for (let i = 1; i < 8; i ++) {
     const passedPosition = new Position(queen.position.x - i, queen.position.y - i);
+    if (passedPosition.outOfBounds()) continue;
 
     if (!tileIsOccupied(passedPosition, boardState) || tileIsOccupiedByOpponentKing(passedPosition, boardState, queen.teamType)) {
       possibleMoves.push(passedPosition);
@@ -184,6 +196,7 @@ export function getPossibleQueenAttackMoves(queen, boardState) {
 
   for (let i = 1; i < 8; i ++) {
     const passedPosition = new Position(queen.position.x - i, queen.position.y + i);
+    if (passedPosition.outOfBounds()) continue;
 
     if (!tileIsOccupied(passedPosition, boardState) || tileIsOccupiedByOpponentKing(passedPosition, boardState, queen.teamType)) {
       possibleMoves.push(passedPosition);
@@ -197,6 +210,7 @@ export function getPossibleQueenAttackMoves(queen, boardState) {
 
   for (let i = 1; i < 8; i ++) {
     const passedPosition = new Position(queen.position.x, queen.position.y + i);
+    if (passedPosition.outOfBounds()) continue;
 
     if (!tileIsOccupied(passedPosition, boardState) || tileIsOccupiedByOpponentKing(passedPosition, boardState, queen.teamType)) {
       possibleMoves.push(passedPosition);
@@ -210,6 +224,7 @@ export function getPossibleQueenAttackMoves(queen, boardState) {
 
   for (let i = 1; i < 8; i ++) {
     const passedPosition = new Position(queen.position.x + i, queen.position.y);
+    if (passedPosition.outOfBounds()) continue;
 
     if (!tileIsOccupied(passedPosition, boardState) || tileIsOccupiedByOpponentKing(passedPosition, boardState, queen.teamType)) {
       possibleMoves.push(passedPosition);
@@ -223,6 +238,7 @@ export function getPossibleQueenAttackMoves(queen, boardState) {
 
   for (let i = 1; i < 8; i ++) {
     const passedPosition = new Position(queen.position.x, queen.position.y - i);
+    if (passedPosition.outOfBounds()) continue;
 
     if (!tileIsOccupied(passedPosition, boardState) || tileIsOccupiedByOpponentKing(passedPosition, boardState, queen.teamType)) {
       possibleMoves.push(passedPosition);
@@ -236,6 +252,7 @@ export function getPossibleQueenAttackMoves(queen, boardState) {
 
   for (let i = 1; i < 8; i ++) {
     const passedPosition = new Position(queen.position.x - i, queen.position.y);
+    if (passedPosition.outOfBounds()) continue;
 
     if (!tileIsOccupied(passedPosition, boardState) || tileIsOccupiedByOpponentKing(passedPosition, boardState, queen.teamType)) {
       possibleMoves.push(passedPosition);

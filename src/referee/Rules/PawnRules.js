@@ -7,6 +7,7 @@ import { samePosition, getPositionPointDifference, sameColumn } from "utilities/
 
 // Rules
 import { tileIsOccupied, tileIsOccupiedByOpponent } from "referee/Rules/GeneralRules";
+import { getPiecesAttackingKing, kingIsThreatened } from "referee/Rules/KingRules";
 
 // Objects
 import Position from "models/Position";
@@ -62,6 +63,15 @@ export function getPossiblePawnMoves(pawn, boardState) {
   const upperRightAttack = new Position(pawn.position.x + 1, pawn.position.y + pawnDirection);
   const leftPosition = new Position(pawn.position.x - 1, pawn.position.y);
   const rightPosition = new Position(pawn.position.x + 1, pawn.position.y);
+
+  const isKingThreatened = kingIsThreatened(pawn.teamType, boardState);
+  if (isKingThreatened) {
+
+    const piecesAttackingKing = getPiecesAttackingKing(pawn.teamType, boardState);
+    console.log(piecesAttackingKing);
+    // return possibleMoves;
+
+  }
 
   if (!tileIsOccupied(normalMove, boardState)) {
     possibleMoves.push(normalMove);
