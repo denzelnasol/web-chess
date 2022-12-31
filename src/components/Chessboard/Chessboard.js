@@ -107,7 +107,7 @@ function Chessboard(props) {
     // }
     setActivePiece(null);
   }
-  // console.log(props.pieces);
+
   let board = [];
 
   for (let j = VERTICAL_AXIS.length - 1; j >= 0; j--) {

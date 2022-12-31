@@ -60,7 +60,7 @@ export default class Board {
     return possibleMoves;
   }
 
-  playMove(isEnpassantMove, isValidMove, isPawnPromotionMove, isCastleMove, piece, newPosition, updatePromotionPawn) {
+  playMove(isEnpassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened, piece, newPosition, updatePromotionPawn) {
     const pawnDirection = piece.teamType === TeamType.WHITE ? 1 : -1;
     const kingRow = piece.teamType === TeamType.WHITE ? 0 : 7;
 
@@ -118,6 +118,9 @@ export default class Board {
               }
             }
           }
+
+          // Check if king is still threatened
+          // if (isKingThreatened) return false; 
 
           // Update piece position
           currentPiece.position.x = newPosition.x;

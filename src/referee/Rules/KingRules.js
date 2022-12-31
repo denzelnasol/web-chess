@@ -4,6 +4,9 @@ import { getPositionPointDifference, samePosition } from "utilities/Position";
 // Rules
 import { tileIsEmptyOrOccupiedByOpponent, tileIsOccupied, tileIsOccupiedByOpponent } from "referee/Rules/GeneralRules";
 import { getPossiblePawnAttackMoves } from "referee/Rules/PawnRules";
+import { getPossibleRookAttackMoves } from "referee/Rules/RookRules";
+import { getPossibleBishopAttackMoves } from "referee/Rules/BishopRules";
+import { getPossibleQueenAttackMoves } from "referee/Rules/QueenRules";
 
 // Models
 import Position from "models/Position";
@@ -19,7 +22,7 @@ export function isValidKingPosition(grabPosition, newPosition, teamType, boardSt
 
   // ** MOVEMENT/ATTACK LOGIC ** //
   const kingAttackedMoves = getKingAttackedMoves(teamType, boardState);
-  const isPositionAttacked = kingAttackedMoves.find((move) => 
+  const isPositionAttacked = kingAttackedMoves.find((move) =>
     samePosition(move, newPosition)
   );
   if (isPositionAttacked) return false;
@@ -221,8 +224,22 @@ function getKingAttackedMoves(teamType, boardState) {
   for (const piece of boardState) {
     if (piece.teamType !== teamType) {
       let attackMoves = [];
-      if (piece.type === PieceType.PAWN) attackMoves = getPossiblePawnAttackMoves(piece);
-      else attackMoves = piece.possibleMoves;
+      switch (piece.type) {
+        case PieceType.PAWN:
+          attackMoves = getPossiblePawnAttackMoves(piece);
+          break;
+        case PieceType.ROOK:
+          attackMoves = getPossibleRookAttackMoves(piece, boardState);
+          break;
+        case PieceType.BISHOP:
+          attackMoves = getPossibleBishopAttackMoves(piece, boardState);
+          break;
+        case PieceType.QUEEN:
+          attackMoves = getPossibleQueenAttackMoves(piece, boardState);
+          break;
+        default:
+          attackMoves = piece.possibleMoves;
+      }
 
       for (const move of attackMoves) possibleAttackMoves.push(move);
     }

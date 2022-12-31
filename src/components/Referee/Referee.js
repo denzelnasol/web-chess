@@ -22,7 +22,7 @@ import { isValidKnightPosition } from "referee/Rules/KnightRules";
 import { isValidBishopPosition } from "referee/Rules/BishopRules";
 import { isValidRookPosition } from "referee/Rules/RookRules";
 import { isValidQueenPosition } from "referee/Rules/QueenRules";
-import { isValidKingPosition } from "referee/Rules/KingRules";
+import { isValidKingPosition, kingIsThreatened } from "referee/Rules/KingRules";
 import { tileIsOccupied } from "referee/Rules/GeneralRules";
 
 /** @TODO
@@ -56,9 +56,10 @@ const Referee = () => {
     const isEnPassantMove = moveIsEnpassant(piece.position, newPosition, piece.type, piece.teamType);
     const isPawnPromotionMove = moveIsPawnPromotion(newPosition, piece.type, piece.teamType);
     const isCastleMove = moveIsCastle(piece.position, newPosition, piece.type, piece.teamType, piece.castleAvailable);
+    const isKingThreatened = kingIsThreatened(piece.teamType, board.pieces);
 
     setBoard((previousBoard) => {
-      isPlayedMoveValid = board.playMove(isEnPassantMove, isValidMove, isPawnPromotionMove, isCastleMove, piece, newPosition, updatePromotionPawn);
+      isPlayedMoveValid = board.playMove(isEnPassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened, piece, newPosition, updatePromotionPawn);
       return board.clone();
     })
 

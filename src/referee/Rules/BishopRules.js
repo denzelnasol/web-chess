@@ -2,7 +2,7 @@
 import { samePosition } from "utilities/Position";
 
 // Rules
-import { tileIsOccupied, tileIsEmptyOrOccupiedByOpponent, tileIsOccupiedByOpponent } from "referee/Rules/GeneralRules";
+import { tileIsOccupied, tileIsEmptyOrOccupiedByOpponent, tileIsOccupiedByOpponent, tileIsOccupiedByOpponentKing } from "referee/Rules/GeneralRules";
 
 // Objects
 import Position from "models/Position";
@@ -97,6 +97,63 @@ export function getPossibleBishopMoves(bishop, boardState) {
     }
   }
 
+  return possibleMoves;
+}
+
+export function getPossibleBishopAttackMoves(bishop, boardState) {
+  const possibleMoves = [];
+
+  for (let i = 1; i < 8; i ++) {
+    const passedPosition = new Position(bishop.position.x + i, bishop.position.y + i);
+
+    if (!tileIsOccupied(passedPosition, boardState) || tileIsOccupiedByOpponentKing(passedPosition, boardState, bishop.teamType)) {
+      possibleMoves.push(passedPosition);
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, bishop.teamType)) {
+      possibleMoves.push(passedPosition);
+      break;
+    } else {
+      break;
+    }
+  }
+
+  for (let i = 1; i < 8; i ++) {
+    const passedPosition = new Position(bishop.position.x + i, bishop.position.y - i);
+
+    if (!tileIsOccupied(passedPosition, boardState) || tileIsOccupiedByOpponentKing(passedPosition, boardState, bishop.teamType)) {
+      possibleMoves.push(passedPosition);
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, bishop.teamType)) {
+      possibleMoves.push(passedPosition);
+      break;
+    } else {
+      break;
+    }
+  }
+
+  for (let i = 1; i < 8; i ++) {
+    const passedPosition = new Position(bishop.position.x - i, bishop.position.y - i);
+
+    if (!tileIsOccupied(passedPosition, boardState) || tileIsOccupiedByOpponentKing(passedPosition, boardState, bishop.teamType)) {
+      possibleMoves.push(passedPosition);
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, bishop.teamType)) {
+      possibleMoves.push(passedPosition);
+      break;
+    } else {
+      break;
+    }
+  }
+
+  for (let i = 1; i < 8; i ++) {
+    const passedPosition = new Position(bishop.position.x - i, bishop.position.y + i);
+
+    if (!tileIsOccupied(passedPosition, boardState) || tileIsOccupiedByOpponentKing(passedPosition, boardState, bishop.teamType)) {
+      possibleMoves.push(passedPosition);
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, bishop.teamType)) {
+      possibleMoves.push(passedPosition);
+      break;
+    } else {
+      break;
+    }
+  }
 
   return possibleMoves;
 }
