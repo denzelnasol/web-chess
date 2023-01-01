@@ -9,6 +9,7 @@ import { getPossiblePawnAttackMoves } from "referee/Rules/PawnRules";
 import { getPossibleRookAttackMoves } from "referee/Rules/RookRules";
 import { getPossibleBishopAttackMoves } from "referee/Rules/BishopRules";
 import { getPossibleQueenAttackMoves } from "referee/Rules/QueenRules";
+import { getPiecesAttackingKing } from "referee/Rules/KingRules";
 
 export function tileIsEmptyOrOccupiedByOpponent(newPosition, boardState, teamType) {
   return !tileIsOccupied(newPosition, boardState) || tileIsOccupiedByOpponent(newPosition, boardState, teamType);
@@ -86,3 +87,15 @@ export function getPieceFromPosition(position, boardState) {
   );
   return piece;
 }
+
+export const checkIfPiecePinned = (piece, boardState) => {
+  const tempBoardState = boardState.filter((currentPiece) => 
+    !samePosition(currentPiece.position, piece.position)
+  );
+
+  const piecesAttackingKing = getPiecesAttackingKing(piece.teamType, tempBoardState);
+  // console.log(tempBoardState, piecesAttackingKing)
+  if (piecesAttackingKing.length > 0) return true;
+
+  return false;
+};

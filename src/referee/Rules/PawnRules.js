@@ -6,7 +6,7 @@ import { TeamType } from "enums/TeamType";
 import { samePosition, getPositionPointDifference, sameColumn } from "utilities/Position";
 
 // Rules
-import { getPieceFromPosition, tileIsOccupied, tileIsOccupiedByOpponent } from "referee/Rules/GeneralRules";
+import { checkIfPiecePinned, getPieceAttackMoves, getPieceFromPosition, tileIsOccupied, tileIsOccupiedByOpponent } from "referee/Rules/GeneralRules";
 import { getPieceCheckPath, getPiecesAttackingKing, kingIsThreatened } from "referee/Rules/KingRules";
 
 // Objects
@@ -37,6 +37,9 @@ export function isValidPawnPosition(grabPosition, newPosition, teamType, boardSt
     const isKingThreatenedPawnMoveValid = kingThreatenedValidPawnMove(teamType, boardState, newPosition, possiblePawnMoves);
     return isKingThreatenedPawnMoveValid;
   }
+
+  const isPawnPinned = checkIfPiecePinned(pawn, boardState);
+  if (isPawnPinned) return false;
 
   // ** MOVEMENT LOGIC ** //
   // check if pawn is at initial position, no piece blocks it moving forward, and may move two spaces forward
@@ -79,6 +82,9 @@ export function getPossiblePawnMoves(pawn, boardState) {
     const kingThreatenedPawnMoves = getKingThreatenedPawnMoves(pawn, boardState);
     return kingThreatenedPawnMoves;
   }
+
+  const isPawnPinned = checkIfPiecePinned(pawn, boardState);
+  if (isPawnPinned) return possibleMoves;
 
   if (!tileIsOccupied(normalMove, boardState)) {
     possibleMoves.push(normalMove);
