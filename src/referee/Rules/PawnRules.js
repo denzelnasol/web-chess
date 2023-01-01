@@ -8,7 +8,7 @@ import { cloneBoardState } from "utilities/Board";
 
 // Rules
 import { checkIfPiecePinned, getPieceFromPosition, tileIsOccupied, tileIsOccupiedByOpponent } from "referee/Rules/GeneralRules";
-import { getPieceCheckPath, getPiecesAttackingKing, kingIsThreatened } from "referee/Rules/KingRules";
+import { getPieceCheckPath, getPiecesAttackingKing, kingIsChecked } from "referee/Rules/KingRules";
 
 // Objects
 import Position from "models/Position";
@@ -23,19 +23,13 @@ export function moveIsPawnPromotion(newPosition, type, teamType) {
 }
 
 export function isValidPawnPosition(grabPosition, newPosition, teamType, boardState) {
-  const initialPawnRow = (teamType === TeamType.WHITE ? 1 : 6)
-  const pawnDirection = (teamType === TeamType.WHITE ? 1 : -1);
-  const isSameColumn = (sameColumn(grabPosition, newPosition));
-  const xDifference = getPositionPointDifference(newPosition.x, grabPosition.x);
-  const yDifference = getPositionPointDifference(newPosition.y, grabPosition.y);
-
   const pawn = getPieceFromPosition(grabPosition, boardState);
   const possiblePawnMoves = getPossiblePawnMoves(pawn, boardState);
 
   // ** KING CHECK LOGIC ** //
-  const isKingThreatened = kingIsThreatened(teamType, boardState);
-  if (isKingThreatened) {
-    const isKingThreatenedPawnMoveValid = kingThreatenedValidPawnMove(teamType, boardState, newPosition, possiblePawnMoves);
+  const isKingCheck = kingIsChecked(teamType, boardState);
+  if (isKingCheck) {
+    const isKingThreatenedPawnMoveValid = validKingCheckPawnMove(teamType, boardState, newPosition, possiblePawnMoves);
     return isKingThreatenedPawnMoveValid;
   }
 
@@ -46,46 +40,16 @@ export function isValidPawnPosition(grabPosition, newPosition, teamType, boardSt
     return isPinnedPawnMoveValid;
   }
 
-  // ** MOVEMENT LOGIC ** //
-  // check if pawn is at initial position, no piece blocks it moving forward, and may move two spaces forward
-  if (isSameColumn && grabPosition.y === initialPawnRow && yDifference === 2 * pawnDirection) {
-    if (!tileIsOccupied(newPosition, boardState) && !tileIsOccupied(new Position(newPosition.x, newPosition.y - pawnDirection), boardState)) {
-      return true;
-    }
-  } else if (isSameColumn && yDifference === pawnDirection) {
-    if (!tileIsOccupied(newPosition, boardState)) {
-      return true;
-    }
-  }
-
-  // ** ATTACK LOGIC ** //
-  if ((xDifference === -1 || xDifference === 1) && yDifference === pawnDirection) {
-    const isTileOccupied = tileIsOccupiedByOpponent(newPosition, boardState, teamType);
-    if (isTileOccupied) {
-      return true;
-    }
-  }
-
-  return false;
+// ** STANDARD MOVE LOGIC ** //
+  const isStandardPawnMoveValid = validStandardPawnMove(pawn, boardState, newPosition, grabPosition);
+  return isStandardPawnMoveValid;
 }
 
 export function getPossiblePawnMoves(pawn, boardState) {
-  const possibleMoves = [];
-
-  const initialPawnRow = (pawn.teamType === TeamType.WHITE ? 1 : 6);
-  const pawnDirection = (pawn.teamType === TeamType.WHITE ? 1 : -1);
-
-  const normalMove = new Position(pawn.position.x, pawn.position.y + pawnDirection);
-  const specialMove = new Position(normalMove.x, normalMove.y + pawnDirection);
-  const upperLeftAttack = new Position(pawn.position.x - 1, pawn.position.y + pawnDirection);
-  const upperRightAttack = new Position(pawn.position.x + 1, pawn.position.y + pawnDirection);
-  const leftPosition = new Position(pawn.position.x - 1, pawn.position.y);
-  const rightPosition = new Position(pawn.position.x + 1, pawn.position.y);
-
   // ** KING CHECK LOGIC ** //
-  const isKingThreatened = kingIsThreatened(pawn.teamType, boardState);
-  if (isKingThreatened) {
-    const kingThreatenedPawnMoves = getKingThreatenedPawnMoves(pawn, boardState);
+  const isKingCheck = kingIsChecked(pawn.teamType, boardState);
+  if (isKingCheck) {
+    const kingThreatenedPawnMoves = getKingCheckPawnMoves(pawn, boardState);
     return kingThreatenedPawnMoves;
   }
 
@@ -97,32 +61,8 @@ export function getPossiblePawnMoves(pawn, boardState) {
   }
 
   // ** STANDARD MOVE LOGIC ** //
-  if (!tileIsOccupied(normalMove, boardState)) {
-    possibleMoves.push(normalMove);
-
-    if (pawn.position.y === initialPawnRow && !tileIsOccupied(specialMove, boardState)) {
-      possibleMoves.push(specialMove);
-    }
-  }
-
-  if (tileIsOccupiedByOpponent(upperLeftAttack, boardState, pawn.teamType)) {
-    possibleMoves.push(upperLeftAttack);
-  } else if (!tileIsOccupied(upperLeftAttack, boardState)) {
-    const leftPiece = boardState.find(piece => samePosition(piece.position, leftPosition));
-    if (leftPiece != null && leftPiece.enPassant) {
-      possibleMoves.push(upperLeftAttack);
-    }
-  }
-
-  if (tileIsOccupiedByOpponent(upperRightAttack, boardState, pawn.teamType)) {
-    possibleMoves.push(upperRightAttack);
-  } else if (!tileIsOccupied(upperRightAttack, boardState)) {
-    const rightPiece = boardState.find(piece => samePosition(piece.position, rightPosition));
-    if (rightPiece != null && rightPiece.enPassant) {
-      possibleMoves.push(upperRightAttack);
-    }
-  }
-  return possibleMoves;
+  const standardPawnMoves = getStandardPawnMoves(pawn, boardState);
+  return standardPawnMoves;
 }
 
 export const getPossiblePawnAttackMoves = (pawn) => {
@@ -137,7 +77,8 @@ export const getPossiblePawnAttackMoves = (pawn) => {
   return possibleMoves
 }
 
-const getKingThreatenedPawnMoves = (pawn, boardState) => {
+// *********************** KING CHECK PAWN MOVE FUNCTIONS *********************** //
+const getKingCheckPawnMoves = (pawn, boardState) => {
   const possibleMoves = [];
   const piecesAttackingKing = getPiecesAttackingKing(pawn.teamType, boardState);
   const pawnDirection = (pawn.teamType === TeamType.WHITE ? 1 : -1);
@@ -175,7 +116,7 @@ const getKingThreatenedPawnMoves = (pawn, boardState) => {
   return possibleMoves;
 };
 
-const kingThreatenedValidPawnMove = (teamType, boardState, newPosition, possiblePawnMoves) => {
+const validKingCheckPawnMove = (teamType, boardState, newPosition, possiblePawnMoves) => {
   const piecesAttackingKing = getPiecesAttackingKing(teamType, boardState);
   for (const piece of piecesAttackingKing) {
     const pieceCheckPath = getPieceCheckPath(piece, teamType, boardState)
@@ -191,6 +132,7 @@ const kingThreatenedValidPawnMove = (teamType, boardState, newPosition, possible
   return true;
 };
 
+// *********************** PINNED PAWN MOVE FUNCTIONS *********************** //
 const getPinnedPawnMoves = (pawn, boardState) => {
   const possibleMoves = [];
   const initialPawnRow = (pawn.teamType === TeamType.WHITE ? 1 : 6);
@@ -257,4 +199,75 @@ const validPinnedPawnMove = (pawn, boardState, newPosition) => {
   }
 
   return isMoveValid;
+};
+
+
+// *********************** STANDARD PAWN MOVE FUNCTIONS *********************** //
+const getStandardPawnMoves = (pawn, boardState) => {
+  const possibleMoves = [];
+
+  const initialPawnRow = (pawn.teamType === TeamType.WHITE ? 1 : 6);
+  const pawnDirection = (pawn.teamType === TeamType.WHITE ? 1 : -1);
+
+  const normalMove = new Position(pawn.position.x, pawn.position.y + pawnDirection);
+  const specialMove = new Position(normalMove.x, normalMove.y + pawnDirection);
+  const upperLeftAttack = new Position(pawn.position.x - 1, pawn.position.y + pawnDirection);
+  const upperRightAttack = new Position(pawn.position.x + 1, pawn.position.y + pawnDirection);
+  const leftPosition = new Position(pawn.position.x - 1, pawn.position.y);
+  const rightPosition = new Position(pawn.position.x + 1, pawn.position.y);
+
+  if (!tileIsOccupied(normalMove, boardState)) {
+    possibleMoves.push(normalMove);
+
+    if (pawn.position.y === initialPawnRow && !tileIsOccupied(specialMove, boardState)) {
+      possibleMoves.push(specialMove);
+    }
+  }
+
+  if (tileIsOccupiedByOpponent(upperLeftAttack, boardState, pawn.teamType)) {
+    possibleMoves.push(upperLeftAttack);
+  } else if (!tileIsOccupied(upperLeftAttack, boardState)) {
+    const leftPiece = boardState.find(piece => samePosition(piece.position, leftPosition));
+    if (leftPiece != null && leftPiece.enPassant) {
+      possibleMoves.push(upperLeftAttack);
+    }
+  }
+
+  if (tileIsOccupiedByOpponent(upperRightAttack, boardState, pawn.teamType)) {
+    possibleMoves.push(upperRightAttack);
+  } else if (!tileIsOccupied(upperRightAttack, boardState)) {
+    const rightPiece = boardState.find(piece => samePosition(piece.position, rightPosition));
+    if (rightPiece != null && rightPiece.enPassant) {
+      possibleMoves.push(upperRightAttack);
+    }
+  }
+  return possibleMoves;
+};
+
+const validStandardPawnMove = (pawn, boardState, newPosition, grabPosition) => {
+  const initialPawnRow = (pawn.teamType === TeamType.WHITE ? 1 : 6)
+  const pawnDirection = (pawn.teamType === TeamType.WHITE ? 1 : -1);
+  const isSameColumn = (sameColumn(grabPosition, newPosition));
+  const xDifference = getPositionPointDifference(newPosition.x, grabPosition.x);
+  const yDifference = getPositionPointDifference(newPosition.y, grabPosition.y);
+
+  // ** MOVEMENT LOGIC ** //
+  // check if pawn is at initial position, no piece blocks it moving forward, and may move two spaces forward
+  if (isSameColumn && grabPosition.y === initialPawnRow && yDifference === 2 * pawnDirection) {
+    if (!tileIsOccupied(newPosition, boardState) && !tileIsOccupied(new Position(newPosition.x, newPosition.y - pawnDirection), boardState)) {
+      return true;
+    }
+  } else if (isSameColumn && yDifference === pawnDirection) {
+    if (!tileIsOccupied(newPosition, boardState)) {
+      return true;
+    }
+  }
+
+  // ** ATTACK LOGIC ** //
+  if ((xDifference === -1 || xDifference === 1) && yDifference === pawnDirection) {
+    const isTileOccupied = tileIsOccupiedByOpponent(newPosition, boardState, pawn.teamType);
+    if (isTileOccupied) {
+      return true;
+    }
+  }
 };

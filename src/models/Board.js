@@ -16,7 +16,7 @@ import { getPossibleKnightMoves } from "referee/Rules/KnightRules";
 import { getPossibleBishopMoves } from "referee/Rules/BishopRules";
 import { getPossibleRookMoves } from "referee/Rules/RookRules";
 import { getPossibleQueenMoves } from "referee/Rules/QueenRules";
-import { getPossibleKingMoves, kingIsThreatened, kingIsSafe, getKing } from "referee/Rules/KingRules";
+import { getPossibleKingMoves, kingIsChecked, kingIsSafe, getKing } from "referee/Rules/KingRules";
 
 export default class Board {
   constructor(pieces) {
@@ -159,7 +159,7 @@ export default class Board {
 
   opponentKingInCheck(teamType) {
     const oppositeTeamType = getOppositeTeamType(teamType);
-    const isOpponentKingThreatened = kingIsThreatened(oppositeTeamType, this.pieces);
+    const isOpponentKingThreatened = kingIsChecked(oppositeTeamType, this.pieces);
     if (!isOpponentKingThreatened) return;
 
     const king = getKing(oppositeTeamType, this.pieces);

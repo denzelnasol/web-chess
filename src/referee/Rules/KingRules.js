@@ -223,7 +223,7 @@ export function getPossibleKingMoves(king, boardState) {
   return possibleMoves;
 }
 
-export const kingIsThreatened = (teamType, boardState) => {
+export const kingIsChecked = (teamType, boardState) => {
   const king = getKing(teamType, boardState);
 
   const attackedMoves = getOpponentAttackMoves(teamType, boardState);
