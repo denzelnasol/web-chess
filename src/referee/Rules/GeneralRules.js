@@ -88,13 +88,17 @@ export function getPieceFromPosition(position, boardState) {
   return piece;
 }
 
+export function addPieceToBoard(piece, boardState) {
+  const tempBoardState = boardState.push(piece);
+  return tempBoardState;
+}
+
 export const checkIfPiecePinned = (piece, boardState) => {
   const tempBoardState = boardState.filter((currentPiece) => 
     !samePosition(currentPiece.position, piece.position)
   );
 
   const piecesAttackingKing = getPiecesAttackingKing(piece.teamType, tempBoardState);
-  // console.log(tempBoardState, piecesAttackingKing)
   if (piecesAttackingKing.length > 0) return true;
 
   return false;
