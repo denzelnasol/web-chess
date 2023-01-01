@@ -20,7 +20,7 @@ export const initialBoard = new Board([
   new Piece(new Position(6, 0), PieceType.KNIGHT, TeamType.WHITE),
   new Piece(new Position(2, 0), PieceType.BISHOP, TeamType.WHITE),
   new Piece(new Position(5, 0), PieceType.BISHOP, TeamType.WHITE),
-  new Piece(new Position(3, 0), PieceType.KING, TeamType.WHITE, [], true),
+  new Piece(new Position(2, 2), PieceType.KING, TeamType.WHITE, [], true),
   new Piece(new Position(4, 0), PieceType.QUEEN, TeamType.WHITE),
 
   new Piece(new Position(0, 7), PieceType.ROOK, TeamType.BLACK, [], true),

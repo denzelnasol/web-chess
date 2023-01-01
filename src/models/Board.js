@@ -64,6 +64,7 @@ export default class Board {
   playMove(isEnpassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened, piece, newPosition, updatePromotionPawn) {
     const pawnDirection = piece.teamType === TeamType.WHITE ? 1 : -1;
     const kingRow = piece.teamType === TeamType.WHITE ? 0 : 7;
+    const king = getKing(piece.teamType, this.pieces);
 
     if (isEnpassantMove) {
       this.pieces = this.pieces.reduce((results, currentPiece) => {
@@ -84,43 +85,14 @@ export default class Board {
       }, []);
 
       this.calculateAllMoves();
-    } 
-    // else if (isKingThreatened && isValidMove) {
-    //   // Check if king is threatened
-    //   this.pieces = this.pieces.reduce((results, currentPiece) => {
-    //     // Check if given piece is the same
-    //     if (samePosition(currentPiece.position, piece.position)) {
-    //       const updatedBoardState = this.pieces.filter((tempPiece) =>
-    //         samePosition(tempPiece.position, piece.position)
-    //       );
-    //       const updatedPiece = piece;
-    //       piece.position = newPosition;
-    //       updatedBoardState.push(updatedPiece);
-
-    //       const isKingSafe = kingIsSafe(updatedBoardState, updatedPiece, newPosition);
-    //       // const isKingSafe = true;
-    //       if (isKingSafe) {
-    //         const king = getKing(piece.teamType, this.pieces);
-    //         // Update piece position
-    //         currentPiece.position.x = newPosition.x;
-    //         currentPiece.position.y = newPosition.y;
-    //         currentPiece.castleAvailable = false;
-    //         king.inCheck = false;
-    //       }
-    //       results.push(currentPiece);
-    //     } else if (!samePosition(currentPiece.position, newPosition)) {
-    //       results.push(currentPiece);
-    //     }
-
-    //     return results;
-    //   }, []);
-
-    //   this.calculateAllMoves();
-    //   this.opponentKingInCheck(piece.teamType);
-
-    // } 
-    else if (isValidMove) {
+    } else if (isValidMove) {
       this.pieces = this.pieces.reduce((results, currentPiece) => {
+
+        // Set king to no longer in check if move is valid
+        if (isKingThreatened && samePosition(currentPiece.position, king.position)) {
+          currentPiece.inCheck = false;
+        }
+
         // Check if given piece is the same
         if (samePosition(currentPiece.position, piece.position)) {
           // Check if enpassant move
@@ -190,7 +162,7 @@ export default class Board {
     const isOpponentKingThreatened = kingIsThreatened(oppositeTeamType, this.pieces);
     if (!isOpponentKingThreatened) return;
 
-    const king = getKing(teamType, this.pieces);
+    const king = getKing(oppositeTeamType, this.pieces);
     this.pieces = this.pieces.reduce((results, currentPiece) => {
       if (samePosition(king.position, currentPiece.position)) {
         currentPiece.inCheck = true;

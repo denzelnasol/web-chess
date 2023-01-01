@@ -32,7 +32,7 @@ export function isValidQueenPosition(grabPosition, newPosition, teamType, boardS
 export function getPossibleQueenMoves(queen, boardState) {
   const possibleMoves = [];
 
-  for (let i = 1; i < 8; i ++) {
+  for (let i = 1; i < 8; i++) {
     const passedPosition = new Position(queen.position.x + i, queen.position.y + i);
     if (passedPosition.outOfBounds()) continue;
 
@@ -46,7 +46,7 @@ export function getPossibleQueenMoves(queen, boardState) {
     }
   }
 
-  for (let i = 1; i < 8; i ++) {
+  for (let i = 1; i < 8; i++) {
     const passedPosition = new Position(queen.position.x + i, queen.position.y - i);
     if (passedPosition.outOfBounds()) continue;
 
@@ -61,7 +61,7 @@ export function getPossibleQueenMoves(queen, boardState) {
     }
   }
 
-  for (let i = 1; i < 8; i ++) {
+  for (let i = 1; i < 8; i++) {
     const passedPosition = new Position(queen.position.x - i, queen.position.y - i);
     if (passedPosition.outOfBounds()) continue;
 
@@ -75,7 +75,7 @@ export function getPossibleQueenMoves(queen, boardState) {
     }
   }
 
-  for (let i = 1; i < 8; i ++) {
+  for (let i = 1; i < 8; i++) {
     const passedPosition = new Position(queen.position.x - i, queen.position.y + i);
     if (passedPosition.outOfBounds()) continue;
 
@@ -89,7 +89,7 @@ export function getPossibleQueenMoves(queen, boardState) {
     }
   }
 
-  for (let i = 1; i < 8; i ++) {
+  for (let i = 1; i < 8; i++) {
     const passedPosition = new Position(queen.position.x, queen.position.y + i);
     if (passedPosition.outOfBounds()) continue;
 
@@ -103,7 +103,7 @@ export function getPossibleQueenMoves(queen, boardState) {
     }
   }
 
-  for (let i = 1; i < 8; i ++) {
+  for (let i = 1; i < 8; i++) {
     const passedPosition = new Position(queen.position.x + i, queen.position.y);
     if (passedPosition.outOfBounds()) continue;
 
@@ -117,7 +117,7 @@ export function getPossibleQueenMoves(queen, boardState) {
     }
   }
 
-  for (let i = 1; i < 8; i ++) {
+  for (let i = 1; i < 8; i++) {
     const passedPosition = new Position(queen.position.x, queen.position.y - i);
     if (passedPosition.outOfBounds()) continue;
 
@@ -131,7 +131,7 @@ export function getPossibleQueenMoves(queen, boardState) {
     }
   }
 
-  for (let i = 1; i < 8; i ++) {
+  for (let i = 1; i < 8; i++) {
     const passedPosition = new Position(queen.position.x - i, queen.position.y);
     if (passedPosition.outOfBounds()) continue;
 
@@ -152,7 +152,7 @@ export function getPossibleQueenMoves(queen, boardState) {
 export function getPossibleQueenAttackMoves(queen, boardState) {
   const possibleMoves = [];
 
-  for (let i = 1; i < 8; i ++) {
+  for (let i = 1; i < 8; i++) {
     const passedPosition = new Position(queen.position.x + i, queen.position.y + i);
     if (passedPosition.outOfBounds()) continue;
 
@@ -166,7 +166,7 @@ export function getPossibleQueenAttackMoves(queen, boardState) {
     }
   }
 
-  for (let i = 1; i < 8; i ++) {
+  for (let i = 1; i < 8; i++) {
     const passedPosition = new Position(queen.position.x + i, queen.position.y - i);
     if (passedPosition.outOfBounds()) continue;
 
@@ -180,7 +180,7 @@ export function getPossibleQueenAttackMoves(queen, boardState) {
     }
   }
 
-  for (let i = 1; i < 8; i ++) {
+  for (let i = 1; i < 8; i++) {
     const passedPosition = new Position(queen.position.x - i, queen.position.y - i);
     if (passedPosition.outOfBounds()) continue;
 
@@ -194,7 +194,7 @@ export function getPossibleQueenAttackMoves(queen, boardState) {
     }
   }
 
-  for (let i = 1; i < 8; i ++) {
+  for (let i = 1; i < 8; i++) {
     const passedPosition = new Position(queen.position.x - i, queen.position.y + i);
     if (passedPosition.outOfBounds()) continue;
 
@@ -208,7 +208,7 @@ export function getPossibleQueenAttackMoves(queen, boardState) {
     }
   }
 
-  for (let i = 1; i < 8; i ++) {
+  for (let i = 1; i < 8; i++) {
     const passedPosition = new Position(queen.position.x, queen.position.y + i);
     if (passedPosition.outOfBounds()) continue;
 
@@ -222,7 +222,7 @@ export function getPossibleQueenAttackMoves(queen, boardState) {
     }
   }
 
-  for (let i = 1; i < 8; i ++) {
+  for (let i = 1; i < 8; i++) {
     const passedPosition = new Position(queen.position.x + i, queen.position.y);
     if (passedPosition.outOfBounds()) continue;
 
@@ -236,7 +236,7 @@ export function getPossibleQueenAttackMoves(queen, boardState) {
     }
   }
 
-  for (let i = 1; i < 8; i ++) {
+  for (let i = 1; i < 8; i++) {
     const passedPosition = new Position(queen.position.x, queen.position.y - i);
     if (passedPosition.outOfBounds()) continue;
 
@@ -250,7 +250,7 @@ export function getPossibleQueenAttackMoves(queen, boardState) {
     }
   }
 
-  for (let i = 1; i < 8; i ++) {
+  for (let i = 1; i < 8; i++) {
     const passedPosition = new Position(queen.position.x - i, queen.position.y);
     if (passedPosition.outOfBounds()) continue;
 

@@ -6,8 +6,8 @@ import { TeamType } from "enums/TeamType";
 import { samePosition, getPositionPointDifference, sameColumn } from "utilities/Position";
 
 // Rules
-import { tileIsOccupied, tileIsOccupiedByOpponent } from "referee/Rules/GeneralRules";
-import { getKing, getPieceCheckPath, getPiecesAttackingKing, kingIsThreatened } from "referee/Rules/KingRules";
+import { getPieceFromPosition, tileIsOccupied, tileIsOccupiedByOpponent } from "referee/Rules/GeneralRules";
+import { getPieceCheckPath, getPiecesAttackingKing, kingIsThreatened } from "referee/Rules/KingRules";
 
 // Objects
 import Position from "models/Position";
@@ -27,6 +27,16 @@ export function isValidPawnPosition(grabPosition, newPosition, teamType, boardSt
   const isSameColumn = (sameColumn(grabPosition, newPosition));
   const xDifference = getPositionPointDifference(newPosition.x, grabPosition.x);
   const yDifference = getPositionPointDifference(newPosition.y, grabPosition.y);
+
+  const pawn = getPieceFromPosition(grabPosition, boardState);
+  const possiblePawnMoves = getPossiblePawnMoves(pawn, boardState);
+
+  // King in check logic
+  const isKingThreatened = kingIsThreatened(teamType, boardState);
+  if (isKingThreatened) {
+    const isKingThreatenedPawnMoveValid = kingThreatenedValidPawnMove(teamType, boardState, newPosition, possiblePawnMoves);
+    return isKingThreatenedPawnMoveValid;
+  }
 
   // ** MOVEMENT LOGIC ** //
   // check if pawn is at initial position, no piece blocks it moving forward, and may move two spaces forward
@@ -66,11 +76,8 @@ export function getPossiblePawnMoves(pawn, boardState) {
 
   const isKingThreatened = kingIsThreatened(pawn.teamType, boardState);
   if (isKingThreatened) {
-    const piecesAttackingKing = getPiecesAttackingKing(pawn.teamType, boardState);
-    const pieceCheckPath = getPieceCheckPath(piecesAttackingKing[0], pawn.teamType, boardState);
-    // console.log(piecesAttackingKing);
-    // return possibleMoves;
-
+    const kingThreatenedPawnMoves = getKingThreatenedPawnMoves(pawn, boardState);
+    return kingThreatenedPawnMoves;
   }
 
   if (!tileIsOccupied(normalMove, boardState)) {
@@ -112,3 +119,57 @@ export const getPossiblePawnAttackMoves = (pawn) => {
 
   return possibleMoves
 }
+
+const getKingThreatenedPawnMoves = (pawn, boardState) => {
+  const possibleMoves = [];
+  const piecesAttackingKing = getPiecesAttackingKing(pawn.teamType, boardState);
+  const pawnDirection = (pawn.teamType === TeamType.WHITE ? 1 : -1);
+  const initialPawnRow = (pawn.teamType === TeamType.WHITE ? 1 : 6);
+
+  const normalMove = new Position(pawn.position.x, pawn.position.y + pawnDirection);
+  const specialMove = new Position(normalMove.x, normalMove.y + pawnDirection);
+  const upperLeftAttack = new Position(pawn.position.x - 1, pawn.position.y + pawnDirection);
+  const upperRightAttack = new Position(pawn.position.x + 1, pawn.position.y + pawnDirection);
+
+  piecesAttackingKing.forEach((piece) => {
+    const pieceCheckPath = getPieceCheckPath(piece, pawn.teamType, boardState);
+    
+    const isSpecialMovePossible = pieceCheckPath.find((move) =>
+      samePosition(move, specialMove) && !tileIsOccupied(move, boardState) && !tileIsOccupied(normalMove, boardState) && pawn.position.y === initialPawnRow
+    );
+    if (isSpecialMovePossible) possibleMoves.push(specialMove);
+
+    const isNormalMovePossible = pieceCheckPath.find((move) =>
+      samePosition(move, normalMove) && !tileIsOccupied(move, boardState)
+    );
+    if (isNormalMovePossible) possibleMoves.push(normalMove);
+
+    const isUpperLeftAttackPossible = pieceCheckPath.find((move) =>
+      samePosition(move, upperLeftAttack) && tileIsOccupiedByOpponent(move, boardState, pawn.teamType)
+    );
+    if (isUpperLeftAttackPossible) possibleMoves.push(upperLeftAttack);
+
+    const isUpperRightAttackPossible = pieceCheckPath.find((move) =>
+      samePosition(move, upperRightAttack) && tileIsOccupiedByOpponent(move, boardState, pawn.teamType)
+    );
+    if (isUpperRightAttackPossible) possibleMoves.push(upperRightAttack);
+  });
+
+  return possibleMoves;
+};
+
+const kingThreatenedValidPawnMove = (teamType, boardState, newPosition, possiblePawnMoves) => {
+  const piecesAttackingKing = getPiecesAttackingKing(teamType, boardState);
+  for (const piece of piecesAttackingKing) {
+    const pieceCheckPath = getPieceCheckPath(piece, teamType, boardState)
+    let checkPathBlocked = false;
+    for (const possiblePawnMove of possiblePawnMoves) {
+      checkPathBlocked = pieceCheckPath.find((move) =>
+        samePosition(possiblePawnMove, move) && samePosition(possiblePawnMove, newPosition)
+      );
+      if (checkPathBlocked) break;
+    }
+    if (!checkPathBlocked) return false;
+  }
+  return true;
+};

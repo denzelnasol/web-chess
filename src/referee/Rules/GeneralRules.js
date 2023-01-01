@@ -79,3 +79,10 @@ export function getPieceAttackMoves(piece, boardState) {
 
   return attackMoves;
 }
+
+export function getPieceFromPosition(position, boardState) {
+  const piece = boardState.find((piece) => 
+    samePosition(piece.position, position)
+  );
+  return piece;
+}
