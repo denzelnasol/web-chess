@@ -7,8 +7,8 @@ import { PieceType } from "enums/PieceType";
 
 // Rules
 import { getPossiblePawnAttackMoves } from "referee/Rules/PawnRules";
-import { getPossibleRookAttackMoves } from "referee/Rules/RookRules";
-import { getPossibleBishopAttackMoves } from "referee/Rules/BishopRules";
+import { getPossibleRookAttackMoves, getStandardRookMoves } from "referee/Rules/RookRules";
+import { getPossibleBishopAttackMoves, getStandardBishopMoves } from "referee/Rules/BishopRules";
 import { getPossibleQueenAttackMoves } from "referee/Rules/QueenRules";
 import { getPossibleKnightAttackMoves } from "referee/Rules/KnightRules";
 import { getPiecesAttackingKing } from "referee/Rules/KingRules";
@@ -107,12 +107,13 @@ export function addPieceToBoard(piece, boardState) {
 }
 
 export const checkIfPiecePinned = (piece, boardState) => {
+  const currentBoardStatePiecesAttackingKing = getPiecesAttackingKing(piece.teamType, boardState);
   const tempBoardState = boardState.filter((currentPiece) => 
     !samePosition(currentPiece.position, piece.position)
   );
 
   const piecesAttackingKing = getPiecesAttackingKing(piece.teamType, tempBoardState);
-  if (piecesAttackingKing.length > 0) return true;
+  if (piecesAttackingKing.length > 0 && piecesAttackingKing.length > currentBoardStatePiecesAttackingKing.length) return true;
 
   return false;
 };
@@ -135,4 +136,40 @@ export const checkPinnedPiecePotentialMove = (move, piece, boardState) => {
 
   const piecesAttackingKing = getPiecesAttackingKing(piece.teamType, tempBoardState);
   if (piecesAttackingKing.length === 0 || !piecesAttackingKing) return move;
+};
+
+export const getStandardPieceMoves = (piece, boardState) => {
+  let standardMoves = [];
+  switch (piece.type) {
+    case PieceType.ROOK:
+      standardMoves = getStandardRookMoves(piece, boardState);
+      break;
+    case PieceType.BISHOP:
+      standardMoves = getStandardBishopMoves(piece, boardState);
+  }
+  return standardMoves;
+};
+
+export const getPinnedPieceMoves = (piece, boardState) => {
+  const possibleMoves = [];
+  const standardPieceMoves = getStandardPieceMoves(piece, boardState);
+  standardPieceMoves.forEach((pieceMove) => {
+    const isMovePossible = checkPinnedPiecePotentialMove(pieceMove, piece, boardState);
+    if (isMovePossible) possibleMoves.push(pieceMove);
+  });
+
+  return possibleMoves;
+};
+
+export const validPinnedPieceMove = (piece, boardState, newPosition) => {
+  let isMoveValid = false;
+  const standardPieceMoves = getStandardPieceMoves(piece, boardState);
+  standardPieceMoves.forEach((pieceMove) => {
+    if (tileIsEmptyOrOccupiedByOpponent(pieceMove, boardState, piece.teamType) && samePosition(pieceMove, newPosition)) {
+      const isMovePossible = checkPinnedPiecePotentialMove(pieceMove, piece, boardState);
+      if (isMovePossible) isMoveValid = true;
+    }
+  });
+
+  return isMoveValid;
 };

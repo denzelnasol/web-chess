@@ -2,7 +2,7 @@
 import { getPositionPointDifference, sameColumn, sameDiagonal, samePosition, sameRow } from "utilities/Position";
 
 // Rules
-import { tileIsEmptyOrOccupiedByOpponent, tileIsOccupied, tileIsOccupiedByOpponent, getOpponentAttackMoves, getPieceAttackMoves } from "referee/Rules/GeneralRules";
+import { tileIsEmptyOrOccupiedByOpponent, tileIsOccupied, tileIsOccupiedByOpponent, getOpponentAttackMoves, getPieceAttackMoves, getStandardPieceMoves, checkIfPiecePinned } from "referee/Rules/GeneralRules";
 
 // Models
 import Position from "models/Position";
@@ -368,4 +368,24 @@ export const validKingCheckMove = (teamType, boardState, newPosition, possibleMo
     if (!checkPathBlocked) return false;
   }
   return true;
+};
+
+export const getKingCheckPieceMoves = (piece, boardState) => {
+  const possibleMoves = [];
+  const piecesAttackingKing = getPiecesAttackingKing(piece.teamType, boardState);
+  const standardPieceMoves = getStandardPieceMoves(piece, boardState);
+
+  const isPiecePinned = checkIfPiecePinned(piece, boardState);
+  if (isPiecePinned) return possibleMoves;
+
+  piecesAttackingKing.forEach((attackPiece) => {
+    const pieceCheckPath = getPieceCheckPath(attackPiece, piece.teamType, boardState);
+    standardPieceMoves.forEach((pieceMove) => {
+      const isMovePossible = pieceCheckPath.find((move) =>
+      samePosition(move, pieceMove) && tileIsEmptyOrOccupiedByOpponent(move, boardState, piece.teamType)
+      );
+      if (isMovePossible) possibleMoves.push(pieceMove);
+    });
+  });
+  return possibleMoves;
 };
