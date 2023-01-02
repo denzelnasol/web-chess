@@ -102,11 +102,8 @@ function Chessboard(props) {
   for (let j = VERTICAL_AXIS.length - 1; j >= 0; j--) {
     for (let i = 0; i < HORIZONTAL_AXIS.length; i++) {
       const number = j + i + 2;
-
       const piece = props.pieces.find((piece) => (samePosition(piece.position, new Position(i, j))));
-
       const image = piece ? piece.image : undefined;
-
       const currentPiece = activePiece !== null ? props.pieces.find((piece) => samePosition(piece.position, grabPosition)) : undefined;
       const highlight = currentPiece?.possibleMoves ? (
         currentPiece.possibleMoves.some((piece) => samePosition(piece, new Position(i, j)))

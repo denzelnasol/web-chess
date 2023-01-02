@@ -24,31 +24,34 @@ import { isValidRookPosition } from "referee/Rules/RookRules";
 import { isValidQueenPosition } from "referee/Rules/QueenRules";
 import { isValidKingPosition, kingIsChecked } from "referee/Rules/KingRules";
 import { tileIsOccupied } from "referee/Rules/GeneralRules";
+import Player from "models/Player";
 
 /** @TODO
  * Add checkmate
- * Add checks
  * Add stalemate
  */
 const Referee = () => {
+
+  const players = [new Player(TeamType.WHITE), new Player(TeamType.BLACK)];
 
   const modalRef = useRef(null);
 
   const [board, setBoard] = useState(initialBoard);
   const [promotionPawn, setPromotionPawn] = useState();
+  const [currentPlayer, setCurrentPlayer] = useState(players[0]);
 
   useEffect(() => {
-    updatePossibleMoves();
+    updatePossibleMoves(players[1]);
   }, []);
 
-  const updatePossibleMoves = () => {
-    board.calculateAllMoves();
+  const updatePossibleMoves = (currentPlayer) => {
+    board.calculateAllMoves(currentPlayer);
   }
 
   const updatePromotionPawn = (pawn) => {
     setPromotionPawn(pawn);
   }
-
+  console.log(currentPlayer)
   const playMove = (piece, newPosition) => {
     let isPlayedMoveValid = false;
 
@@ -57,14 +60,19 @@ const Referee = () => {
     const isPawnPromotionMove = moveIsPawnPromotion(newPosition, piece.type, piece.teamType);
     const isCastleMove = moveIsCastle(piece.position, newPosition, piece.type, piece.teamType, piece.castleAvailable);
     const isKingThreatened = kingIsChecked(piece.teamType, board.pieces);
+    const isValidPlayer = playerIsValid(piece.teamType);
 
     setBoard((previousBoard) => {
-      isPlayedMoveValid = board.playMove(isEnPassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened, piece, newPosition, updatePromotionPawn);
+      isPlayedMoveValid = board.playMove(isEnPassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened, isValidPlayer, piece, newPosition, updatePromotionPawn, currentPlayer);
       return board.clone();
     })
 
     if (isPawnPromotionMove && isPlayedMoveValid) {
       modalRef.current?.classList.remove('hidden');
+    }
+
+    if (isValidPlayer && isPlayedMoveValid) {
+      updateCurrentPlayer();
     }
 
     return isPlayedMoveValid;
@@ -143,6 +151,15 @@ const Referee = () => {
     return false;
   }
 
+  const playerIsValid = (teamType) => {
+    return currentPlayer.teamType === teamType;
+  };
+
+  const updateCurrentPlayer = () => {
+    const newCurrentPlayer = currentPlayer.teamType === TeamType.WHITE ? players[1] : players[0];
+    setCurrentPlayer(newCurrentPlayer);
+  }
+
   const promotionTeamType = () => {
     return (promotionPawn?.teamType === TeamType.WHITE) ? TeamType.WHITE.toLowerCase() : TeamType.BLACK.toLowerCase();
   }
@@ -150,7 +167,7 @@ const Referee = () => {
   const promotePawn = (pieceType) => {
     if (!promotionPawn) return;
     setBoard((previousBoard) => {
-      board.promotePawn(pieceType, promotionPawn.clone());
+      board.promotePawn(pieceType, promotionPawn.clone(), currentPlayer);
       return board.clone();
     })
 
