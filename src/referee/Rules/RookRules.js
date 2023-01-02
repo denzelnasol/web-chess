@@ -2,7 +2,7 @@
 import { sameColumn, samePosition, sameRow } from "utilities/Position";
 
 // Rules
-import { tileIsOccupied, tileIsEmptyOrOccupiedByOpponent, tileIsOccupiedByOpponent, tileIsOccupiedByOpponentKing, tileIsOccupiedByAlly, getPieceFromPosition, checkIfPiecePinned, checkPinnedPiecePotentialMove, getPinnedPieceMoves, validPinnedPieceMove } from "referee/Rules/GeneralRules";
+import { tileIsOccupied, tileIsEmptyOrOccupiedByOpponent, tileIsOccupiedByOpponent, tileIsOccupiedByOpponentKing, tileIsOccupiedByAlly, getPieceFromPosition, checkIfPiecePinned, getPinnedPieceMoves, validPinnedPieceMove } from "referee/Rules/GeneralRules";
 import { kingIsChecked, validKingCheckMove, getKingCheckPieceMoves } from "referee/Rules/KingRules";
 
 // Objects
@@ -54,6 +54,7 @@ export function getPossibleRookMoves(rook, boardState) {
   return standardRookMoves;
 }
 
+// *********************** ROOK ATTACK FUNCTIONS *********************** //
 export const getPossibleRookAttackMoves = (rook, boardState) => {
   const possibleMoves = [];
 

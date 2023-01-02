@@ -2,7 +2,7 @@
 import { samePosition } from "utilities/Position";
 
 // Rules
-import { tileIsOccupied, tileIsEmptyOrOccupiedByOpponent, tileIsOccupiedByOpponent, tileIsOccupiedByOpponentKing, tileIsOccupiedByAlly, getPieceFromPosition, checkIfPiecePinned, checkPinnedPiecePotentialMove, getPinnedPieceMoves, validPinnedPieceMove } from "referee/Rules/GeneralRules";
+import { tileIsOccupied, tileIsEmptyOrOccupiedByOpponent, tileIsOccupiedByOpponent, tileIsOccupiedByOpponentKing, tileIsOccupiedByAlly, getPieceFromPosition, checkIfPiecePinned, getPinnedPieceMoves, validPinnedPieceMove } from "referee/Rules/GeneralRules";
 import { kingIsChecked, validKingCheckMove, getKingCheckPieceMoves } from "referee/Rules/KingRules";
 
 // Enums
@@ -55,6 +55,7 @@ export const getPossibleBishopMoves = (bishop, boardState) => {
   return standardBishopMoves;
 };
 
+// *********************** BISHOP ATTACK FUNCTIONS *********************** //
 export const getPossibleBishopAttackMoves = (bishop, boardState) => {
   const possibleMoves = [];
 

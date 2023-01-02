@@ -9,7 +9,7 @@ import { PieceType } from "enums/PieceType";
 import { getPossiblePawnAttackMoves } from "referee/Rules/PawnRules";
 import { getPossibleRookAttackMoves, getStandardRookMoves } from "referee/Rules/RookRules";
 import { getPossibleBishopAttackMoves, getStandardBishopMoves } from "referee/Rules/BishopRules";
-import { getPossibleQueenAttackMoves } from "referee/Rules/QueenRules";
+import { getPossibleQueenAttackMoves, getStandardQueenMoves } from "referee/Rules/QueenRules";
 import { getPossibleKnightAttackMoves } from "referee/Rules/KnightRules";
 import { getPiecesAttackingKing } from "referee/Rules/KingRules";
 
@@ -146,6 +146,10 @@ export const getStandardPieceMoves = (piece, boardState) => {
       break;
     case PieceType.BISHOP:
       standardMoves = getStandardBishopMoves(piece, boardState);
+      break;
+    case PieceType.QUEEN:
+      standardMoves = getStandardQueenMoves(piece, boardState);
+      break;
   }
   return standardMoves;
 };
