@@ -353,3 +353,19 @@ const getDiagonalCheckTiles = (piece, king) => {
   tiles.push(piece.position);
   return tiles;
 }
+
+export const validKingCheckMove = (teamType, boardState, newPosition, possibleMoves) => {
+  const piecesAttackingKing = getPiecesAttackingKing(teamType, boardState);
+  for (const piece of piecesAttackingKing) {
+    const pieceCheckPath = getPieceCheckPath(piece, teamType, boardState)
+    let checkPathBlocked = false;
+    for (const possiblePawnMove of possibleMoves) {
+      checkPathBlocked = pieceCheckPath.find((move) =>
+        samePosition(possiblePawnMove, move) && samePosition(possiblePawnMove, newPosition)
+      );
+      if (checkPathBlocked) break;
+    }
+    if (!checkPathBlocked) return false;
+  }
+  return true;
+};

@@ -4,32 +4,31 @@ import { TeamType } from "enums/TeamType";
 
 // Utilities
 import { samePosition, getPositionPointDifference, sameColumn } from "utilities/Position";
-import { cloneBoardState } from "utilities/Board";
 
 // Rules
-import { checkIfPiecePinned, getPieceFromPosition, tileIsOccupied, tileIsOccupiedByOpponent } from "referee/Rules/GeneralRules";
-import { getPieceCheckPath, getPiecesAttackingKing, kingIsChecked } from "referee/Rules/KingRules";
+import { checkIfPiecePinned, getPieceFromPosition, tileIsOccupied, tileIsOccupiedByOpponent, checkPinnedPiecePotentialMove } from "referee/Rules/GeneralRules";
+import { getPieceCheckPath, getPiecesAttackingKing, kingIsChecked, validKingCheckMove } from "referee/Rules/KingRules";
 
 // Objects
 import Position from "models/Position";
 
-export function moveIsPawnPromotion(newPosition, type, teamType) {
+export const moveIsPawnPromotion = (newPosition, type, teamType) => {
   const promotionRow = teamType === TeamType.WHITE ? 7 : 0;
 
   if (type !== PieceType.PAWN) return false;
   if (newPosition.y === promotionRow) return true;
 
   return false;
-}
+};
 
-export function isValidPawnPosition(grabPosition, newPosition, teamType, boardState) {
+export const isValidPawnPosition = (grabPosition, newPosition, teamType, boardState) => {
   const pawn = getPieceFromPosition(grabPosition, boardState);
   const possiblePawnMoves = getPossiblePawnMoves(pawn, boardState);
 
   // ** KING CHECK LOGIC ** //
   const isKingCheck = kingIsChecked(teamType, boardState);
   if (isKingCheck) {
-    const isKingThreatenedPawnMoveValid = validKingCheckPawnMove(teamType, boardState, newPosition, possiblePawnMoves);
+    const isKingThreatenedPawnMoveValid = validKingCheckMove(teamType, boardState, newPosition, possiblePawnMoves);
     return isKingThreatenedPawnMoveValid;
   }
 
@@ -40,12 +39,12 @@ export function isValidPawnPosition(grabPosition, newPosition, teamType, boardSt
     return isPinnedPawnMoveValid;
   }
 
-// ** STANDARD MOVE LOGIC ** //
+  // ** STANDARD MOVE LOGIC ** //
   const isStandardPawnMoveValid = validStandardPawnMove(pawn, boardState, newPosition, grabPosition);
   return isStandardPawnMoveValid;
-}
+};
 
-export function getPossiblePawnMoves(pawn, boardState) {
+export const getPossiblePawnMoves = (pawn, boardState) => {
   // ** KING CHECK LOGIC ** //
   const isKingCheck = kingIsChecked(pawn.teamType, boardState);
   if (isKingCheck) {
@@ -63,7 +62,7 @@ export function getPossiblePawnMoves(pawn, boardState) {
   // ** STANDARD MOVE LOGIC ** //
   const standardPawnMoves = getStandardPawnMoves(pawn, boardState);
   return standardPawnMoves;
-}
+};
 
 export const getPossiblePawnAttackMoves = (pawn) => {
   const possibleMoves = [];
@@ -116,22 +115,6 @@ const getKingCheckPawnMoves = (pawn, boardState) => {
   return possibleMoves;
 };
 
-const validKingCheckPawnMove = (teamType, boardState, newPosition, possiblePawnMoves) => {
-  const piecesAttackingKing = getPiecesAttackingKing(teamType, boardState);
-  for (const piece of piecesAttackingKing) {
-    const pieceCheckPath = getPieceCheckPath(piece, teamType, boardState)
-    let checkPathBlocked = false;
-    for (const possiblePawnMove of possiblePawnMoves) {
-      checkPathBlocked = pieceCheckPath.find((move) =>
-        samePosition(possiblePawnMove, move) && samePosition(possiblePawnMove, newPosition)
-      );
-      if (checkPathBlocked) break;
-    }
-    if (!checkPathBlocked) return false;
-  }
-  return true;
-};
-
 // *********************** PINNED PAWN MOVE FUNCTIONS *********************** //
 const getPinnedPawnMoves = (pawn, boardState) => {
   const possibleMoves = [];
@@ -144,33 +127,22 @@ const getPinnedPawnMoves = (pawn, boardState) => {
   const upperRightAttack = new Position(pawn.position.x + 1, pawn.position.y + pawnDirection);
 
   if (!tileIsOccupied(normalMove, boardState)) {
-    const isNormalMovePossible = checkPinnedPawnPotentialMove(normalMove, pawn, boardState);
+    const isNormalMovePossible = checkPinnedPiecePotentialMove(normalMove, pawn, boardState);
     if (isNormalMovePossible) possibleMoves.push(normalMove);
 
     if (!tileIsOccupied(specialMove, boardState) && pawn.position.y === initialPawnRow) {
-      const isSpecialMovePossible = checkPinnedPawnPotentialMove(specialMove, pawn, boardState);
+      const isSpecialMovePossible = checkPinnedPiecePotentialMove(specialMove, pawn, boardState);
       if (isSpecialMovePossible) possibleMoves.push(specialMove);
     }
   } else if (tileIsOccupiedByOpponent(upperLeftAttack, boardState, pawn.teamType)) {
-    const isUpperLeftAttackPossible = checkPinnedPawnPotentialMove(upperLeftAttack, pawn, boardState);
+    const isUpperLeftAttackPossible = checkPinnedPiecePotentialMove(upperLeftAttack, pawn, boardState);
     if (isUpperLeftAttackPossible) possibleMoves.push(upperLeftAttack);
   } else if (tileIsOccupiedByOpponent(upperRightAttack, boardState, pawn.teamType)) {
-    const isUpperRightAttackPossible = checkPinnedPawnPotentialMove(upperRightAttack, pawn, boardState);
+    const isUpperRightAttackPossible = checkPinnedPiecePotentialMove(upperRightAttack, pawn, boardState);
     if (isUpperRightAttackPossible) possibleMoves.push(upperRightAttack);
   }
 
   return possibleMoves;
-};
-
-const checkPinnedPawnPotentialMove = (move, pawn, boardState) => {
-  let tempBoardState = cloneBoardState(boardState);
-  tempBoardState = tempBoardState.reduce((results, currentPiece) => {
-    if (samePosition(currentPiece.position, pawn.position)) currentPiece.position = move;
-    results.push(currentPiece);
-    return results;
-  }, []);
-  const piecesAttackingKing = getPiecesAttackingKing(pawn.teamType, tempBoardState);
-  if (piecesAttackingKing.length === 0 || !piecesAttackingKing) return move;
 };
 
 const validPinnedPawnMove = (pawn, boardState, newPosition) => {
@@ -185,22 +157,21 @@ const validPinnedPawnMove = (pawn, boardState, newPosition) => {
   let isMoveValid = false;
 
   if (!tileIsOccupied(normalMove, boardState) && samePosition(normalMove, newPosition)) {
-    const isNormalMovePossible = checkPinnedPawnPotentialMove(normalMove, pawn, boardState);
+    const isNormalMovePossible = checkPinnedPiecePotentialMove(normalMove, pawn, boardState);
     if (isNormalMovePossible) isMoveValid = true;
   } else if (!tileIsOccupied(normalMove, boardState) && !tileIsOccupied(specialMove, boardState) && pawn.position.y === initialPawnRow && samePosition(specialMove, newPosition)) {
-    const isSpecialMovePossible = checkPinnedPawnPotentialMove(specialMove, pawn, boardState);
+    const isSpecialMovePossible = checkPinnedPiecePotentialMove(specialMove, pawn, boardState);
     if (isSpecialMovePossible) isMoveValid = true;
   } else if (tileIsOccupiedByOpponent(upperLeftAttack, boardState, pawn.teamType) && samePosition(upperLeftAttack, newPosition)) {
-    const isUpperLeftAttackPossible = checkPinnedPawnPotentialMove(upperLeftAttack, pawn, boardState);
+    const isUpperLeftAttackPossible = checkPinnedPiecePotentialMove(upperLeftAttack, pawn, boardState);
     if (isUpperLeftAttackPossible) isMoveValid = true;
   } else if (tileIsOccupiedByOpponent(upperRightAttack, boardState, pawn.teamType) && samePosition(upperRightAttack, newPosition)) {
-    const isUpperRightAttackPossible = checkPinnedPawnPotentialMove(upperRightAttack, pawn, boardState);
+    const isUpperRightAttackPossible = checkPinnedPiecePotentialMove(upperRightAttack, pawn, boardState);
     if (isUpperRightAttackPossible) isMoveValid = true;
   }
 
   return isMoveValid;
 };
-
 
 // *********************** STANDARD PAWN MOVE FUNCTIONS *********************** //
 const getStandardPawnMoves = (pawn, boardState) => {

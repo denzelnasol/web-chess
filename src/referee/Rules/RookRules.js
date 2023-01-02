@@ -2,7 +2,7 @@
 import { sameColumn, samePosition, sameRow } from "utilities/Position";
 
 // Rules
-import { tileIsOccupied, tileIsEmptyOrOccupiedByOpponent, tileIsOccupiedByOpponent, tileIsOccupiedByOpponentKing } from "referee/Rules/GeneralRules";
+import { tileIsOccupied, tileIsEmptyOrOccupiedByOpponent, tileIsOccupiedByOpponent, tileIsOccupiedByOpponentKing, tileIsOccupiedByAlly } from "referee/Rules/GeneralRules";
 
 // Objects
 import Position from "models/Position";
@@ -113,7 +113,7 @@ export const getPossibleRookAttackMoves = (rook, boardState) => {
 
     if (!tileIsOccupied(passedPosition, boardState) || tileIsOccupiedByOpponentKing(passedPosition, boardState, rook.teamType)) {
       possibleMoves.push(passedPosition);
-    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, rook.teamType)) {
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, rook.teamType) || tileIsOccupiedByAlly(passedPosition, boardState, rook.teamType)) {
       possibleMoves.push(passedPosition);
       break;
     } else {
@@ -127,7 +127,7 @@ export const getPossibleRookAttackMoves = (rook, boardState) => {
 
     if (!tileIsOccupied(passedPosition, boardState) || tileIsOccupiedByOpponentKing(passedPosition, boardState, rook.teamType)) {
       possibleMoves.push(passedPosition);
-    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, rook.teamType)) {
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, rook.teamType) || tileIsOccupiedByAlly(passedPosition, boardState, rook.teamType)) {
       possibleMoves.push(passedPosition);
       break;
     } else {
@@ -141,7 +141,7 @@ export const getPossibleRookAttackMoves = (rook, boardState) => {
 
     if (!tileIsOccupied(passedPosition, boardState) || tileIsOccupiedByOpponentKing(passedPosition, boardState, rook.teamType)) {
       possibleMoves.push(passedPosition);
-    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, rook.teamType)) {
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, rook.teamType) || tileIsOccupiedByAlly(passedPosition, boardState, rook.teamType)) {
       possibleMoves.push(passedPosition);
       break;
     } else {
@@ -155,7 +155,7 @@ export const getPossibleRookAttackMoves = (rook, boardState) => {
 
     if (!tileIsOccupied(passedPosition, boardState) || tileIsOccupiedByOpponentKing(passedPosition, boardState, rook.teamType)) {
       possibleMoves.push(passedPosition);
-    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, rook.teamType)) {
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, rook.teamType) || tileIsOccupiedByAlly(passedPosition, boardState, rook.teamType)) {
       possibleMoves.push(passedPosition);
       break;
     } else {

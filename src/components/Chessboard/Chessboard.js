@@ -94,16 +94,6 @@ function Chessboard(props) {
       activePiece.style.removeProperty('left');
     }
 
-    // const isWhiteKingThreatened = props.kingIsThreatened(TeamType.WHITE);
-    // const isBlackKingThreatened = props.kingIsThreatened(TeamType.BLACK);
-    // // console.log(isWhiteKingThreatened);
-    // if (isBlackKingThreatened) {
-    //   console.log("BLACK KING THREATENED");
-    // }
-
-    // if (isWhiteKingThreatened) {
-    //   console.log("WHITE KING THREATENED");
-    // }
     setActivePiece(null);
   }
 

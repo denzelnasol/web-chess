@@ -156,7 +156,7 @@ const Referee = () => {
 
     modalRef.current?.classList.add('hidden');
   }
-// console.log(board.pieces)
+
   return (
     <>
       <div className="pawn-promotion-modal hidden" ref={modalRef}>

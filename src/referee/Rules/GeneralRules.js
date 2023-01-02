@@ -1,5 +1,6 @@
 // Utilities
 import { samePosition } from "utilities/Position";
+import { cloneBoardState } from "utilities/Board";
 
 // Enums
 import { PieceType } from "enums/PieceType";
@@ -9,6 +10,7 @@ import { getPossiblePawnAttackMoves } from "referee/Rules/PawnRules";
 import { getPossibleRookAttackMoves } from "referee/Rules/RookRules";
 import { getPossibleBishopAttackMoves } from "referee/Rules/BishopRules";
 import { getPossibleQueenAttackMoves } from "referee/Rules/QueenRules";
+import { getPossibleKnightAttackMoves } from "referee/Rules/KnightRules";
 import { getPiecesAttackingKing } from "referee/Rules/KingRules";
 
 export function tileIsEmptyOrOccupiedByOpponent(newPosition, boardState, teamType) {
@@ -22,6 +24,11 @@ export function tileIsOccupied(newPosition, boardState) {
 
 export function tileIsOccupiedByOpponent(newPosition, boardState, teamType) {
   const piece = boardState.find((p) => samePosition(p.position, newPosition) && p.teamType !== teamType);
+  return piece;
+}
+
+export function tileIsOccupiedByAlly(newPosition, boardState, teamType) {
+  const piece = boardState.find((p) => samePosition(p.position, newPosition) && p.teamType === teamType);
   return piece;
 }
 
@@ -48,6 +55,9 @@ export function getOpponentAttackMoves(teamType, boardState) {
         case PieceType.QUEEN:
           attackMoves = getPossibleQueenAttackMoves(piece, boardState);
           break;
+        case PieceType.KNIGHT:
+          attackMoves = getPossibleKnightAttackMoves(piece, boardState);
+          break;
         default:
           attackMoves = piece.possibleMoves;
       }
@@ -73,6 +83,9 @@ export function getPieceAttackMoves(piece, boardState) {
       break;
     case PieceType.QUEEN:
       attackMoves = getPossibleQueenAttackMoves(piece, boardState);
+      break;
+    case PieceType.KNIGHT:
+      attackMoves = getPossibleKnightAttackMoves(piece, boardState);
       break;
     default:
       attackMoves = piece.possibleMoves;
@@ -102,4 +115,24 @@ export const checkIfPiecePinned = (piece, boardState) => {
   if (piecesAttackingKing.length > 0) return true;
 
   return false;
+};
+
+export const checkPinnedPiecePotentialMove = (move, piece, boardState) => {
+  let tempBoardState = cloneBoardState(boardState);
+  tempBoardState = tempBoardState.reduce((results, currentPiece) => {
+    if (samePosition(currentPiece.position, piece.position)) currentPiece.position = move;
+    results.push(currentPiece);
+    return results;
+  }, []);
+
+  // Remove piece from temp boardState if attacked
+  tempBoardState = tempBoardState.filter((currentPiece) => {
+    if (samePosition(move, currentPiece.position) && piece.type !== currentPiece.type && piece.teamType !== currentPiece.teamType) {
+      return false;
+    }
+    return true;
+  });
+
+  const piecesAttackingKing = getPiecesAttackingKing(piece.teamType, tempBoardState);
+  if (piecesAttackingKing.length === 0 || !piecesAttackingKing) return move;
 };
