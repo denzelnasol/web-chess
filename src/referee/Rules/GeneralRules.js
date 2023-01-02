@@ -10,7 +10,7 @@ import { getPossiblePawnAttackMoves } from "referee/Rules/PawnRules";
 import { getPossibleRookAttackMoves, getStandardRookMoves } from "referee/Rules/RookRules";
 import { getPossibleBishopAttackMoves, getStandardBishopMoves } from "referee/Rules/BishopRules";
 import { getPossibleQueenAttackMoves, getStandardQueenMoves } from "referee/Rules/QueenRules";
-import { getPossibleKnightAttackMoves } from "referee/Rules/KnightRules";
+import { getPossibleKnightAttackMoves, getStandardKnightMoves } from "referee/Rules/KnightRules";
 import { getPiecesAttackingKing } from "referee/Rules/KingRules";
 
 export function tileIsEmptyOrOccupiedByOpponent(newPosition, boardState, teamType) {
@@ -150,6 +150,8 @@ export const getStandardPieceMoves = (piece, boardState) => {
     case PieceType.QUEEN:
       standardMoves = getStandardQueenMoves(piece, boardState);
       break;
+    case PieceType.KNIGHT:
+      standardMoves = getStandardKnightMoves(piece, boardState);
   }
   return standardMoves;
 };

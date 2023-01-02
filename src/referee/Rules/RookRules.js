@@ -22,7 +22,7 @@ export function isValidRookPosition(grabPosition, newPosition, teamType, boardSt
     return isKingThreatenedRookMoveValid;
   }
 
-  // // ** ROOK PINNED LOGIC ** //
+  // ** ROOK PINNED LOGIC ** //
   const isRookPinned = checkIfPiecePinned(rook, boardState);
   if (isRookPinned) {
     const isPinnedRookMoveValid = validPinnedPieceMove(rook, boardState, newPosition);
