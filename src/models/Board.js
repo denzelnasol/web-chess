@@ -16,7 +16,7 @@ import { getPossibleKnightMoves } from "referee/Rules/KnightRules";
 import { getPossibleBishopMoves } from "referee/Rules/BishopRules";
 import { getPossibleRookMoves } from "referee/Rules/RookRules";
 import { getPossibleQueenMoves } from "referee/Rules/QueenRules";
-import { getPossibleKingMoves, kingIsChecked, kingIsSafe, getKing } from "referee/Rules/KingRules";
+import { getPossibleKingMoves, kingIsChecked, getKing } from "referee/Rules/KingRules";
 
 export default class Board {
   constructor(pieces) {

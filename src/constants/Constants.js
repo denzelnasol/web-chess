@@ -47,6 +47,6 @@ export const initialBoard = new Board([
   new Pawn(new Position(3, 6), TeamType.BLACK, true),
   new Pawn(new Position(4, 6), TeamType.BLACK, true),
   new Pawn(new Position(5, 6), TeamType.BLACK, true),
-  new Pawn(new Position(6, 5), TeamType.BLACK, true),
+  new Pawn(new Position(6, 6), TeamType.BLACK, true),
   new Pawn(new Position(7, 6), TeamType.BLACK, true),
 ]);
