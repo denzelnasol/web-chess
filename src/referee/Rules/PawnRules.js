@@ -25,18 +25,18 @@ export const isValidPawnPosition = (grabPosition, newPosition, teamType, boardSt
   const pawn = getPieceFromPosition(grabPosition, boardState);
   const possiblePawnMoves = getPossiblePawnMoves(pawn, boardState);
 
-  // ** KING CHECK LOGIC ** //
-  const isKingCheck = kingIsChecked(teamType, boardState);
-  if (isKingCheck) {
-    const isKingThreatenedPawnMoveValid = validKingCheckMove(teamType, boardState, newPosition, possiblePawnMoves);
-    return isKingThreatenedPawnMoveValid;
-  }
-
   // ** PAWN PINNED LOGIC ** //
   const isPawnPinned = checkIfPiecePinned(pawn, boardState);
   if (isPawnPinned) {
     const isPinnedPawnMoveValid = validPinnedPawnMove(pawn, boardState, newPosition);
     return isPinnedPawnMoveValid;
+  }
+
+  // ** KING CHECK LOGIC ** //
+  const isKingCheck = kingIsChecked(teamType, boardState);
+  if (isKingCheck) {
+    const isKingThreatenedPawnMoveValid = validKingCheckMove(teamType, boardState, newPosition, possiblePawnMoves);
+    return isKingThreatenedPawnMoveValid;
   }
 
   // ** STANDARD MOVE LOGIC ** //
@@ -45,18 +45,18 @@ export const isValidPawnPosition = (grabPosition, newPosition, teamType, boardSt
 };
 
 export const getPossiblePawnMoves = (pawn, boardState) => {
-  // ** KING CHECK LOGIC ** //
-  const isKingCheck = kingIsChecked(pawn.teamType, boardState);
-  if (isKingCheck) {
-    const kingThreatenedPawnMoves = getKingCheckPawnMoves(pawn, boardState);
-    return kingThreatenedPawnMoves;
-  }
-
   // ** PAWN PINNED LOGIC ** //
   const isPawnPinned = checkIfPiecePinned(pawn, boardState);
   if (isPawnPinned) {
     const pinnedPawnMoves = getPinnedPawnMoves(pawn, boardState);
     return pinnedPawnMoves;
+  }
+
+  // ** KING CHECK LOGIC ** //
+  const isKingCheck = kingIsChecked(pawn.teamType, boardState);
+  if (isKingCheck) {
+    const kingThreatenedPawnMoves = getKingCheckPawnMoves(pawn, boardState);
+    return kingThreatenedPawnMoves;
   }
 
   // ** STANDARD MOVE LOGIC ** //
@@ -82,12 +82,12 @@ const getKingCheckPawnMoves = (pawn, boardState) => {
   const piecesAttackingKing = getPiecesAttackingKing(pawn.teamType, boardState);
   const pawnDirection = (pawn.teamType === TeamType.WHITE ? 1 : -1);
   const initialPawnRow = (pawn.teamType === TeamType.WHITE ? 1 : 6);
-
+  
   const normalMove = new Position(pawn.position.x, pawn.position.y + pawnDirection);
   const specialMove = new Position(normalMove.x, normalMove.y + pawnDirection);
   const upperLeftAttack = new Position(pawn.position.x - 1, pawn.position.y + pawnDirection);
   const upperRightAttack = new Position(pawn.position.x + 1, pawn.position.y + pawnDirection);
-
+  
   piecesAttackingKing.forEach((piece) => {
     const pieceCheckPath = getPieceCheckPath(piece, pawn.teamType, boardState);
 

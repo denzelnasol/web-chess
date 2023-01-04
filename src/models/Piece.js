@@ -1,5 +1,5 @@
 export default class Piece {
-  constructor(position, type, teamType, possibleMoves = [], castleAvailable = false, inCheck = false) {
+  constructor(position, type, teamType, possibleMoves = [], castleAvailable = false, inCheck = false, isImmovable = false) {
     this.image = `images/${teamType}-${type.toLowerCase()}.png`;
     this.position = position;
     this.type = type;
@@ -8,10 +8,11 @@ export default class Piece {
     this.possibleMoves = possibleMoves;
     this.castleAvailable = castleAvailable;
     this.inCheck = inCheck;
+    this.isImmovable = isImmovable
   }
 
   clone() {
-    return new Piece(this.position.clone(), this.type, this.teamType, this.possibleMoves?.map((move) => move.clone()), this.castleAvailable, this.inCheck);
+    return new Piece(this.position.clone(), this.type, this.teamType, this.possibleMoves?.map((move) => move.clone()), this.castleAvailable, this.inCheck, this.isImmovable);
   }
 
   abovePiece(otherPiece) {

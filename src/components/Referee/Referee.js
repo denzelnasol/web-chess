@@ -41,17 +41,17 @@ const Referee = () => {
   const [currentPlayer, setCurrentPlayer] = useState(players[0]);
 
   useEffect(() => {
-    updatePossibleMoves(players[1]);
+    updatePossibleMoves();
   }, []);
 
-  const updatePossibleMoves = (currentPlayer) => {
-    board.calculateAllMoves(currentPlayer);
+  const updatePossibleMoves = () => {
+    board.calculateAllMoves(currentPlayer.teamType);
   }
 
   const updatePromotionPawn = (pawn) => {
     setPromotionPawn(pawn);
   }
-  console.log(currentPlayer)
+
   const playMove = (piece, newPosition) => {
     let isPlayedMoveValid = false;
 
@@ -63,16 +63,12 @@ const Referee = () => {
     const isValidPlayer = playerIsValid(piece.teamType);
 
     setBoard((previousBoard) => {
-      isPlayedMoveValid = board.playMove(isEnPassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened, isValidPlayer, piece, newPosition, updatePromotionPawn, currentPlayer);
+      isPlayedMoveValid = board.playMove(isEnPassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened, isValidPlayer, piece, newPosition, updatePromotionPawn, currentPlayer.teamType, updateCurrentPlayer);
       return board.clone();
     })
 
     if (isPawnPromotionMove && isPlayedMoveValid) {
       modalRef.current?.classList.remove('hidden');
-    }
-
-    if (isValidPlayer && isPlayedMoveValid) {
-      updateCurrentPlayer();
     }
 
     return isPlayedMoveValid;
@@ -167,7 +163,7 @@ const Referee = () => {
   const promotePawn = (pieceType) => {
     if (!promotionPawn) return;
     setBoard((previousBoard) => {
-      board.promotePawn(pieceType, promotionPawn.clone(), currentPlayer);
+      board.promotePawn(pieceType, promotionPawn.clone(), currentPlayer.teamType);
       return board.clone();
     })
 

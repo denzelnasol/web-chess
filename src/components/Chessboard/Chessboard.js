@@ -107,11 +107,11 @@ function Chessboard(props) {
       const currentPiece = activePiece !== null ? props.pieces.find((piece) => samePosition(piece.position, grabPosition)) : undefined;
       const highlight = currentPiece?.possibleMoves ? (
         currentPiece.possibleMoves.some((piece) => samePosition(piece, new Position(i, j)))
-      ) : false;
+      ) && !currentPiece.isImmovable : false;
 
       const enemyHighlight = currentPiece?.possibleMoves ? (
         currentPiece.possibleMoves.some((piece) => samePosition(piece, new Position(i, j))) && tileIsOccupiedByOpponent(new Position(i, j), props.pieces, currentPiece.teamType)
-      ) : false;
+      ) && !currentPiece.isImmovable : false;
 
       board.push(<Tile key={`${j},${i}`} number={number} image={image} highlight={highlight} enemyHighlight={enemyHighlight} />);
     }

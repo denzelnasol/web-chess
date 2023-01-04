@@ -23,25 +23,24 @@ export default class Board {
     this.pieces = pieces;
   }
 
-  calculateAllMoves(currentPlayer) {
+  calculateAllMoves(playerTeamType) {
     for (const piece of this.pieces) {
       if (piece.type === PieceType.KING) continue;
-      piece.possibleMoves = this.getPossibleMoves(piece, this.pieces, currentPlayer);
+      if (playerTeamType !== piece.teamType) piece.isImmovable = true;
+      else piece.isImmovable = false;
+      piece.possibleMoves = this.getPossibleMoves(piece, this.pieces);
     }
 
     for (const piece of this.pieces) {
       if (piece.type !== PieceType.KING) continue;
-      piece.possibleMoves = this.getPossibleMoves(piece, this.pieces, currentPlayer);
+      if (playerTeamType !== piece.teamType) piece.isImmovable = true;
+      else piece.isImmovable = false;
+      piece.possibleMoves = this.getPossibleMoves(piece, this.pieces);
     }
   }
 
-  getPossibleMoves(piece, boardState, currentPlayer) {
+  getPossibleMoves(piece, boardState) {
     let possibleMoves = [];
-
-    /** @TODO Why does this work? */
-    if (currentPlayer && piece && currentPlayer.teamType === piece.teamType) {
-      return possibleMoves;
-    }
 
     switch (piece.type) {
       case PieceType.PAWN:
@@ -67,10 +66,11 @@ export default class Board {
     return possibleMoves;
   }
 
-  playMove(isEnpassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened, isPlayerValid, piece, newPosition, updatePromotionPawn, currentPlayer) {
+  playMove(isEnpassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened, isPlayerValid, piece, newPosition, updatePromotionPawn, playerTeamType, updateCurrentPlayer) {
     const pawnDirection = piece.teamType === TeamType.WHITE ? 1 : -1;
     const kingRow = piece.teamType === TeamType.WHITE ? 0 : 7;
     const king = getKing(piece.teamType, this.pieces);
+    const otherPlayerTeamType = getOppositeTeamType(playerTeamType);
 
     if (!isPlayerValid) return false;
 
@@ -92,7 +92,7 @@ export default class Board {
         return results;
       }, []);
 
-      this.calculateAllMoves(currentPlayer);
+      this.calculateAllMoves(otherPlayerTeamType);
     } else if (isValidMove) {
       this.pieces = this.pieces.reduce((results, currentPiece) => {
 
@@ -156,8 +156,9 @@ export default class Board {
         return results;
       }, []);
 
-      this.calculateAllMoves(currentPlayer);
-      this.opponentKingInCheck(piece.teamType, currentPlayer);
+      updateCurrentPlayer();
+      this.calculateAllMoves(otherPlayerTeamType);
+      this.opponentKingInCheck(piece.teamType, playerTeamType);
     } else {
       return false;
     }
@@ -165,8 +166,9 @@ export default class Board {
     return true;
   }
 
-  opponentKingInCheck(teamType, currentPlayer) {
+  opponentKingInCheck(teamType, playerTeamType) {
     const oppositeTeamType = getOppositeTeamType(teamType);
+    const oppositePlayerTeamType = getOppositeTeamType(playerTeamType);
     const isOpponentKingThreatened = kingIsChecked(oppositeTeamType, this.pieces);
     if (!isOpponentKingThreatened) return;
 
@@ -182,10 +184,10 @@ export default class Board {
       return results;
     }, []);
 
-    this.calculateAllMoves(currentPlayer);
+    this.calculateAllMoves(oppositePlayerTeamType);
   }
 
-  promotePawn(pieceType, promotionPawn, currentPlayer) {
+  promotePawn(pieceType, promotionPawn, playerTeamType) {
     this.pieces = this.pieces.reduce((results, currentPiece) => {
       if (samePosition(currentPiece.position, promotionPawn.position)) {
         const teamType = (currentPiece.teamType === TeamType.WHITE) ? TeamType.WHITE.toLowerCase() : TeamType.BLACK.toLowerCase();
@@ -196,7 +198,7 @@ export default class Board {
       return results;
     }, []);
 
-    this.calculateAllMoves(currentPlayer);
+    this.calculateAllMoves(playerTeamType);
   }
 
   clone() {

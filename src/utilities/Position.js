@@ -15,9 +15,5 @@ export function sameRow(positionOne, positionTwo) {
 }
 
 export function sameDiagonal(positionOne, positionTwo) {
-  /**
- *  positionOne: 0, 4
- *  positionTwo: 2, 2
- */
   return Math.abs(positionOne.y - positionTwo.y) === Math.abs(positionOne.x - positionTwo.x);
 }
