@@ -61,12 +61,12 @@ export const getPossibleKnightAttackMoves = (knight, boardState) => {
       const horizontalMove = new Position(knight.position.x + i * 2, knight.position.y + j);
 
       if (tileIsEmptyOrOccupiedByOpponent(verticalMove, boardState, knight.teamType) || tileIsOccupiedByAlly(verticalMove, boardState, knight.teamType)) {
-        // if (verticalMove.outOfBounds()) continue;
+        if (verticalMove.outOfBounds()) continue;
         possibleMoves.push(verticalMove);
       }
 
       if (tileIsEmptyOrOccupiedByOpponent(horizontalMove, boardState, knight.teamType) || tileIsOccupiedByAlly(horizontalMove, boardState, knight.teamType)) {
-        // if (horizontalMove.outOfBounds()) continue;
+        if (horizontalMove.outOfBounds()) continue;
         possibleMoves.push(horizontalMove);
       }
     }
@@ -84,12 +84,12 @@ export const getStandardKnightMoves = (knight, boardState) => {
       const horizontalMove = new Position(knight.position.x + i * 2, knight.position.y + j);
 
       if (tileIsEmptyOrOccupiedByOpponent(verticalMove, boardState, knight.teamType)) {
-        // if (verticalMove.outOfBounds()) continue;
+        if (verticalMove.outOfBounds()) continue;
         possibleMoves.push(verticalMove);
       }
 
       if (tileIsEmptyOrOccupiedByOpponent(horizontalMove, boardState, knight.teamType)) {
-        // if (horizontalMove.outOfBounds()) continue;
+        if (horizontalMove.outOfBounds()) continue;
         possibleMoves.push(horizontalMove);
       }
     }

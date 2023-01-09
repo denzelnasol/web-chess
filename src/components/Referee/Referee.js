@@ -25,6 +25,7 @@ import { isValidQueenPosition } from "referee/Rules/QueenRules";
 import { isValidKingPosition, kingIsChecked } from "referee/Rules/KingRules";
 import { tileIsOccupied } from "referee/Rules/GeneralRules";
 import Player from "models/Player";
+import MoveGeneration from "models/MoveGeneration";
 
 /** @TODO
  * Add checkmate
@@ -39,13 +40,41 @@ const Referee = () => {
   const [board, setBoard] = useState(initialBoard);
   const [promotionPawn, setPromotionPawn] = useState();
   const [currentPlayer, setCurrentPlayer] = useState(players[0]);
+  // const moveGenerationTest = new MoveGeneration(initialBoard, currentPlayer);
 
   useEffect(() => {
     updatePossibleMoves();
   }, []);
 
+  useEffect(() => {
+    if (currentPlayer.teamType === TeamType.BLACK) {
+      playComputerMove();
+    }
+  }, [currentPlayer])
+
+  const moveGenerationTest = (depth) => {
+    let count = 0;
+    board.pieces.forEach((piece) => {
+      if (piece.teamType === TeamType.WHITE) return;
+      count += piece.possibleMoves.length;
+    });
+    console.log(count);
+  }
+
+  const playComputerMove = () => {
+    const blackPieces = board.pieces.filter((piece) =>
+      piece.teamType == TeamType.BLACK && piece.possibleMoves.length > 0
+    );
+    const randomBlackPiece = blackPieces[Math.floor(Math.random() * blackPieces.length)];
+
+    const randomBlackMove = randomBlackPiece.possibleMoves[Math.floor(Math.random() * randomBlackPiece.possibleMoves.length)];
+    playMove(randomBlackPiece, randomBlackMove);
+    console.log(randomBlackMove)
+  }
+
   const updatePossibleMoves = () => {
     board.calculateAllMoves(currentPlayer.teamType);
+    // moveGenerationTest(1);
   }
 
   const updatePromotionPawn = (pawn) => {
@@ -181,7 +210,7 @@ const Referee = () => {
           <img onClick={() => promotePawn(PieceType.QUEEN)} src={`images/${promotionTeamType()}-queen.png`} />
         </div>
       </div>
-      <Chessboard playMove={playMove} pieces={board.pieces} />
+      <Chessboard playMove={playMove} pieces={board.pieces} playComputerMove={playComputerMove} />
     </>
   );
 }

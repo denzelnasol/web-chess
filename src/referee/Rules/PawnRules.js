@@ -198,7 +198,7 @@ const getStandardPawnMoves = (pawn, boardState) => {
   if (tileIsOccupiedByOpponent(upperLeftAttack, boardState, pawn.teamType)) {
     possibleMoves.push(upperLeftAttack);
   } else if (!tileIsOccupied(upperLeftAttack, boardState)) {
-    const leftPiece = boardState.find(piece => samePosition(piece.position, leftPosition));
+    const leftPiece = boardState.find(piece => samePosition(piece.position, leftPosition) && piece.teamType !== pawn.teamType);
     if (leftPiece != null && leftPiece.enPassant) {
       possibleMoves.push(upperLeftAttack);
     }
@@ -207,7 +207,7 @@ const getStandardPawnMoves = (pawn, boardState) => {
   if (tileIsOccupiedByOpponent(upperRightAttack, boardState, pawn.teamType)) {
     possibleMoves.push(upperRightAttack);
   } else if (!tileIsOccupied(upperRightAttack, boardState)) {
-    const rightPiece = boardState.find(piece => samePosition(piece.position, rightPosition));
+    const rightPiece = boardState.find(piece => samePosition(piece.position, rightPosition) && piece.teamType !== pawn.teamType);
     if (rightPiece != null && rightPiece.enPassant) {
       possibleMoves.push(upperRightAttack);
     }
