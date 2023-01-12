@@ -66,6 +66,19 @@ export default class Board {
     return possibleMoves;
   }
 
+  getAllPlayerPossiblePieceMoves(teamType, boardState) {
+    const allPlayerPossiblePieceMoves = [];
+    this.pieces.forEach((piece) => {
+      if (piece.teamType !== teamType) return;
+      const possibleMoves = this.getPossibleMoves(piece, boardState);
+      possibleMoves.forEach((move) => {
+        allPlayerPossiblePieceMoves.push({ piece, move });
+      })
+    })
+
+    return allPlayerPossiblePieceMoves;
+  }
+
   playMove(isEnpassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened, isPlayerValid, piece, newPosition, updatePromotionPawn, playerTeamType, updateCurrentPlayer) {
     const pawnDirection = piece.teamType === TeamType.WHITE ? 1 : -1;
     const kingRow = piece.teamType === TeamType.WHITE ? 0 : 7;
@@ -203,5 +216,11 @@ export default class Board {
 
   clone() {
     return new Board(this.pieces.map((piece) => piece.clone()));
+  }
+
+  unplayMove(move) {
+    if (move) {
+      this.pieces = move.pieces;
+    }
   }
 }

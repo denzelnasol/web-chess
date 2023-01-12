@@ -55,45 +55,26 @@ export function getPossibleKnightMoves(knight, boardState) {
 export const getPossibleKnightAttackMoves = (knight, boardState) => {
   const possibleMoves = [];
 
-  for (let i = -1; i < 2; i += 2) {
-    for (let j = -1; j < 2; j += 2) {
-      const verticalMove = new Position(knight.position.x + j, knight.position.y + i * 2);
-      const horizontalMove = new Position(knight.position.x + i * 2, knight.position.y + j);
+  const knightMoves = [ [1, 2], [1, -2], [2, 1], [2, -1], [-2, -1], [-1, -2], [-1, 2], [-2, 1]];
 
-      if (tileIsEmptyOrOccupiedByOpponent(verticalMove, boardState, knight.teamType) || tileIsOccupiedByAlly(verticalMove, boardState, knight.teamType)) {
-        if (verticalMove.outOfBounds()) continue;
-        possibleMoves.push(verticalMove);
-      }
-
-      if (tileIsEmptyOrOccupiedByOpponent(horizontalMove, boardState, knight.teamType) || tileIsOccupiedByAlly(horizontalMove, boardState, knight.teamType)) {
-        if (horizontalMove.outOfBounds()) continue;
-        possibleMoves.push(horizontalMove);
-      }
-    }
-  }
-
+  knightMoves.forEach((move) => {
+    const newPos = new Position(knight.position.x + move[0], knight.position.y + move[1]);
+    if (newPos.outOfBounds()) return;
+    if (tileIsEmptyOrOccupiedByOpponent(newPos, boardState, knight.teamType)  || tileIsOccupiedByAlly(newPos, boardState, knight.teamType)) possibleMoves.push(newPos);
+  })
   return possibleMoves;
 };
 
 // *********************** STANDARD KNIGHT MOVE FUNCTIONS *********************** //
 export const getStandardKnightMoves = (knight, boardState) => {
   const possibleMoves = [];
-  for (let i = -1; i < 2; i += 2) {
-    for (let j = -1; j < 2; j += 2) {
-      const verticalMove = new Position(knight.position.x + j, knight.position.y + i * 2);
-      const horizontalMove = new Position(knight.position.x + i * 2, knight.position.y + j);
+  const knightMoves = [ [1, 2], [1, -2], [2, 1], [2, -1], [-2, -1], [-1, -2], [-1, 2], [-2, 1]];
 
-      if (tileIsEmptyOrOccupiedByOpponent(verticalMove, boardState, knight.teamType)) {
-        if (verticalMove.outOfBounds()) continue;
-        possibleMoves.push(verticalMove);
-      }
-
-      if (tileIsEmptyOrOccupiedByOpponent(horizontalMove, boardState, knight.teamType)) {
-        if (horizontalMove.outOfBounds()) continue;
-        possibleMoves.push(horizontalMove);
-      }
-    }
-  }
+  knightMoves.forEach((move) => {
+    const newPos = new Position(knight.position.x + move[0], knight.position.y + move[1]);
+    if (newPos.outOfBounds()) return;
+    if (tileIsEmptyOrOccupiedByOpponent(newPos, boardState, knight.teamType)) possibleMoves.push(newPos);
+  })
   return possibleMoves;
 };
 
