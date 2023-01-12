@@ -18,9 +18,13 @@ import { getPossibleRookMoves } from "referee/Rules/RookRules";
 import { getPossibleQueenMoves } from "referee/Rules/QueenRules";
 import { getPossibleKingMoves, kingIsChecked, getKing } from "referee/Rules/KingRules";
 
+// Constants
+import { PLAYERS } from "constants/Constants";
+
 export default class Board {
-  constructor(pieces) {
+  constructor(pieces, currentPlayer) {
     this.pieces = pieces;
+    this.currentPlayer = currentPlayer
   }
 
   calculateAllMoves(playerTeamType) {
@@ -66,11 +70,11 @@ export default class Board {
     return possibleMoves;
   }
 
-  getAllPlayerPossiblePieceMoves(teamType, boardState) {
+  getAllPlayerPossiblePieceMoves(teamType) {
     const allPlayerPossiblePieceMoves = [];
     this.pieces.forEach((piece) => {
       if (piece.teamType !== teamType) return;
-      const possibleMoves = this.getPossibleMoves(piece, boardState);
+      const possibleMoves = this.getPossibleMoves(piece, this.pieces);
       possibleMoves.forEach((move) => {
         allPlayerPossiblePieceMoves.push({ piece, move });
       })
@@ -79,13 +83,17 @@ export default class Board {
     return allPlayerPossiblePieceMoves;
   }
 
-  playMove(isEnpassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened, isPlayerValid, piece, newPosition, updatePromotionPawn, playerTeamType, updateCurrentPlayer) {
+  playMove(isEnpassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened, piece, newPosition, updatePromotionPawn, updateCurrentPlayer) {
     const pawnDirection = piece.teamType === TeamType.WHITE ? 1 : -1;
     const kingRow = piece.teamType === TeamType.WHITE ? 0 : 7;
     const king = getKing(piece.teamType, this.pieces);
-    const otherPlayerTeamType = getOppositeTeamType(playerTeamType);
-
-    if (!isPlayerValid) return false;
+    const otherPlayerTeamType = getOppositeTeamType(this.currentPlayer.teamType);
+    // console.log("WHY ARE YOU DIFFERENT HERE")
+    if (piece.teamType !== this.currentPlayer.teamType) {
+      console.log('FAIL', piece.teamType, this.currentPlayer.teamType);
+      return false;
+    }
+    console.log("SUCCEED");
 
     if (isEnpassantMove) {
       this.pieces = this.pieces.reduce((results, currentPiece) => {
@@ -169,13 +177,12 @@ export default class Board {
         return results;
       }, []);
 
-      updateCurrentPlayer();
       this.calculateAllMoves(otherPlayerTeamType);
-      this.opponentKingInCheck(piece.teamType, playerTeamType);
+      this.opponentKingInCheck(piece.teamType, this.currentPlayer.teamType);
     } else {
       return false;
     }
-
+    this.currentPlayer = this.currentPlayer.teamType === TeamType.WHITE ? PLAYERS[1] : PLAYERS[0];
     return true;
   }
 
@@ -215,7 +222,7 @@ export default class Board {
   }
 
   clone() {
-    return new Board(this.pieces.map((piece) => piece.clone()));
+    return new Board(this.pieces.map((piece) => piece.clone()), this.currentPlayer);
   }
 
   unplayMove(move) {

@@ -95,6 +95,10 @@ function Chessboard(props) {
     }
 
     setActivePiece(null);
+
+    if (success) {
+      props.playComputerMove();
+    }
   }
 
   let board = [];
