@@ -31,7 +31,7 @@ import { tileIsOccupied, tileIsOccupiedByOpponent } from "referee/Rules/GeneralR
 import { getOppositeTeamType } from "utilities/TeamType";
 
 
-export const minimax = (currBoard, depth, maximizingPlayer) => {
+export const minimax = (currBoard, depth, alpha, beta, maximizingPlayer) => {
   if (depth === 0) {
     return { pieceMove: null, currEval: heuristicEvaluation(currBoard) };
   }
@@ -42,11 +42,15 @@ export const minimax = (currBoard, depth, maximizingPlayer) => {
     let maxEval = Number.NEGATIVE_INFINITY;
     for (let i = 0; i < allPlayerPossiblePieceMoves.length; i++) {
       const nextBoard = evaluateMove(allPlayerPossiblePieceMoves[i].piece, allPlayerPossiblePieceMoves[i].move, currBoard);
-      const { pm, currEval } = minimax(nextBoard, depth - 1, false);
+      const { pm, currEval } = minimax(nextBoard, depth - 1, alpha, beta, false);
       // currBoard = unplayMove();
       if (currEval > maxEval) {
         maxEval = currEval;
         bestPieceMove = allPlayerPossiblePieceMoves[i];
+      }
+      alpha = Math.max(alpha, currEval);
+      if (beta <= alpha) {
+        break;
       }
 
     }
@@ -55,11 +59,15 @@ export const minimax = (currBoard, depth, maximizingPlayer) => {
     let minEval = Number.POSITIVE_INFINITY;
     for (let i = 0; i < allPlayerPossiblePieceMoves.length; i++) {
       const nextBoard = evaluateMove(allPlayerPossiblePieceMoves[i].piece, allPlayerPossiblePieceMoves[i].move, currBoard);
-      const { pm, currEval } = minimax(nextBoard, depth - 1, true);
+      const { pm, currEval } = minimax(nextBoard, depth - 1, alpha, beta, true);
       // currBoard = unplayMove();
       if (currEval < minEval) {
         minEval = currEval;
         bestPieceMove = allPlayerPossiblePieceMoves[i];
+      }
+      beta = Math.min(beta, currEval);
+      if (beta <= alpha) {
+        break;
       }
     }
     return { pieceMove: bestPieceMove, currEval: minEval };
