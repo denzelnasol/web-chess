@@ -83,17 +83,14 @@ export default class Board {
     return allPlayerPossiblePieceMoves;
   }
 
-  playMove(isEnpassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened, piece, newPosition, updatePromotionPawn, updateCurrentPlayer) {
+  playMove(isEnpassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened, piece, newPosition, updatePromotionPawn) {
     const pawnDirection = piece.teamType === TeamType.WHITE ? 1 : -1;
     const kingRow = piece.teamType === TeamType.WHITE ? 0 : 7;
     const king = getKing(piece.teamType, this.pieces);
     const otherPlayerTeamType = getOppositeTeamType(this.currentPlayer.teamType);
-    // console.log("WHY ARE YOU DIFFERENT HERE")
     if (piece.teamType !== this.currentPlayer.teamType) {
-      console.log('FAIL', piece.teamType, this.currentPlayer.teamType);
       return false;
     }
-    console.log("SUCCEED");
 
     if (isEnpassantMove) {
       this.pieces = this.pieces.reduce((results, currentPiece) => {
@@ -162,7 +159,7 @@ export default class Board {
           currentPiece.castleAvailable = false;
 
           // Update promotion pawn
-          if (isPawnPromotionMove) {
+          if (isPawnPromotionMove && updatePromotionPawn) {
             updatePromotionPawn(currentPiece);
           }
 
@@ -182,8 +179,12 @@ export default class Board {
     } else {
       return false;
     }
-    this.currentPlayer = this.currentPlayer.teamType === TeamType.WHITE ? PLAYERS[1] : PLAYERS[0];
+    this.updateCurrentPlayer();
     return true;
+  }
+
+  updateCurrentPlayer() {
+    this.currentPlayer = this.currentPlayer.teamType === TeamType.WHITE ? PLAYERS[1] : PLAYERS[0];
   }
 
   opponentKingInCheck(teamType, playerTeamType) {

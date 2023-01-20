@@ -16,6 +16,7 @@ import MoveGeneration from "models/MoveGeneration";
 
 // Utilities
 import { samePosition, getPositionPointDifference } from "utilities/Position";
+import { minimax } from "utilities/AI";
 
 // Constants
 import { initialBoard, PLAYERS } from "constants/Constants";
@@ -46,34 +47,29 @@ const Referee = () => {
   const [board, setBoard] = useState(initialBoard);
   const [promotionPawn, setPromotionPawn] = useState();
   const [boardHistory] = useState([]);
-  const [boardEvaluationStack] = useState([]);
+  // const [boardEvaluationStack] = useState([]);
 
   useEffect(() => {
     updatePossibleMoves();
   }, []);
 
-  const moveGenerationTest = (depth, teamType) => {
-    if (depth == 0) return 1;
+  // const moveGenerationTest = (depth, teamType) => {
+  //   if (depth == 0) return 1;
 
-    const allPlayerPossiblePieceMoves = board.getAllPlayerPossiblePieceMoves(teamType);
-    let moves = 0;
+  //   const allPlayerPossiblePieceMoves = board.getAllPlayerPossiblePieceMoves(teamType);
+  //   let moves = 0;
 
-    for (let i = 0; i < allPlayerPossiblePieceMoves.length; i++) {
-      playMove(allPlayerPossiblePieceMoves[i].piece, allPlayerPossiblePieceMoves[i].move);
-      moves += moveGenerationTest(depth - 1, getOppositeTeamType(teamType));
-      unplayMove();
-    }
-    return moves;
-  };
+  //   for (let i = 0; i < allPlayerPossiblePieceMoves.length; i++) {
+  //     playMove(allPlayerPossiblePieceMoves[i].piece, allPlayerPossiblePieceMoves[i].move);
+  //     moves += moveGenerationTest(depth - 1, getOppositeTeamType(teamType));
+  //     // unplayMove();
+  //   }
+  //   return moves;
+  // };
 
   const playComputerMove = () => {
-
-    const evaluationBoard = board.clone();
-    // evaluationBoard.currentPlayer = evaluationBoard.currentPlayer.teamType === TeamType.WHITE ? PLAYERS[1] : PLAYERS[0];
-    // console.log("TEAM: ", evaluationBoard.currentPlayer.teamType);
-    const bestPieceMove = search(1, evaluationBoard, -1000, 1000);
-    console.log(bestPieceMove)
-    playMove(bestPieceMove.piece, bestPieceMove.move);
+    const bestPieceMove = minimax(board, 3, false);
+    playMove(bestPieceMove.pieceMove.piece, bestPieceMove.pieceMove.move);
   };
 
   const updatePossibleMoves = () => {
@@ -110,23 +106,6 @@ const Referee = () => {
 
     return isPlayedMoveValid;
   };
-
-  const evaluateMove = (piece, newPosition, currBoard) => {
-    const isValidMove = moveIsValid(piece.position, newPosition, piece.type, piece.teamType, piece.castleAvailable);
-    const isEnPassantMove = moveIsEnpassant(piece.position, newPosition, piece.type, piece.teamType);
-    const isPawnPromotionMove = moveIsPawnPromotion(newPosition, piece.type, piece.teamType);
-    const isCastleMove = moveIsCastle(piece.position, newPosition, piece.type, piece.teamType, piece.castleAvailable);
-    const isKingThreatened = kingIsChecked(piece.teamType, currBoard.pieces);
-
-    const prevBoard = currBoard.clone();
-    boardEvaluationStack.push(prevBoard);
-
-    const newBoard = currBoard.clone();
-    const result = newBoard.playMove(isEnPassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened, piece, newPosition, updatePromotionPawn);
-    // console.log(isEnPassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened)
-    console.log('NEWBOARD: ', newBoard)
-    return newBoard;
-  }
 
   const moveIsValid = (grabPosition, newPosition, type, teamType, castleAvailable) => {
     let isValidPosition = false;
@@ -219,85 +198,11 @@ const Referee = () => {
     modalRef.current?.classList.add('hidden');
   };
 
-  const evaluate = (currBoard) => {
-    const whiteEvaluationValue = countMaterialValue(currBoard, TeamType.WHITE);
-    const blackEvaluationValue = countMaterialValue(currBoard, TeamType.BLACK);
-
-    const evaluation = whiteEvaluationValue - blackEvaluationValue;
-
-    const perspective = currBoard.currentPlayer.teamType === TeamType.WHITE ? 1 : -1;
-
-    return evaluation * perspective;
-  };
-
-  const countMaterialValue = (currBoard, teamType) => {
-    let materialValue = 0;
-    currBoard.pieces.forEach((piece) => {
-      if (piece.teamType !== teamType) return;
-
-      switch (piece.type) {
-        case PieceType.PAWN:
-          materialValue += PieceValue.PAWN;
-          break;
-        case PieceType.BISHOP:
-          materialValue += PieceValue.BISHOP;
-          break;
-        case PieceType.KNIGHT:
-          materialValue += PieceValue.KNIGHT;
-          break;
-        case PieceType.ROOK:
-          materialValue += PieceValue.ROOK;
-          break;
-        case PieceType.QUEEN:
-          materialValue += PieceValue.QUEEN;
-          break;
-        default:
-      }
-    });
-    // console.log(materialValue, teamType);
-    return materialValue;
-  };
-
-  const search = (depth, currBoard, alpha, beta) => {
-    if (depth === 0) {
-      console.log(evaluate(currBoard));
-      return evaluate(currBoard);
-    }
-    const allPlayerPossiblePieceMoves = currBoard.getAllPlayerPossiblePieceMoves(currBoard.currentPlayer.teamType);
-    if (allPlayerPossiblePieceMoves.length === 0) {
-      // if player in checkmate, return negative infinity
-      return 0;
-    }
-    console.log(currBoard.currentPlayer.teamType)
-
-    let bestPieceAndMove = allPlayerPossiblePieceMoves[0];
-    // let bestEvaluation = Number.NEGATIVE_INFINITY;
-    for (let i = 0; i < allPlayerPossiblePieceMoves.length; i++) {
-      console.log("CURRBOARD: ", currBoard, allPlayerPossiblePieceMoves[i].move, currBoard.currentPlayer.teamType);
-      const nextBoard = evaluateMove(allPlayerPossiblePieceMoves[i].piece, allPlayerPossiblePieceMoves[i].move, currBoard);
-      console.log("NEXTBOARD: ", nextBoard);
-
-      console.log("------ SEARCH CALLED -------")
-      const evaluation = -search(depth - 1, nextBoard, -beta, -alpha);
-      console.log("------ SEARCH CALL END -------")
-      currBoard = unplayMove();
-      if (evaluation >= beta) {
-        return beta;
-      }
-      alpha = Math.max(alpha, evaluation);
-      if (evaluation >= alpha) {
-        bestPieceAndMove = allPlayerPossiblePieceMoves[i];
-      }
-    }
-
-    return bestPieceAndMove;
-  };
-
-  const unplayMove = () => {
-    const previousBoardState = boardEvaluationStack.pop();
-    if (!previousBoardState) return;
-    return previousBoardState.clone();
-  };
+  // const unplayMove = () => {
+  //   const previousBoardState = boardEvaluationStack.pop();
+  //   if (!previousBoardState) return;
+  //   return previousBoardState.clone();
+  // };
 
   return (
     <>
@@ -311,7 +216,7 @@ const Referee = () => {
         </div>
       </div>
       <Chessboard playMove={playMove} pieces={board.pieces} playComputerMove={playComputerMove} />
-      <button onClick={() => unplayMove()}>Click Me!</button>
+      {/* <button onClick={() => unplayMove()}>Click Me!</button> */}
     </>
   );
 }
