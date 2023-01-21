@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef } from "react";
 // Enums
 import { PieceType } from "enums/PieceType";
 import { TeamType } from 'enums/TeamType';
-import { PieceValue } from "enums/Evaluation";
 
 // Components
 import Chessboard from "components/Chessboard/Chessboard";
@@ -11,62 +10,52 @@ import Chessboard from "components/Chessboard/Chessboard";
 // Models
 import Position from 'models/Position';
 import Player from "models/Player";
-import Move from "models/Move";
-import MoveGeneration from "models/MoveGeneration";
 
 // Utilities
 import { samePosition, getPositionPointDifference } from "utilities/Position";
 import { minimax } from "utilities/AI";
 
 // Constants
-import { initialBoard, PLAYERS } from "constants/Constants";
+import { initialBoard } from "constants/Constants";
 
 // Rules
-import { isValidPawnPosition, moveIsPawnPromotion } from "referee/Rules/PawnRules";
-import { isValidKnightPosition } from "referee/Rules/KnightRules";
-import { isValidBishopPosition } from "referee/Rules/BishopRules";
-import { isValidRookPosition } from "referee/Rules/RookRules";
-import { isValidQueenPosition } from "referee/Rules/QueenRules";
-import { isValidKingPosition, kingIsChecked } from "referee/Rules/KingRules";
-import { tileIsOccupied, tileIsOccupiedByOpponent } from "referee/Rules/GeneralRules";
-import { getOppositeTeamType } from "utilities/TeamType";
+import { isValidPawnPosition, moveIsPawnPromotion } from "PieceRules/PawnRules";
+import { isValidKnightPosition } from "PieceRules/KnightRules";
+import { isValidBishopPosition } from "PieceRules/BishopRules";
+import { isValidRookPosition } from "PieceRules/RookRules";
+import { isValidQueenPosition } from "PieceRules/QueenRules";
+import { isValidKingPosition, kingIsChecked } from "PieceRules/KingRules";
+import { tileIsOccupied } from "PieceRules/GeneralRules";
 
+/** @TODO Add checkmate // Add stalemate */
 
-/** @TODO
- * Add checkmate
- * Add stalemate
+/**
+ * @description Renders the chessboard and handles game logic related to moves being made on the current board state
+ *
+ * @returns
+ *
+ * @example
+ * <Referee />
  */
-const Referee = () => {
+function Referee() {
 
   const players = [new Player(TeamType.WHITE), new Player(TeamType.BLACK)];
 
+  // ** useRefs ** //
   const modalRef = useRef(null);
-
   const currentPlayerRef = useRef(players[0]);
 
+  // ** useStates ** //
   const [board, setBoard] = useState(initialBoard);
   const [promotionPawn, setPromotionPawn] = useState();
   const [boardHistory] = useState([]);
-  // const [boardEvaluationStack] = useState([]);
 
+  // ** useEffects ** //
   useEffect(() => {
     updatePossibleMoves();
   }, []);
 
-  // const moveGenerationTest = (depth, teamType) => {
-  //   if (depth == 0) return 1;
-
-  //   const allPlayerPossiblePieceMoves = board.getAllPlayerPossiblePieceMoves(teamType);
-  //   let moves = 0;
-
-  //   for (let i = 0; i < allPlayerPossiblePieceMoves.length; i++) {
-  //     playMove(allPlayerPossiblePieceMoves[i].piece, allPlayerPossiblePieceMoves[i].move);
-  //     moves += moveGenerationTest(depth - 1, getOppositeTeamType(teamType));
-  //     // unplayMove();
-  //   }
-  //   return moves;
-  // };
-
+  // ** Functions ** //
   const playComputerMove = () => {
     const bestPieceMove = minimax(board, 3, false);
     playMove(bestPieceMove.pieceMove.piece, bestPieceMove.pieceMove.move);

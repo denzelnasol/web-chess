@@ -1,9 +1,11 @@
 // Models
-import Piece from 'models/Piece';
 import Board from "models/Board";
 import Position from 'models/Position';
-import Pawn from 'models/Pawn';
 import Player from 'models/Player';
+import Piece from 'models/Pieces/Piece';
+import King from 'models/Pieces/King';
+import Rook from 'models/Pieces/Rook';
+import Pawn from 'models/Pieces/Pawn';
 
 // Enums
 import { PieceType } from 'enums/PieceType';
@@ -35,21 +37,21 @@ export const initialBoard = new Board([
   new Pawn(new Position(6, 6), TeamType.BLACK, true),
   new Pawn(new Position(7, 6), TeamType.BLACK, true),
 
-  // new Piece(new Position(0, 0), PieceType.ROOK, TeamType.WHITE, [], true),
-  // new Piece(new Position(7, 0), PieceType.ROOK, TeamType.WHITE, [], true),
-  // new Piece(new Position(1, 0), PieceType.KNIGHT, TeamType.WHITE),
-  // new Piece(new Position(6, 0), PieceType.KNIGHT, TeamType.WHITE),
-  // new Piece(new Position(2, 0), PieceType.BISHOP, TeamType.WHITE),
-  // new Piece(new Position(5, 0), PieceType.BISHOP, TeamType.WHITE),
-  new Piece(new Position(3, 0), PieceType.KING, TeamType.WHITE, [], true),
-  // new Piece(new Position(4, 0), PieceType.QUEEN, TeamType.WHITE),
+  new Rook(new Position(0, 0), TeamType.WHITE, true),
+  new Rook(new Position(7, 0), TeamType.WHITE, true),
+  new Piece(new Position(1, 0), PieceType.KNIGHT, TeamType.WHITE),
+  new Piece(new Position(6, 0), PieceType.KNIGHT, TeamType.WHITE),
+  new Piece(new Position(2, 0), PieceType.BISHOP, TeamType.WHITE),
+  new Piece(new Position(5, 0), PieceType.BISHOP, TeamType.WHITE),
+  new King(new Position(3, 0), TeamType.WHITE, true),
+  new Piece(new Position(4, 0), PieceType.QUEEN, TeamType.WHITE),
 
-  // new Piece(new Position(0, 7), PieceType.ROOK, TeamType.BLACK, [], true, false, true),
-  // new Piece(new Position(7, 7), PieceType.ROOK, TeamType.BLACK, [], true, false, true),
-  // new Piece(new Position(1, 7), PieceType.KNIGHT, TeamType.BLACK, [], false, false, true),
-  // new Piece(new Position(6, 7), PieceType.KNIGHT, TeamType.BLACK, [], false, false, true),
-  // new Piece(new Position(2, 7), PieceType.BISHOP, TeamType.BLACK, [], false, false, true),
-  // new Piece(new Position(5, 7), PieceType.BISHOP, TeamType.BLACK, [], false, false, true),
-  new Piece(new Position(3, 7), PieceType.KING, TeamType.BLACK, [], true, false, true),
-  // new Piece(new Position(4, 7), PieceType.QUEEN, TeamType.BLACK, [], false, false, true),
+  new Rook(new Position(0, 7), TeamType.BLACK, true),
+  new Rook(new Position(7, 7), TeamType.BLACK, true),
+  new Piece(new Position(1, 7), PieceType.KNIGHT, TeamType.BLACK),
+  new Piece(new Position(6, 7), PieceType.KNIGHT, TeamType.BLACK),
+  new Piece(new Position(2, 7), PieceType.BISHOP, TeamType.BLACK),
+  new Piece(new Position(5, 7), PieceType.BISHOP, TeamType.BLACK),
+  new King(new Position(3, 7), TeamType.BLACK, true),
+  new Piece(new Position(4, 7), PieceType.QUEEN, TeamType.BLACK),
 ], PLAYERS[0]);

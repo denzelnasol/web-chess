@@ -10,7 +10,7 @@ import Tile from 'components/Tile/Tile';
 import { VERTICAL_AXIS, HORIZONTAL_AXIS, GRID_SIZE } from 'constants/Constants';
 
 // Rules
-import { tileIsOccupiedByOpponent } from 'referee/Rules/GeneralRules';
+import { tileIsOccupiedByOpponent } from 'PieceRules/GeneralRules';
 
 // Utilities
 import { samePosition } from 'utilities/Position';
@@ -18,12 +18,27 @@ import { samePosition } from 'utilities/Position';
 // Styles
 import './style.scss';
 
-function Chessboard(props) {
+/**
+ * @description Renders a chess board and updates the render on legal moves
+ * @param {Array} pieces - List of Piece objects which contain information on its team, current position, and possible moves
+ * @param {Function} playMove - Function which returns a boolean on the legality of a move. If true, re-render to update the board view
+ * @param {Function} [playComputerMove] - Function which allows the AI to play a move as black once white has made a move
+ *
+ * @returns
+ *
+ * @example
+ * <Chessboard playMove={playMove} pieces={board.pieces} playComputerMove={playComputerMove} />
+ */
+function Chessboard({ ...props }) {
+
+  // ** useRefs ** //
   const chessboardRef = useRef(null);
 
+  // ** useStates ** //
   const [activePiece, setActivePiece] = useState(null);
   const [grabPosition, setGrabPosition] = useState(new Position(-1, -1));
 
+  // ** Functions ** //
   const grabPiece = (e) => {
     const element = e.target;
     const chessboard = chessboardRef.current;
@@ -44,6 +59,7 @@ function Chessboard(props) {
     }
   }
 
+  // Allows the dragging of a grabbed piece across the screen
   const movePiece = (e) => {
     const chessboard = chessboardRef.current;
     if (!activePiece || !chessboard) return;
@@ -88,7 +104,7 @@ function Chessboard(props) {
     const success = props.playMove(currentPiece.clone(), new Position(x, y));
 
     if (!success) {
-      // resets piece position
+      // Reset the piece position
       activePiece.style.position = 'relative';
       activePiece.style.removeProperty('top');
       activePiece.style.removeProperty('left');
@@ -96,6 +112,7 @@ function Chessboard(props) {
 
     setActivePiece(null);
 
+    /** @TODO refactor all bugs in game logic before continuing with AI development */
     // if (success) {
     //   props.playComputerMove();
     // }

@@ -5,8 +5,8 @@ import { samePosition } from "utilities/Position";
 import { Operator, operatorOperations } from "enums/Operator";
 
 // Rules
-import { getKingCheckPieceMoves, kingIsChecked, validKingCheckMove } from "referee/Rules/KingRules";
-import { tileIsOccupied, tileIsEmptyOrOccupiedByOpponent, tileIsOccupiedByOpponent, tileIsOccupiedByOpponentKing, tileIsOccupiedByAlly, getPieceFromPosition, getPinnedPieceMoves, checkIfPiecePinned, validPinnedPieceMove } from "referee/Rules/GeneralRules";
+import { getKingCheckPieceMoves, kingIsChecked, validKingCheckMove } from "PieceRules/KingRules";
+import { tileIsOccupied, tileIsEmptyOrOccupiedByOpponent, tileIsOccupiedByOpponent, tileIsOccupiedByOpponentKing, tileIsOccupiedByAlly, getPieceFromPosition, getPinnedPieceMoves, checkIfPiecePinned, validPinnedPieceMove } from "PieceRules/GeneralRules";
 
 // Objects
 import Position from "models/Position";

@@ -2,8 +2,8 @@
 import { samePosition } from "utilities/Position";
 
 // Rules
-import { tileIsOccupied, tileIsEmptyOrOccupiedByOpponent, tileIsOccupiedByOpponent, tileIsOccupiedByOpponentKing, tileIsOccupiedByAlly, getPieceFromPosition, checkIfPiecePinned, getPinnedPieceMoves, validPinnedPieceMove } from "referee/Rules/GeneralRules";
-import { kingIsChecked, validKingCheckMove, getKingCheckPieceMoves } from "referee/Rules/KingRules";
+import { tileIsOccupied, tileIsEmptyOrOccupiedByOpponent, tileIsOccupiedByOpponent, tileIsOccupiedByOpponentKing, tileIsOccupiedByAlly, getPieceFromPosition, checkIfPiecePinned, getPinnedPieceMoves, validPinnedPieceMove } from "PieceRules/GeneralRules";
+import { kingIsChecked, validKingCheckMove, getKingCheckPieceMoves } from "PieceRules/KingRules";
 
 // Enums
 import { Operator, operatorOperations } from "enums/Operator";

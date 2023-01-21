@@ -21,13 +21,13 @@ import { samePosition, getPositionPointDifference } from "utilities/Position";
 import { initialBoard, PLAYERS } from "constants/Constants";
 
 // Rules
-import { isValidPawnPosition, moveIsPawnPromotion } from "referee/Rules/PawnRules";
-import { isValidKnightPosition } from "referee/Rules/KnightRules";
-import { isValidBishopPosition } from "referee/Rules/BishopRules";
-import { isValidRookPosition } from "referee/Rules/RookRules";
-import { isValidQueenPosition } from "referee/Rules/QueenRules";
-import { isValidKingPosition, kingIsChecked } from "referee/Rules/KingRules";
-import { tileIsOccupied, tileIsOccupiedByOpponent } from "referee/Rules/GeneralRules";
+import { isValidPawnPosition, moveIsPawnPromotion } from "PieceRules/PawnRules";
+import { isValidKnightPosition } from "PieceRules/KnightRules";
+import { isValidBishopPosition } from "PieceRules/BishopRules";
+import { isValidRookPosition } from "PieceRules/RookRules";
+import { isValidQueenPosition } from "PieceRules/QueenRules";
+import { isValidKingPosition, kingIsChecked } from "PieceRules/KingRules";
+import { tileIsOccupied, tileIsOccupiedByOpponent } from "PieceRules/GeneralRules";
 import { getOppositeTeamType } from "utilities/TeamType";
 
 

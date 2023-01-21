@@ -1,10 +1,10 @@
 import React from 'react';
 
 // Components
-import Referee from 'components/Referee/Referee';
+import Referee from 'components/Chessboard/Referee';
 
 // Style
-import './App.css'
+import './App.scss'
 
 function App() {
 

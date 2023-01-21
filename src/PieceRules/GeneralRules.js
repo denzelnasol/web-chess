@@ -6,12 +6,12 @@ import { cloneBoardState } from "utilities/Board";
 import { PieceType } from "enums/PieceType";
 
 // Rules
-import { getPossiblePawnAttackMoves } from "referee/Rules/PawnRules";
-import { getPossibleRookAttackMoves, getStandardRookMoves } from "referee/Rules/RookRules";
-import { getPossibleBishopAttackMoves, getStandardBishopMoves } from "referee/Rules/BishopRules";
-import { getPossibleQueenAttackMoves, getStandardQueenMoves } from "referee/Rules/QueenRules";
-import { getPossibleKnightAttackMoves, getStandardKnightMoves } from "referee/Rules/KnightRules";
-import { getPiecesAttackingKing } from "referee/Rules/KingRules";
+import { getPossiblePawnAttackMoves } from "PieceRules/PawnRules";
+import { getPossibleRookAttackMoves, getStandardRookMoves } from "PieceRules/RookRules";
+import { getPossibleBishopAttackMoves, getStandardBishopMoves } from "PieceRules/BishopRules";
+import { getPossibleQueenAttackMoves, getStandardQueenMoves } from "PieceRules/QueenRules";
+import { getPossibleKnightAttackMoves, getStandardKnightMoves } from "PieceRules/KnightRules";
+import { getPiecesAttackingKing } from "PieceRules/KingRules";
 
 export function tileIsEmptyOrOccupiedByOpponent(newPosition, boardState, teamType) {
   return !tileIsOccupied(newPosition, boardState) || tileIsOccupiedByOpponent(newPosition, boardState, teamType);

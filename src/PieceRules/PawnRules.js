@@ -6,8 +6,8 @@ import { TeamType } from "enums/TeamType";
 import { samePosition, getPositionPointDifference, sameColumn } from "utilities/Position";
 
 // Rules
-import { checkIfPiecePinned, getPieceFromPosition, tileIsOccupied, tileIsOccupiedByOpponent, checkPinnedPiecePotentialMove } from "referee/Rules/GeneralRules";
-import { getPieceCheckPath, getPiecesAttackingKing, kingIsChecked, validKingCheckMove } from "referee/Rules/KingRules";
+import { checkIfPiecePinned, getPieceFromPosition, tileIsOccupied, tileIsOccupiedByOpponent, checkPinnedPiecePotentialMove } from "PieceRules/GeneralRules";
+import { getPieceCheckPath, getPiecesAttackingKing, kingIsChecked, validKingCheckMove } from "PieceRules/KingRules";
 
 // Objects
 import Position from "models/Position";

@@ -2,11 +2,11 @@
 import { PieceType } from 'enums/PieceType';
 
 // Models
-import Piece from 'models/Piece';
+import Piece from 'models/Pieces/Piece';
 
 export default class Pawn extends Piece {
-  constructor(position, teamType, enPassant, possibleMoves = [], isImmovable = false) {
-    super(position, PieceType.PAWN, teamType, possibleMoves);
+  constructor(position, teamType, enPassant = false, possibleMoves = [], isImmovable = false) {
+    super(position, PieceType.PAWN, teamType, possibleMoves, isImmovable);
     this.enPassant = enPassant;
     this.isImmovable = isImmovable;
   }

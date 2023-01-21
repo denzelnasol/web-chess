@@ -2,8 +2,8 @@
 import { getPositionPointDifference } from "utilities/Position";
 
 // Rules
-import { tileIsEmptyOrOccupiedByOpponent, tileIsOccupiedByAlly, getPinnedPieceMoves, getPieceFromPosition, checkIfPiecePinned, validPinnedPieceMove } from "referee/Rules/GeneralRules";
-import { kingIsChecked, getKingCheckPieceMoves, validKingCheckMove } from "referee/Rules/KingRules";
+import { tileIsEmptyOrOccupiedByOpponent, tileIsOccupiedByAlly, getPinnedPieceMoves, getPieceFromPosition, checkIfPiecePinned, validPinnedPieceMove } from "PieceRules/GeneralRules";
+import { kingIsChecked, getKingCheckPieceMoves, validKingCheckMove } from "PieceRules/KingRules";
 
 // Models
 import Position from "models/Position";

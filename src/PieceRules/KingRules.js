@@ -2,7 +2,7 @@
 import { getPositionPointDifference, sameColumn, sameDiagonal, samePosition, sameRow } from "utilities/Position";
 
 // Rules
-import { tileIsEmptyOrOccupiedByOpponent, tileIsOccupied, tileIsOccupiedByOpponent, getOpponentAttackMoves, getPieceAttackMoves, getStandardPieceMoves, checkIfPiecePinned } from "referee/Rules/GeneralRules";
+import { tileIsEmptyOrOccupiedByOpponent, tileIsOccupied, tileIsOccupiedByOpponent, getOpponentAttackMoves, getPieceAttackMoves, getStandardPieceMoves, checkIfPiecePinned } from "PieceRules/GeneralRules";
 
 // Models
 import Position from "models/Position";
@@ -278,7 +278,7 @@ export function getPossibleKingMoves(king, boardState) {
   possibleMoves = possibleMoves.filter((move) =>
     !possibleAttackedMoves.some((attackMove) => samePosition(move, attackMove))
   );
-
+  
   return possibleMoves;
 }
 

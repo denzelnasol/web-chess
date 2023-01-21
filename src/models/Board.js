@@ -4,19 +4,19 @@ import { TeamType } from 'enums/TeamType';
 
 // Models
 import Position from 'models/Position';
-import Piece from "models/Piece";
+import Piece from "models/Pieces/Piece";
 
 // Utilities
 import { samePosition } from "utilities/Position";
 import { getOppositeTeamType } from "utilities/TeamType";
 
 // Rules
-import { getPossiblePawnMoves } from "referee/Rules/PawnRules";
-import { getPossibleKnightMoves } from "referee/Rules/KnightRules";
-import { getPossibleBishopMoves } from "referee/Rules/BishopRules";
-import { getPossibleRookMoves } from "referee/Rules/RookRules";
-import { getPossibleQueenMoves } from "referee/Rules/QueenRules";
-import { getPossibleKingMoves, kingIsChecked, getKing } from "referee/Rules/KingRules";
+import { getPossiblePawnMoves } from "PieceRules/PawnRules";
+import { getPossibleKnightMoves } from "PieceRules/KnightRules";
+import { getPossibleBishopMoves } from "PieceRules/BishopRules";
+import { getPossibleRookMoves } from "PieceRules/RookRules";
+import { getPossibleQueenMoves } from "PieceRules/QueenRules";
+import { getPossibleKingMoves, kingIsChecked, getKing } from "PieceRules/KingRules";
 
 // Constants
 import { PLAYERS } from "constants/Constants";
