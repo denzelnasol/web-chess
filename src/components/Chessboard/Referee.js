@@ -6,6 +6,8 @@ import { TeamType } from 'enums/TeamType';
 
 // Components
 import Chessboard from "components/Chessboard/Chessboard";
+import PawnPromotionModal from "components/PawnPromotionModal/PawnPromotionModal";
+import CheckmateModal from "components/CheckmateModal/CheckmateModal";
 
 // Models
 import Position from 'models/Position';
@@ -26,8 +28,9 @@ import { isValidRookPosition } from "Rules/PieceRules/RookRules";
 import { isValidQueenPosition } from "Rules/PieceRules/QueenRules";
 import { isValidKingPosition, kingIsChecked } from "Rules/PieceRules/KingRules";
 import { tileIsOccupied } from "Rules/GeneralRules";
+import { getOppositeTeamType } from "utilities/TeamType";
 
-/** @TODO Add checkmate // Add stalemate */
+/** @TODO Add stalemate */
 
 /**
  * @description Renders the chessboard and handles game logic related to moves being made on the current board state
@@ -38,17 +41,11 @@ import { tileIsOccupied } from "Rules/GeneralRules";
  * <Referee />
  */
 function Referee() {
-
-  const players = [new Player(TeamType.WHITE), new Player(TeamType.BLACK)];
-
-  // ** useRefs ** //
-  const modalRef = useRef(null);
-  const currentPlayerRef = useRef(players[0]);
-
   // ** useStates ** //
-  const [board, setBoard] = useState(initialBoard);
+  const [board, setBoard] = useState(initialBoard.clone());
   const [promotionPawn, setPromotionPawn] = useState();
-  const [boardHistory] = useState([]);
+  const [showPawnPromotionModal, setShowPawnPromotionModal] = useState(false);
+  const [showCheckmateModal, setShowCheckmmateModal] = useState(false);
 
   // ** useEffects ** //
   useEffect(() => {
@@ -62,7 +59,7 @@ function Referee() {
   };
 
   const updatePossibleMoves = () => {
-    board.calculateAllMoves(currentPlayerRef.current.teamType);
+    board.calculateAllMoves(board.currentPlayer.teamType);
   };
 
   const updatePromotionPawn = (pawn) => {
@@ -78,19 +75,17 @@ function Referee() {
     const isCastleMove = moveIsCastle(piece.position, newPosition, piece.type, piece.teamType, piece.castleAvailable);
     const isKingThreatened = kingIsChecked(piece.teamType, board.pieces);
 
-    const prevBoard = board.clone();
-
     setBoard((previousBoard) => {
       isPlayedMoveValid = board.playMove(isEnPassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened, piece, newPosition, updatePromotionPawn);
       return board.clone();
     })
 
     if (isPawnPromotionMove && isPlayedMoveValid) {
-      modalRef.current?.classList.remove('hidden');
+      setShowPawnPromotionModal(true);
     }
 
     if (isPlayedMoveValid) {
-      updateBoardHistory(prevBoard);
+      checkForCheckmate(piece.teamType);
     }
 
     return isPlayedMoveValid;
@@ -169,13 +164,10 @@ function Referee() {
     return false;
   };
 
-  const updateBoardHistory = (move) => {
-    boardHistory.push(move);
-  };
-
-  const promotionTeamType = () => {
-    return (promotionPawn?.teamType === TeamType.WHITE) ? TeamType.WHITE.toLowerCase() : TeamType.BLACK.toLowerCase();
-  };
+  const checkForCheckmate = () => {
+    const pieceMoves = board.getAllPlayerPossiblePieceMoves(board.currentPlayer.teamType);
+    if (pieceMoves.length === 0 || !pieceMoves) setShowCheckmmateModal(true);
+  }
 
   const promotePawn = (pieceType) => {
     if (!promotionPawn) return;
@@ -183,9 +175,17 @@ function Referee() {
       board.promotePawn(pieceType, promotionPawn.clone(), board.currentPlayer.teamType);
       return board.clone();
     })
-
-    modalRef.current?.classList.add('hidden');
+    setShowPawnPromotionModal(false);
   };
+
+  const resetBoard = () => {
+    setShowCheckmmateModal(false);
+    setBoard((previousBoard) => {
+      const newboard = initialBoard.clone();
+      newboard.calculateAllMoves(newboard.currentPlayer.teamType);
+      return newboard;
+    })
+  }
 
   // const unplayMove = () => {
   //   const previousBoardState = boardEvaluationStack.pop();
@@ -195,17 +195,9 @@ function Referee() {
 
   return (
     <>
-      <div className="pawn-promotion-modal hidden" ref={modalRef}>
-        <div className="modal-body">
-          {/* Pawn Promotion Modal! */}
-          <img onClick={() => promotePawn(PieceType.ROOK)} src={`images/${promotionTeamType()}-rook.png`} />
-          <img onClick={() => promotePawn(PieceType.BISHOP)} src={`images/${promotionTeamType()}-bishop.png`} />
-          <img onClick={() => promotePawn(PieceType.KNIGHT)} src={`images/${promotionTeamType()}-knight.png`} />
-          <img onClick={() => promotePawn(PieceType.QUEEN)} src={`images/${promotionTeamType()}-queen.png`} />
-        </div>
-      </div>
+      <PawnPromotionModal showPawnPromotionModal={showPawnPromotionModal} promotionPawn={promotionPawn} promotePawn={promotePawn} />
+      <CheckmateModal showCheckmateModal={showCheckmateModal} teamType={getOppositeTeamType(board.currentPlayer.teamType)} resetBoard={resetBoard} />
       <Chessboard playMove={playMove} pieces={board.pieces} playComputerMove={playComputerMove} />
-      {/* <button onClick={() => unplayMove()}>Click Me!</button> */}
     </>
   );
 }
