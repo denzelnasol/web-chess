@@ -10,6 +10,7 @@ export default class King extends Piece {
     this.castleAvailable = castleAvailable;
     this.inCheck = inCheck;
     this.isImmovable = isImmovable
+    this.possibleMoves = possibleMoves;
   }
 
   clone() {

@@ -1,8 +1,9 @@
 // Utilities
-import { getPositionPointDifference, sameColumn, sameDiagonal, samePosition, sameRow } from "utilities/Position";
+import { sameColumn, sameDiagonal, samePosition, sameRow } from "utilities/Position";
 
 // Rules
-import { tileIsEmptyOrOccupiedByOpponent, tileIsOccupied, tileIsOccupiedByOpponent, getOpponentAttackMoves, getPieceAttackMoves, getStandardPieceMoves, checkIfPiecePinned } from "PieceRules/GeneralRules";
+import { tileIsEmptyOrOccupiedByOpponent, tileIsOccupied, tileIsOccupiedByOpponent, getOpponentAttackMoves, getPieceAttackMoves, getStandardPieceMoves, getPieceFromPosition } from "Rules/GeneralRules";
+import { checkIfPiecePinned } from "Rules/PinnedRules";
 
 // Models
 import Position from "models/Position";
@@ -10,210 +11,111 @@ import Position from "models/Position";
 // Enums
 import { TeamType } from "enums/TeamType";
 import { PieceType } from "enums/PieceType";
+import { operatorOperations, Operator } from "enums/Operator";
 
-export function isValidKingPosition(grabPosition, passedPosition, teamType, boardState, castleAvailable) {
-  const kingRow = teamType === TeamType.WHITE ? 0 : 7;
-  const xDifference = Math.abs(getPositionPointDifference(passedPosition.x, grabPosition.x));
-  const yDifference = Math.abs(getPositionPointDifference(passedPosition.y, grabPosition.y));
-
-  // ** MOVEMENT/ATTACK LOGIC ** //
-  const kingAttackedMoves = getOpponentAttackMoves(teamType, boardState);
-  const isPositionAttacked = kingAttackedMoves.find((move) =>
-    samePosition(move, passedPosition)
-  );
-  if (isPositionAttacked) return false;
-
-  if ((xDifference === 1 && yDifference === 0) || (yDifference === 1 && xDifference === 0) || (yDifference === 1 && xDifference === 1)) {
-    if (tileIsEmptyOrOccupiedByOpponent(passedPosition, boardState, teamType)) {
-      return true;
-    }
-  }
-
-
-  const isKingInPosition = samePosition(grabPosition, new Position(3, kingRow));
-  const possibleAttackedMoves = getOpponentAttackMoves(teamType, boardState);
-  const isKingChecked = kingIsChecked(teamType, boardState);
-
-  // Left Castle
-  const leftKnightPosition = new Position(1, kingRow);
-  const leftBishopPosition = new Position(2, kingRow);
-  const isLeftKnightPositionEmpty = !tileIsOccupied(leftKnightPosition, boardState);
-  const isLeftBishopPositionEmpty = !tileIsOccupied(leftBishopPosition, boardState);
-  const isLeftNewPositionCorrect = samePosition(passedPosition, leftKnightPosition);
-  
-  const isLeftKnightPositionAttacked = possibleAttackedMoves.find((move) =>
-    samePosition(move, leftKnightPosition)
-    );
-    
-    const isLeftBishopPositionAttacked = possibleAttackedMoves.find((move) =>
-    samePosition(move, leftBishopPosition)
-    );
-    
-  if (isKingInPosition && isLeftKnightPositionEmpty && isLeftBishopPositionEmpty && isLeftNewPositionCorrect && castleAvailable && !isLeftKnightPositionAttacked && !isLeftBishopPositionAttacked && !isKingChecked) {
-    const rook = boardState.find((piece) =>
-      samePosition(new Position(0, kingRow), piece.position) && piece.castleAvailable
-    );
-    if (rook) return true;
-  }
-
-  
-  // Right Castle
-  const rightKnightPosition = new Position(6, kingRow);
-  const rightBishopPosition = new Position(5, kingRow);
-  const queenPosition = new Position(4, kingRow);
-  
-  const isRightKnightPositionEmpty = !tileIsOccupied(rightKnightPosition, boardState);
-  const isRightBishopPositionEmpty = !tileIsOccupied(rightBishopPosition, boardState);
-  const isQueenPositionEmpty = !tileIsOccupied(queenPosition, boardState);
-  const isRightNewPositionCorrect = samePosition(passedPosition, rightBishopPosition);
-  
-  const isRightKnightPositionAttacked = possibleAttackedMoves.find((move) =>
-    samePosition(move, rightKnightPosition)
-  );
-
-  const isRightBishopPositionAttacked = possibleAttackedMoves.find((move) =>
-    samePosition(move, rightBishopPosition)
-  );
-
-  const isQueenPositionAttacked = possibleAttackedMoves.find((move) =>
-    samePosition(move, queenPosition)
-  );
-
-  if (isKingInPosition && isRightKnightPositionEmpty && isRightBishopPositionEmpty && isQueenPositionEmpty && isRightNewPositionCorrect && castleAvailable && !isRightBishopPositionAttacked && !isRightKnightPositionAttacked && !isQueenPositionAttacked && !isKingChecked) {
-    const rook = boardState.find((piece) =>
-      samePosition(new Position(7, kingRow), piece.position) && piece.castleAvailable
-    );
-    if (rook) return true;
-  }
-
-  return false;
+export function isValidKingPosition(grabPosition, passedPosition, teamType, board, castleAvailable) {
+  if (teamType !== board.currentPlayer.teamType) return false;
+  const king = getPieceFromPosition(grabPosition, board.pieces);
+  const isValidMove = king.possibleMoves.find((move) => samePosition(move, passedPosition));
+  return isValidMove;
 }
 
 export function getPossibleKingMoves(king, boardState) {
   let possibleMoves = [];
+  
+  possibleMoves = getStandardKingMoves(king, boardState);
+  
   const kingRow = king.teamType === TeamType.WHITE ? 0 : 7;
-
-  // Top movement
-  for (let i = 1; i < 2; i++) {
-    const passedPosition = new Position(king.position.x, king.position.y + i);
-    if (passedPosition.outOfBounds()) continue;
-
-    if (!tileIsOccupied(passedPosition, boardState)) {
-      possibleMoves.push(passedPosition);
-    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, king.teamType)) {
-      possibleMoves.push(passedPosition);
-      break;
-    } else {
-      break;
-    }
-  }
-
-  // Bottom movement
-  for (let i = 1; i < 2; i++) {
-    const passedPosition = new Position(king.position.x, king.position.y - i);
-    if (passedPosition.outOfBounds()) continue;
-
-    if (!tileIsOccupied(passedPosition, boardState)) {
-      possibleMoves.push(passedPosition);
-    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, king.teamType)) {
-      possibleMoves.push(passedPosition);
-      break;
-    } else {
-      break;
-    }
-  }
-
-  // Left movement
-  for (let i = 1; i < 2; i++) {
-    const passedPosition = new Position(king.position.x - i, king.position.y);
-    if (passedPosition.outOfBounds()) continue;
-
-    if (!tileIsOccupied(passedPosition, boardState)) {
-      possibleMoves.push(passedPosition);
-    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, king.teamType)) {
-      possibleMoves.push(passedPosition);
-      break;
-    } else {
-      break;
-    }
-  }
-
-  // Right movement
-  for (let i = 1; i < 2; i++) {
-    const passedPosition = new Position(king.position.x + i, king.position.y);
-    if (passedPosition.outOfBounds()) continue;
-
-    if (!tileIsOccupied(passedPosition, boardState)) {
-      possibleMoves.push(passedPosition);
-    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, king.teamType)) {
-      possibleMoves.push(passedPosition);
-      break;
-    } else {
-      break;
-    }
-  }
-
-  // Upper right movement
-  for (let i = 1; i < 2; i++) {
-    const passedPosition = new Position(king.position.x + i, king.position.y + i);
-    if (passedPosition.outOfBounds()) continue;
-
-    if (!tileIsOccupied(passedPosition, boardState)) {
-      possibleMoves.push(passedPosition);
-    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, king.teamType)) {
-      possibleMoves.push(passedPosition);
-      break;
-    } else {
-      break;
-    }
-  }
-
-  // Bottom right movement
-  for (let i = 1; i < 2; i++) {
-    const passedPosition = new Position(king.position.x + i, king.position.y - i);
-    if (passedPosition.outOfBounds()) continue;
-
-    if (!tileIsOccupied(passedPosition, boardState)) {
-      possibleMoves.push(passedPosition);
-    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, king.teamType)) {
-      possibleMoves.push(passedPosition);
-      break;
-    } else {
-      break;
-    }
-  }
-
-  // Bottom left movement
-  for (let i = 1; i < 2; i++) {
-    const passedPosition = new Position(king.position.x - i, king.position.y - i);
-    if (passedPosition.outOfBounds()) continue;
-
-    if (!tileIsOccupied(passedPosition, boardState)) {
-      possibleMoves.push(passedPosition);
-    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, king.teamType)) {
-      possibleMoves.push(passedPosition);
-      break;
-    } else {
-      break;
-    }
-  }
-
-  // Top left movement
-  for (let i = 1; i < 2; i++) {
-    const passedPosition = new Position(king.position.x - i, king.position.y + i);
-    if (passedPosition.outOfBounds()) continue;
-
-    if (!tileIsOccupied(passedPosition, boardState)) {
-      possibleMoves.push(passedPosition);
-    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, king.teamType)) {
-      possibleMoves.push(passedPosition);
-      break;
-    } else {
-      break;
-    }
-  }
-
   const possibleAttackedMoves = getOpponentAttackMoves(king.teamType, boardState);
+
+  const leftCastleMove = getLeftCastleMove(king, boardState, possibleAttackedMoves, kingRow);
+  if (leftCastleMove) possibleMoves.push(leftCastleMove);
+
+  const rightCastleMove = getRightCastleMove(king, boardState, possibleAttackedMoves, kingRow);
+  if (rightCastleMove) possibleMoves.push(rightCastleMove);
+
+  // Filter out positions being attacked
+  possibleMoves = possibleMoves.filter((move) =>
+    !possibleAttackedMoves.some((attackMove) => samePosition(move, attackMove))
+  );
+
+  return possibleMoves;
+}
+
+// *********************** STANDARD KING MOVE FUNCTIONS *********************** //
+export const getStandardKingMoves = (king, boardState) => {
+  const possibleMoves = [];
+
+  const upMoves = getPossibleKingLineMoves(king, boardState, undefined, Operator.ADDITION);
+  possibleMoves.push(...upMoves);
+
+  const bottomMoves = getPossibleKingLineMoves(king, boardState, undefined, Operator.SUBTRACTION);
+  possibleMoves.push(...bottomMoves);
+
+  const leftMoves = getPossibleKingLineMoves(king, boardState, Operator.SUBTRACTION, undefined);
+  possibleMoves.push(...leftMoves);
+
+  const rightMoves = getPossibleKingLineMoves(king, boardState, Operator.ADDITION, undefined);
+  possibleMoves.push(...rightMoves);
+
+  const upperRightMoves = getPossibleKingDiagonalMoves(king, boardState, Operator.ADDITION, Operator.ADDITION);
+  possibleMoves.push(...upperRightMoves);
+
+  const bottomRightMoves = getPossibleKingDiagonalMoves(king, boardState, Operator.ADDITION, Operator.SUBTRACTION);
+  possibleMoves.push(...bottomRightMoves);
+
+  const upperLeftMoves = getPossibleKingDiagonalMoves(king, boardState, Operator.SUBTRACTION, Operator.SUBTRACTION);
+  possibleMoves.push(...upperLeftMoves);
+
+  const bottomLeftMoves = getPossibleKingDiagonalMoves(king, boardState, Operator.SUBTRACTION, Operator.ADDITION);
+  possibleMoves.push(...bottomLeftMoves);
+
+  return possibleMoves
+};
+
+const getPossibleKingLineMoves = (king, boardState, xOperator, yOperator) => {
+  const possibleMoves = [];
+  for (let i = 1; i < 2; i++) {
+    const positionX = xOperator ? operatorOperations[xOperator](king.position.x, i) : king.position.x;
+    const positionY = yOperator ? operatorOperations[yOperator](king.position.y, i) : king.position.y;
+    const passedPosition = new Position(positionX, positionY);
+    if (passedPosition.outOfBounds()) continue;
+
+    if (!tileIsOccupied(passedPosition, boardState)) {
+      possibleMoves.push(passedPosition);
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, king.teamType)) {
+      possibleMoves.push(passedPosition);
+      break;
+    } else {
+      break;
+    }
+  }
+
+  return possibleMoves;
+};
+
+const getPossibleKingDiagonalMoves = (king, boardState, xOperator, yOperator) => {
+  const possibleMoves = [];
+  for (let i = 1; i < 2; i++) {
+    const positionX = operatorOperations[xOperator](king.position.x, i);
+    const positionY = operatorOperations[yOperator](king.position.y, i);
+    const passedPosition = new Position(positionX, positionY);
+    if (passedPosition.outOfBounds()) continue;
+
+    if (!tileIsOccupied(passedPosition, boardState)) {
+      possibleMoves.push(passedPosition);
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, king.teamType)) {
+      possibleMoves.push(passedPosition);
+      break;
+    } else {
+      break;
+    }
+  }
+
+  return possibleMoves;
+};
+
+const getLeftCastleMove = (king, boardState, possibleAttackedMoves, kingRow) => {
   const isKingChecked = kingIsChecked(king.teamType, boardState);
 
   // Left Castle
@@ -237,12 +139,17 @@ export function getPossibleKingMoves(king, boardState) {
 
     if (rook) {
       const passedPosition = new Position(1, kingRow);
-      possibleMoves.push(passedPosition);
+      return passedPosition;
     }
   }
 
+  return null;
 
-  // Right Castle
+};
+
+const getRightCastleMove = (king, boardState, possibleAttackedMoves, kingRow) => {
+  const isKingChecked = kingIsChecked(king.teamType, boardState);
+
   const rightKnightPosition = new Position(6, kingRow);
   const rightBishopPosition = new Position(5, kingRow);
   const queenPosition = new Position(4, kingRow);
@@ -270,18 +177,15 @@ export function getPossibleKingMoves(king, boardState) {
 
     if (rook) {
       const passedPosition = new Position(5, kingRow);
-      possibleMoves.push(passedPosition);
+      return passedPosition;
     }
   }
 
-  // Filter out positions being attacked
-  possibleMoves = possibleMoves.filter((move) =>
-    !possibleAttackedMoves.some((attackMove) => samePosition(move, attackMove))
-  );
-  
-  return possibleMoves;
-}
+  return null;
 
+};
+
+// *********************** KING CHECK FUNCTIONS *********************** //
 export const kingIsChecked = (teamType, boardState) => {
   const king = getKing(teamType, boardState);
 

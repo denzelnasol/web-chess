@@ -5,55 +5,31 @@ import { samePosition } from "utilities/Position";
 import { Operator, operatorOperations } from "enums/Operator";
 
 // Rules
-import { getKingCheckPieceMoves, kingIsChecked, validKingCheckMove } from "PieceRules/KingRules";
-import { tileIsOccupied, tileIsEmptyOrOccupiedByOpponent, tileIsOccupiedByOpponent, tileIsOccupiedByOpponentKing, tileIsOccupiedByAlly, getPieceFromPosition, getPinnedPieceMoves, checkIfPiecePinned, validPinnedPieceMove } from "PieceRules/GeneralRules";
+import { getKingCheckPieceMoves, kingIsChecked } from "Rules/PieceRules/KingRules";
+import { tileIsOccupied, tileIsOccupiedByOpponent, tileIsOccupiedByOpponentKing, tileIsOccupiedByAlly, getPieceFromPosition } from "Rules/GeneralRules";
+import { getPinnedPieceMoves, checkIfPiecePinned } from "Rules/PinnedRules";
 
 // Objects
 import Position from "models/Position";
 
-export function isValidQueenPosition(grabPosition, newPosition, teamType, boardState) {
-  const queen = getPieceFromPosition(grabPosition, boardState);
-  const possibleQueenMoves = getPossibleQueenMoves(queen, boardState);
-
-  // ** KING CHECK LOGIC ** //
-  const isKingCheck = kingIsChecked(teamType, boardState);
-  if (isKingCheck) {
-    const isKingThreatenedQueenMoveValid = validKingCheckMove(teamType, boardState, newPosition, possibleQueenMoves);
-    return isKingThreatenedQueenMoveValid;
-  }
-
-  // ** QUEEN PINNED LOGIC ** //
-  const isQueenPinned = checkIfPiecePinned(queen, boardState);
-  if (isQueenPinned) {
-    const isPinnedQueenMoveValid = validPinnedPieceMove(queen, boardState, newPosition);
-    return isPinnedQueenMoveValid;
-  }
-
-
-  // ** STANDARD MOVE LOGIC ** //
-  const isStandardQueenMoveValid = validStandardQueenMove(queen.teamType, boardState, newPosition, grabPosition);
-  return isStandardQueenMoveValid;
+export function isValidQueenPosition(grabPosition, newPosition, teamType, board) {
+  if (teamType !== board.currentPlayer.teamType) return false;
+  const queen = getPieceFromPosition(grabPosition, board.pieces);
+  const isValidMove = queen.possibleMoves.find((move) => samePosition(move, newPosition));
+  return isValidMove;
 }
 
 export function getPossibleQueenMoves(queen, boardState) {
-
   // ** KING CHECK LOGIC ** //
   const isKingCheck = kingIsChecked(queen.teamType, boardState);
-  if (isKingCheck) {
-    const kingThreatenedQueenMoves = getKingCheckPieceMoves(queen, boardState);
-    return kingThreatenedQueenMoves;
-  }
+  if (isKingCheck) return getKingCheckPieceMoves(queen, boardState);
 
   // ** QUEEN PINNED LOGIC ** //
   const isQueenPinned = checkIfPiecePinned(queen, boardState);
-  if (isQueenPinned) {
-    const pinnedQueenMoves = getPinnedPieceMoves(queen, boardState);
-    return pinnedQueenMoves;
-  }
+  if (isQueenPinned) return getPinnedPieceMoves(queen, boardState);
 
   // ** STANDARD MOVE LOGIC ** //
-  const standardQueenMoves = getStandardQueenMoves(queen, boardState);
-  return standardQueenMoves;
+  return getStandardQueenMoves(queen, boardState);
 
 }
 
@@ -159,26 +135,4 @@ const getPossibleQueenLineDiagonalMoves = (queen, boardState, xOperator, yOperat
   }
 
   return possibleMoves;
-};
-
-const validStandardQueenMove = (teamType, boardState, newPosition, grabPosition) => {
-  const multiplierX = (newPosition.x < grabPosition.x) ? -1 : (newPosition.x > grabPosition.x) ? 1 : 0;
-  const multiplierY = (newPosition.y < grabPosition.y) ? -1 : (newPosition.y > grabPosition.y) ? 1 : 0;
-
-  // ** MOVEMENT/ATTACK LOGIC ** //
-  for (let i = 1; i < 8; i++) {
-    const passedPosition = new Position(grabPosition.x + (i * multiplierX), grabPosition.y + (i * multiplierY));
-
-    if (samePosition(newPosition, passedPosition)) {
-      if (tileIsEmptyOrOccupiedByOpponent(passedPosition, boardState, teamType)) {
-        return true;
-      }
-    } else {
-      if (tileIsOccupied(passedPosition, boardState)) {
-        break;
-      }
-    }
-  }
-
-  return false;
 };

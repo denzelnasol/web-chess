@@ -11,12 +11,12 @@ import { samePosition } from "utilities/Position";
 import { getOppositeTeamType } from "utilities/TeamType";
 
 // Rules
-import { getPossiblePawnMoves } from "PieceRules/PawnRules";
-import { getPossibleKnightMoves } from "PieceRules/KnightRules";
-import { getPossibleBishopMoves } from "PieceRules/BishopRules";
-import { getPossibleRookMoves } from "PieceRules/RookRules";
-import { getPossibleQueenMoves } from "PieceRules/QueenRules";
-import { getPossibleKingMoves, kingIsChecked, getKing } from "PieceRules/KingRules";
+import { getPossiblePawnMoves } from "Rules/PieceRules/PawnRules";
+import { getPossibleKnightMoves } from "Rules/PieceRules/KnightRules";
+import { getPossibleBishopMoves } from "Rules/PieceRules/BishopRules";
+import { getPossibleRookMoves } from "Rules/PieceRules/RookRules";
+import { getPossibleQueenMoves } from "Rules/PieceRules/QueenRules";
+import { getPossibleKingMoves, kingIsChecked, getKing } from "Rules/PieceRules/KingRules";
 
 // Constants
 import { PLAYERS } from "constants/Constants";
@@ -175,7 +175,7 @@ export default class Board {
       }, []);
 
       this.calculateAllMoves(otherPlayerTeamType);
-      this.opponentKingInCheck(piece.teamType, this.currentPlayer.teamType);
+      this.opponentKingInCheck(piece.teamType);
     } else {
       return false;
     }
@@ -187,9 +187,8 @@ export default class Board {
     this.currentPlayer = this.currentPlayer.teamType === TeamType.WHITE ? PLAYERS[1] : PLAYERS[0];
   }
 
-  opponentKingInCheck(teamType, playerTeamType) {
+  opponentKingInCheck(teamType) {
     const oppositeTeamType = getOppositeTeamType(teamType);
-    const oppositePlayerTeamType = getOppositeTeamType(playerTeamType);
     const isOpponentKingThreatened = kingIsChecked(oppositeTeamType, this.pieces);
     if (!isOpponentKingThreatened) return;
 
@@ -205,7 +204,7 @@ export default class Board {
       return results;
     }, []);
 
-    this.calculateAllMoves(oppositePlayerTeamType);
+    this.calculateAllMoves(oppositeTeamType);
   }
 
   promotePawn(pieceType, promotionPawn, playerTeamType) {

@@ -19,13 +19,13 @@ import { minimax } from "utilities/AI";
 import { initialBoard } from "constants/Constants";
 
 // Rules
-import { isValidPawnPosition, moveIsPawnPromotion } from "PieceRules/PawnRules";
-import { isValidKnightPosition } from "PieceRules/KnightRules";
-import { isValidBishopPosition } from "PieceRules/BishopRules";
-import { isValidRookPosition } from "PieceRules/RookRules";
-import { isValidQueenPosition } from "PieceRules/QueenRules";
-import { isValidKingPosition, kingIsChecked } from "PieceRules/KingRules";
-import { tileIsOccupied } from "PieceRules/GeneralRules";
+import { isValidPawnPosition, moveIsPawnPromotion } from "Rules/PieceRules/PawnRules";
+import { isValidKnightPosition } from "Rules/PieceRules/KnightRules";
+import { isValidBishopPosition } from "Rules/PieceRules/BishopRules";
+import { isValidRookPosition } from "Rules/PieceRules/RookRules";
+import { isValidQueenPosition } from "Rules/PieceRules/QueenRules";
+import { isValidKingPosition, kingIsChecked } from "Rules/PieceRules/KingRules";
+import { tileIsOccupied } from "Rules/GeneralRules";
 
 /** @TODO Add checkmate // Add stalemate */
 
@@ -100,22 +100,22 @@ function Referee() {
     let isValidPosition = false;
     switch (type) {
       case PieceType.PAWN:
-        isValidPosition = isValidPawnPosition(grabPosition, newPosition, teamType, board.pieces);
+        isValidPosition = isValidPawnPosition(grabPosition, newPosition, teamType, board);
         break;
       case PieceType.KNIGHT:
-        isValidPosition = isValidKnightPosition(grabPosition, newPosition, teamType, board.pieces);
+        isValidPosition = isValidKnightPosition(grabPosition, newPosition, teamType, board);
         break;
       case PieceType.BISHOP:
-        isValidPosition = isValidBishopPosition(grabPosition, newPosition, teamType, board.pieces);
+        isValidPosition = isValidBishopPosition(grabPosition, newPosition, teamType, board);
         break;
       case PieceType.ROOK:
-        isValidPosition = isValidRookPosition(grabPosition, newPosition, teamType, board.pieces);
+        isValidPosition = isValidRookPosition(grabPosition, newPosition, teamType, board);
         break;
       case PieceType.QUEEN:
-        isValidPosition = isValidQueenPosition(grabPosition, newPosition, teamType, board.pieces);
+        isValidPosition = isValidQueenPosition(grabPosition, newPosition, teamType, board);
         break;
       case PieceType.KING:
-        isValidPosition = isValidKingPosition(grabPosition, newPosition, teamType, board.pieces, castleAvailable);
+        isValidPosition = isValidKingPosition(grabPosition, newPosition, teamType, board, castleAvailable);
     }
     return isValidPosition;
   };

@@ -10,7 +10,7 @@ import Tile from 'components/Tile/Tile';
 import { VERTICAL_AXIS, HORIZONTAL_AXIS, GRID_SIZE } from 'constants/Constants';
 
 // Rules
-import { tileIsOccupiedByOpponent } from 'PieceRules/GeneralRules';
+import { tileIsOccupiedByOpponent } from 'Rules/GeneralRules';
 
 // Utilities
 import { samePosition } from 'utilities/Position';

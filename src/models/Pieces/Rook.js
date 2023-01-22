@@ -8,7 +8,7 @@ export default class Rook extends Piece {
   constructor(position, teamType, castleAvailable = false, possibleMoves = [], isImmovable = false) {
     super(position, PieceType.ROOK, teamType, possibleMoves, isImmovable);
     this.castleAvailable = castleAvailable;
-    this.isImmovable = isImmovable
+    this.isImmovable = isImmovable;
   }
 
   clone() {
