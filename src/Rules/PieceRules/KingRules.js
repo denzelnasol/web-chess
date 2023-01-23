@@ -43,43 +43,48 @@ export function getPossibleKingMoves(king, boardState) {
 }
 
 // *********************** STANDARD KING MOVE FUNCTIONS *********************** //
-export const getStandardKingMoves = (king, boardState) => {
+export const getStandardKingMoves = (king, boardState, attackMove) => {
   const possibleMoves = [];
 
-  const upMoves = getPossibleKingLineMoves(king, boardState, undefined, Operator.ADDITION);
+  const upMoves = getPossibleKingLineMoves(king, boardState, undefined, Operator.ADDITION, attackMove);
   possibleMoves.push(...upMoves);
 
-  const bottomMoves = getPossibleKingLineMoves(king, boardState, undefined, Operator.SUBTRACTION);
+  const bottomMoves = getPossibleKingLineMoves(king, boardState, undefined, Operator.SUBTRACTION, attackMove);
   possibleMoves.push(...bottomMoves);
 
-  const leftMoves = getPossibleKingLineMoves(king, boardState, Operator.SUBTRACTION, undefined);
+  const leftMoves = getPossibleKingLineMoves(king, boardState, Operator.SUBTRACTION, undefined, attackMove);
   possibleMoves.push(...leftMoves);
 
-  const rightMoves = getPossibleKingLineMoves(king, boardState, Operator.ADDITION, undefined);
+  const rightMoves = getPossibleKingLineMoves(king, boardState, Operator.ADDITION, undefined, attackMove);
   possibleMoves.push(...rightMoves);
 
-  const upperRightMoves = getPossibleKingDiagonalMoves(king, boardState, Operator.ADDITION, Operator.ADDITION);
+  const upperRightMoves = getPossibleKingDiagonalMoves(king, boardState, Operator.ADDITION, Operator.ADDITION, attackMove);
   possibleMoves.push(...upperRightMoves);
 
-  const bottomRightMoves = getPossibleKingDiagonalMoves(king, boardState, Operator.ADDITION, Operator.SUBTRACTION);
+  const bottomRightMoves = getPossibleKingDiagonalMoves(king, boardState, Operator.ADDITION, Operator.SUBTRACTION, attackMove);
   possibleMoves.push(...bottomRightMoves);
 
-  const upperLeftMoves = getPossibleKingDiagonalMoves(king, boardState, Operator.SUBTRACTION, Operator.SUBTRACTION);
+  const upperLeftMoves = getPossibleKingDiagonalMoves(king, boardState, Operator.SUBTRACTION, Operator.SUBTRACTION, attackMove);
   possibleMoves.push(...upperLeftMoves);
 
-  const bottomLeftMoves = getPossibleKingDiagonalMoves(king, boardState, Operator.SUBTRACTION, Operator.ADDITION);
+  const bottomLeftMoves = getPossibleKingDiagonalMoves(king, boardState, Operator.SUBTRACTION, Operator.ADDITION, attackMove);
   possibleMoves.push(...bottomLeftMoves);
 
   return possibleMoves
 };
 
-const getPossibleKingLineMoves = (king, boardState, xOperator, yOperator) => {
+const getPossibleKingLineMoves = (king, boardState, xOperator, yOperator, attackMove) => {
   const possibleMoves = [];
   for (let i = 1; i < 2; i++) {
     const positionX = xOperator ? operatorOperations[xOperator](king.position.x, i) : king.position.x;
     const positionY = yOperator ? operatorOperations[yOperator](king.position.y, i) : king.position.y;
     const passedPosition = new Position(positionX, positionY);
     if (passedPosition.outOfBounds()) continue;
+
+    if (attackMove) {
+      possibleMoves.push(passedPosition);
+      continue;
+    }
 
     if (!tileIsOccupied(passedPosition, boardState)) {
       possibleMoves.push(passedPosition);
@@ -94,13 +99,18 @@ const getPossibleKingLineMoves = (king, boardState, xOperator, yOperator) => {
   return possibleMoves;
 };
 
-const getPossibleKingDiagonalMoves = (king, boardState, xOperator, yOperator) => {
+const getPossibleKingDiagonalMoves = (king, boardState, xOperator, yOperator, attackMove) => {
   const possibleMoves = [];
   for (let i = 1; i < 2; i++) {
     const positionX = operatorOperations[xOperator](king.position.x, i);
     const positionY = operatorOperations[yOperator](king.position.y, i);
     const passedPosition = new Position(positionX, positionY);
     if (passedPosition.outOfBounds()) continue;
+
+    if (attackMove) {
+      possibleMoves.push(passedPosition);
+      continue;
+    }
 
     if (!tileIsOccupied(passedPosition, boardState)) {
       possibleMoves.push(passedPosition);

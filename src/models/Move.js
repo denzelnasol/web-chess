@@ -1,6 +1,7 @@
 export default class Move {
-  constructor(piece, toPosition, capturedPiece) {
+  constructor(piece, fromPosition, toPosition, capturedPiece) {
     this.piece = piece;
+    this.fromPosition = fromPosition;
     this.toPosition = toPosition;
     this.capturedPiece = capturedPiece;
   }

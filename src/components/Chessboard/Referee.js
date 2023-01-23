@@ -29,6 +29,7 @@ import { isValidKingPosition } from "Rules/PieceRules/KingRules";
 import { tileIsOccupied } from "Rules/GeneralRules";
 import { getOppositeTeamType } from "utilities/TeamType";
 import { kingIsChecked } from "Rules/CheckRules";
+import Move from "models/Move";
 
 /**
  * @description Renders the chessboard and handles game logic related to moves being made on the current board state
@@ -45,6 +46,7 @@ function Referee() {
   const [showPawnPromotionModal, setShowPawnPromotionModal] = useState(false);
   const [showCheckmateModal, setShowCheckmmateModal] = useState(false);
   const [showStalemateModal, setShowStalemateModal] = useState(false);
+  const [moveStack, setMoveStack] = useState([]);
 
   // ** useEffects ** //
   useEffect(() => {
@@ -53,7 +55,7 @@ function Referee() {
 
   // ** Functions ** //
   const playComputerMove = () => {
-    const bestPieceMove = minimax(board, 3, false);
+    const bestPieceMove = minimax(board.clone(), 3, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, false);
     playMove(bestPieceMove.pieceMove.piece, bestPieceMove.pieceMove.move);
   };
 
@@ -67,7 +69,9 @@ function Referee() {
 
   const playMove = (piece, newPosition) => {
     let isPlayedMoveValid = false;
+    let capturedPiece;
 
+    const prevPosition = piece.position.clone();
     const isValidMove = moveIsValid(piece.position, newPosition, piece.type, piece.teamType, piece.castleAvailable);
     const isEnPassantMove = moveIsEnpassant(piece.position, newPosition, piece.type, piece.teamType);
     const isPawnPromotionMove = moveIsPawnPromotion(newPosition, piece.type, piece.teamType);
@@ -75,15 +79,18 @@ function Referee() {
     const isKingThreatened = kingIsChecked(piece.teamType, board.pieces);
 
     setBoard((previousBoard) => {
-      isPlayedMoveValid = board.playMove(isEnPassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened, piece, newPosition, updatePromotionPawn);
+      const result = board.playMove(isEnPassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened, piece, newPosition, updatePromotionPawn);
+      isPlayedMoveValid = result.success;
+      if (result.capturedPiece) capturedPiece = result.capturedPiece.clone();
       return board.clone();
     })
 
     if (isPawnPromotionMove && isPlayedMoveValid) {
       setShowPawnPromotionModal(true);
     }
-
     if (isPlayedMoveValid) {
+      const move = new Move(piece, prevPosition, newPosition, capturedPiece);
+      setMoveStack(moveStack => [...moveStack, move]);
       checkForCheckmate(piece.teamType);
       checkForStalemate(piece.teamType);
     }
@@ -193,20 +200,23 @@ function Referee() {
     })
   }
 
-  // const unplayMove = () => {
-  //   const previousBoardState = boardEvaluationStack.pop();
-  //   if (!previousBoardState) return;
-  //   return previousBoardState.clone();
-  // };
+  const unplayMove = () => {
+    const move = moveStack.pop();
+    if (move) {
+      setBoard((previousBoard) => {
+        previousBoard.unplayMove(move);
+        return previousBoard.clone();
+      });
+    }
+  }
 
   return (
     <>
       <PawnPromotionModal showPawnPromotionModal={showPawnPromotionModal} promotionPawn={promotionPawn} promotePawn={promotePawn} />
       <CheckmateModal showCheckmateModal={showCheckmateModal} teamType={getOppositeTeamType(board.currentPlayer.teamType)} resetBoard={resetBoard} showStalemateModal={showStalemateModal} />
-      <Chessboard playMove={playMove} pieces={board.pieces} playComputerMove={playComputerMove} />
+      <Chessboard playMove={playMove} pieces={board.pieces} playComputerMove={playComputerMove} unplayMove={unplayMove} />
     </>
   );
 }
-
 
 export default Referee;

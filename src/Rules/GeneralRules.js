@@ -69,7 +69,7 @@ export function getPieceAttackMoves(piece, boardState) {
       attackMoves = getPossibleKnightAttackMoves(piece, boardState);
       break;
     case PieceType.KING:
-      attackMoves = getStandardKingMoves(piece, boardState);
+      attackMoves = getStandardKingMoves(piece, boardState, true);
       break;
     default:
       attackMoves = piece.possibleMoves;

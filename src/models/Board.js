@@ -89,9 +89,9 @@ export default class Board {
     const kingRow = piece.teamType === TeamType.WHITE ? 0 : 7;
     const king = getKing(piece.teamType, this.pieces);
     const otherPlayerTeamType = getOppositeTeamType(this.currentPlayer.teamType);
-    if (piece.teamType !== this.currentPlayer.teamType) {
-      return false;
-    }
+    let capturedPiece;
+
+    if (piece.teamType !== this.currentPlayer.teamType) return { success: false, capturedPiece };
 
     if (isEnpassantMove) {
       this.pieces = this.pieces.reduce((results, currentPiece) => {
@@ -118,6 +118,11 @@ export default class Board {
         // Set king to no longer in check if move is valid
         if (isKingThreatened && samePosition(currentPiece.position, king.position)) {
           currentPiece.inCheck = false;
+        }
+
+        if (samePosition(currentPiece.position, newPosition)) {
+          capturedPiece = currentPiece;
+          return results;
         }
 
         // Check if given piece is the same
@@ -166,9 +171,7 @@ export default class Board {
 
           results.push(currentPiece);
         } else if (!samePosition(currentPiece.position, newPosition)) {
-          if (currentPiece.type === PieceType.PAWN) {
-            currentPiece.enPassant = false;
-          }
+          if (currentPiece.type === PieceType.PAWN) currentPiece.enPassant = false;
           results.push(currentPiece);
         }
 
@@ -178,10 +181,33 @@ export default class Board {
       this.calculateAllMoves(otherPlayerTeamType);
       this.opponentKingInCheck(piece.teamType);
     } else {
-      return false;
+      return { success: false, capturedPiece };
     }
     this.updateCurrentPlayer();
-    return true;
+    return { success: true, capturedPiece };
+  }
+
+  unplayMove(move) {
+    this.pieces = this.pieces.reduce((results, currentPiece) => {
+      // Check if given piece is the same
+      if (samePosition(currentPiece.position, move.toPosition)) {
+        // Update piece position
+        currentPiece.position.x = move.fromPosition.x;
+        currentPiece.position.y = move.fromPosition.y;
+        currentPiece.castleAvailable = false;
+
+        results.push(currentPiece);
+      } else if (!samePosition(currentPiece.position, move.toPosition)) {
+        results.push(currentPiece);
+      }
+
+      return results;
+    }, []);
+
+    if (move.capturedPiece) {
+      const capturedPiece = move.capturedPiece.clone();
+      this.pieces.push(capturedPiece);
+    }
   }
 
   updateCurrentPlayer() {
@@ -224,11 +250,5 @@ export default class Board {
 
   clone() {
     return new Board(this.pieces.map((piece) => piece.clone()), this.currentPlayer);
-  }
-
-  unplayMove(move) {
-    if (move) {
-      this.pieces = move.pieces;
-    }
   }
 }

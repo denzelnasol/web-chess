@@ -102,7 +102,6 @@ function Chessboard({ ...props }) {
     }
 
     const success = props.playMove(currentPiece.clone(), new Position(x, y));
-
     if (!success) {
       // Reset the piece position
       activePiece.style.position = 'relative';
@@ -112,7 +111,6 @@ function Chessboard({ ...props }) {
 
     setActivePiece(null);
 
-    /** @TODO refactor all bugs in game logic before continuing with AI development */
     // if (success) {
     //   props.playComputerMove();
     // }
@@ -139,15 +137,18 @@ function Chessboard({ ...props }) {
   }
 
   return (
-    <div
-      className='chessboard'
-      ref={chessboardRef}
-      onMouseMove={e => movePiece(e)}
-      onMouseDown={e => grabPiece(e)}
-      onMouseUp={e => dropPiece(e)}
-    >
-      {board}
-    </div>
+    <>
+      <div
+        className='chessboard'
+        ref={chessboardRef}
+        onMouseMove={e => movePiece(e)}
+        onMouseDown={e => grabPiece(e)}
+        onMouseUp={e => dropPiece(e)}
+      >
+        {board}
+      </div>
+      <button onClick={() => props.unplayMove()}>Undo</button>
+    </>
   );
 }
 

@@ -1,24 +1,14 @@
-import React, { useState, useEffect, useRef } from "react";
-
 // Enums
 import { PieceType } from "enums/PieceType";
 import { TeamType } from 'enums/TeamType';
 import { PieceValue } from "enums/Evaluation";
 
-// Components
-import Chessboard from "components/Chessboard/Chessboard";
-
 // Models
 import Position from 'models/Position';
-import Player from "models/Player";
 import Move from "models/Move";
-import MoveGeneration from "models/MoveGeneration";
 
 // Utilities
 import { samePosition, getPositionPointDifference } from "utilities/Position";
-
-// Constants
-import { initialBoard, PLAYERS } from "constants/Constants";
 
 // Rules
 import { isValidPawnPosition, moveIsPawnPromotion } from "Rules/PieceRules/PawnRules";
@@ -27,10 +17,11 @@ import { isValidBishopPosition } from "Rules/PieceRules/BishopRules";
 import { isValidRookPosition } from "Rules/PieceRules/RookRules";
 import { isValidQueenPosition } from "Rules/PieceRules/QueenRules";
 import { isValidKingPosition } from "Rules/PieceRules/KingRules";
-import { tileIsOccupied, tileIsOccupiedByOpponent } from "Rules/GeneralRules";
-import { getOppositeTeamType } from "utilities/TeamType";
+import { tileIsOccupied } from "Rules/GeneralRules";
 import { kingIsChecked } from "Rules/CheckRules";
+import { getOppositeTeamType } from "./TeamType";
 
+const moveStack = [];
 
 export const minimax = (currBoard, depth, alpha, beta, maximizingPlayer) => {
   if (depth === 0) {
@@ -38,16 +29,18 @@ export const minimax = (currBoard, depth, alpha, beta, maximizingPlayer) => {
   }
 
   const allPlayerPossiblePieceMoves = currBoard.getAllPlayerPossiblePieceMoves(currBoard.currentPlayer.teamType);
-  let bestPieceMove = allPlayerPossiblePieceMoves[0];
+  // console.log(allPlayerPossiblePieceMoves, maximizingPlayer)
+  let bestPieceMove = Math.floor(Math.random() * allPlayerPossiblePieceMoves.length);
   if (maximizingPlayer) {
     let maxEval = Number.NEGATIVE_INFINITY;
     for (let i = 0; i < allPlayerPossiblePieceMoves.length; i++) {
-      const nextBoard = evaluateMove(allPlayerPossiblePieceMoves[i].piece, allPlayerPossiblePieceMoves[i].move, currBoard);
-      const { pm, currEval } = minimax(nextBoard, depth - 1, alpha, beta, false);
-      // currBoard = unplayMove();
+      playMove(allPlayerPossiblePieceMoves[i].piece, allPlayerPossiblePieceMoves[i].move, currBoard);
+      const { pm, currEval } = minimax(currBoard, depth - 1, alpha, beta, false);
+      unplayMove(currBoard);
       if (currEval > maxEval) {
         maxEval = currEval;
         bestPieceMove = allPlayerPossiblePieceMoves[i];
+        // console.log('max: ', bestPieceMove);
       }
       alpha = Math.max(alpha, currEval);
       if (beta <= alpha) {
@@ -55,22 +48,25 @@ export const minimax = (currBoard, depth, alpha, beta, maximizingPlayer) => {
       }
 
     }
+    // console.log('maxEval: ', maxEval);
     return { pieceMove: bestPieceMove, currEval: maxEval };
   } else {
     let minEval = Number.POSITIVE_INFINITY;
     for (let i = 0; i < allPlayerPossiblePieceMoves.length; i++) {
-      const nextBoard = evaluateMove(allPlayerPossiblePieceMoves[i].piece, allPlayerPossiblePieceMoves[i].move, currBoard);
-      const { pm, currEval } = minimax(nextBoard, depth - 1, alpha, beta, true);
-      // currBoard = unplayMove();
+      playMove(allPlayerPossiblePieceMoves[i].piece, allPlayerPossiblePieceMoves[i].move, currBoard);
+      const { pm, currEval } = minimax(currBoard, depth - 1, alpha, beta, true);
+      unplayMove(currBoard);
       if (currEval < minEval) {
         minEval = currEval;
         bestPieceMove = allPlayerPossiblePieceMoves[i];
+        // console.log('min: ', bestPieceMove);
       }
       beta = Math.min(beta, currEval);
       if (beta <= alpha) {
         break;
       }
     }
+    // console.log('minEval: ', minEval)
     return { pieceMove: bestPieceMove, currEval: minEval };
   }
 }
@@ -112,43 +108,53 @@ const countMaterialValue = (currBoard, teamType) => {
   return materialValue;
 };
 
-const evaluateMove = (piece, newPosition, currBoard) => {
+const playMove = (piece, newPosition, currBoard) => {
+  // console.log(newPosition, piece)
   const isValidMove = moveIsValid(piece.position, newPosition, piece.type, piece.teamType, piece.castleAvailable, currBoard);
   const isEnPassantMove = moveIsEnpassant(piece.position, newPosition, piece.type, piece.teamType, currBoard);
   const isPawnPromotionMove = moveIsPawnPromotion(newPosition, piece.type, piece.teamType);
   const isCastleMove = moveIsCastle(piece.position, newPosition, piece.type, piece.teamType, piece.castleAvailable, currBoard);
   const isKingThreatened = kingIsChecked(piece.teamType, currBoard.pieces);
+  
+  const prevPosition = piece.position.clone();
 
-  const newBoard = currBoard.clone();
   const updatePromotionPawn = null  // @TODO: refactor pawn promotion for AI evaluation
-  const result = newBoard.playMove(isEnPassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened, piece, newPosition, updatePromotionPawn);
-  return newBoard;
+  const result = currBoard.playMove(isEnPassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened, piece, newPosition, updatePromotionPawn);
+  if (result.success) {
+    const move = new Move(piece, prevPosition, newPosition, result.capturedPiece);
+    moveStack.push(move);
+  }
 }
+
+const unplayMove = (currBoard) => {
+  const move = moveStack.pop();
+  // console.log(move)
+  if (move) currBoard.unplayMove(move);
+};
 
 const moveIsValid = (grabPosition, newPosition, type, teamType, castleAvailable, currBoard) => {
   let isValidPosition = false;
   switch (type) {
     case PieceType.PAWN:
-      isValidPosition = isValidPawnPosition(grabPosition, newPosition, teamType, currBoard.pieces);
+      isValidPosition = isValidPawnPosition(grabPosition, newPosition, teamType, currBoard);
       break;
     case PieceType.KNIGHT:
-      isValidPosition = isValidKnightPosition(grabPosition, newPosition, teamType, currBoard.pieces);
+      isValidPosition = isValidKnightPosition(grabPosition, newPosition, teamType, currBoard);
       break;
     case PieceType.BISHOP:
-      isValidPosition = isValidBishopPosition(grabPosition, newPosition, teamType, currBoard.pieces);
+      isValidPosition = isValidBishopPosition(grabPosition, newPosition, teamType, currBoard);
       break;
     case PieceType.ROOK:
-      isValidPosition = isValidRookPosition(grabPosition, newPosition, teamType, currBoard.pieces);
+      isValidPosition = isValidRookPosition(grabPosition, newPosition, teamType, currBoard);
       break;
     case PieceType.QUEEN:
-      isValidPosition = isValidQueenPosition(grabPosition, newPosition, teamType, currBoard.pieces);
+      isValidPosition = isValidQueenPosition(grabPosition, newPosition, teamType, currBoard);
       break;
     case PieceType.KING:
-      isValidPosition = isValidKingPosition(grabPosition, newPosition, teamType, currBoard.pieces, castleAvailable);
+      isValidPosition = isValidKingPosition(grabPosition, newPosition, teamType, currBoard, castleAvailable);
   }
   return isValidPosition;
 };
-
 
 const moveIsEnpassant = (grabPosition, newPosition, type, teamType, currBoard) => {
   const pawnDirection = teamType === TeamType.WHITE ? 1 : -1;
