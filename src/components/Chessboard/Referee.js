@@ -44,6 +44,7 @@ function Referee() {
   const [promotionPawn, setPromotionPawn] = useState();
   const [showPawnPromotionModal, setShowPawnPromotionModal] = useState(false);
   const [showCheckmateModal, setShowCheckmmateModal] = useState(false);
+  const [showStalemateModal, setShowStalemateModal] = useState(false);
 
   // ** useEffects ** //
   useEffect(() => {
@@ -84,6 +85,7 @@ function Referee() {
 
     if (isPlayedMoveValid) {
       checkForCheckmate(piece.teamType);
+      checkForStalemate(piece.teamType);
     }
 
     return isPlayedMoveValid;
@@ -164,7 +166,13 @@ function Referee() {
 
   const checkForCheckmate = () => {
     const pieceMoves = board.getAllPlayerPossiblePieceMoves(board.currentPlayer.teamType);
-    if (pieceMoves.length === 0 || !pieceMoves) setShowCheckmmateModal(true);
+    if ((pieceMoves.length === 0 || !pieceMoves) && kingIsChecked(board.currentPlayer.teamType, board.pieces)) setShowCheckmmateModal(true);
+  }
+
+  const checkForStalemate = () => {
+    const pieceMoves = board.getAllPlayerPossiblePieceMoves(board.currentPlayer.teamType);
+    console.log(pieceMoves, kingIsChecked(board.currentPlayer.teamType, board.pieces));
+    if ((pieceMoves.length === 0 || !pieceMoves) && !kingIsChecked(board.currentPlayer.teamType, board.pieces)) setShowStalemateModal(true);
   }
 
   const promotePawn = (pieceType) => {
@@ -178,6 +186,7 @@ function Referee() {
 
   const resetBoard = () => {
     setShowCheckmmateModal(false);
+    setShowStalemateModal(false);
     setBoard((previousBoard) => {
       const newboard = initialBoard.clone();
       newboard.calculateAllMoves(newboard.currentPlayer.teamType);
@@ -194,7 +203,7 @@ function Referee() {
   return (
     <>
       <PawnPromotionModal showPawnPromotionModal={showPawnPromotionModal} promotionPawn={promotionPawn} promotePawn={promotePawn} />
-      <CheckmateModal showCheckmateModal={showCheckmateModal} teamType={getOppositeTeamType(board.currentPlayer.teamType)} resetBoard={resetBoard} />
+      <CheckmateModal showCheckmateModal={showCheckmateModal} teamType={getOppositeTeamType(board.currentPlayer.teamType)} resetBoard={resetBoard} showStalemateModal={showStalemateModal} />
       <Chessboard playMove={playMove} pieces={board.pieces} playComputerMove={playComputerMove} />
     </>
   );
