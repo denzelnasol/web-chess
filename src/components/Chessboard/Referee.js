@@ -171,7 +171,6 @@ function Referee() {
 
   const checkForStalemate = () => {
     const pieceMoves = board.getAllPlayerPossiblePieceMoves(board.currentPlayer.teamType);
-    console.log(pieceMoves, kingIsChecked(board.currentPlayer.teamType, board.pieces));
     if ((pieceMoves.length === 0 || !pieceMoves) && !kingIsChecked(board.currentPlayer.teamType, board.pieces)) setShowStalemateModal(true);
   }
 

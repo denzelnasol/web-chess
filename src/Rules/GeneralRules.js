@@ -11,7 +11,7 @@ import { getPossibleRookAttackMoves, getStandardRookMoves } from "Rules/PieceRul
 import { getPossibleBishopAttackMoves, getStandardBishopMoves } from "Rules/PieceRules/BishopRules";
 import { getPossibleQueenAttackMoves, getStandardQueenMoves } from "Rules/PieceRules/QueenRules";
 import { getPossibleKnightAttackMoves, getStandardKnightMoves } from "Rules/PieceRules/KnightRules";
-import { getPiecesAttackingKing } from "Rules/PieceRules/KingRules";
+import { getStandardKingMoves } from "Rules/PieceRules/KingRules";
 
 export function tileIsEmptyOrOccupiedByOpponent(newPosition, boardState, teamType) {
   return !tileIsOccupied(newPosition, boardState) || tileIsOccupiedByOpponent(newPosition, boardState, teamType);
@@ -67,6 +67,9 @@ export function getPieceAttackMoves(piece, boardState) {
       break;
     case PieceType.KNIGHT:
       attackMoves = getPossibleKnightAttackMoves(piece, boardState);
+      break;
+    case PieceType.KING:
+      attackMoves = getStandardKingMoves(piece, boardState);
       break;
     default:
       attackMoves = piece.possibleMoves;
