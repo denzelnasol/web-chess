@@ -7,7 +7,7 @@ import { samePosition } from "utilities/Position";
 
 // Rules
 import { getPieceFromPosition, tileIsOccupied, tileIsOccupiedByOpponent } from "Rules/GeneralRules";
-import { getPieceCheckPath, getPiecesAttackingKing, kingIsChecked } from "Rules/PieceRules/KingRules";
+import { kingIsChecked, getPieceCheckPath, getPiecesAttackingKing } from "Rules/CheckRules";
 import { checkPinnedPiecePotentialMove, checkIfPiecePinned } from "Rules/PinnedRules";
 
 // Objects

@@ -16,7 +16,8 @@ import { getPossibleKnightMoves } from "Rules/PieceRules/KnightRules";
 import { getPossibleBishopMoves } from "Rules/PieceRules/BishopRules";
 import { getPossibleRookMoves } from "Rules/PieceRules/RookRules";
 import { getPossibleQueenMoves } from "Rules/PieceRules/QueenRules";
-import { getPossibleKingMoves, kingIsChecked, getKing } from "Rules/PieceRules/KingRules";
+import { getPossibleKingMoves, getKing } from "Rules/PieceRules/KingRules";
+import { kingIsChecked } from "Rules/CheckRules";
 
 // Constants
 import { PLAYERS } from "constants/Constants";

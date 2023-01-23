@@ -26,9 +26,10 @@ import { isValidKnightPosition } from "Rules/PieceRules/KnightRules";
 import { isValidBishopPosition } from "Rules/PieceRules/BishopRules";
 import { isValidRookPosition } from "Rules/PieceRules/RookRules";
 import { isValidQueenPosition } from "Rules/PieceRules/QueenRules";
-import { isValidKingPosition, kingIsChecked } from "Rules/PieceRules/KingRules";
+import { isValidKingPosition } from "Rules/PieceRules/KingRules";
 import { tileIsOccupied, tileIsOccupiedByOpponent } from "Rules/GeneralRules";
 import { getOppositeTeamType } from "utilities/TeamType";
+import { kingIsChecked } from "Rules/CheckRules";
 
 
 export const minimax = (currBoard, depth, alpha, beta, maximizingPlayer) => {

@@ -3,8 +3,8 @@ import { samePosition } from "utilities/Position";
 import { cloneBoardState } from "utilities/Board";
 
 // Rules
-import { getPiecesAttackingKing } from "Rules/PieceRules/KingRules";
 import { getStandardPieceMoves, tileIsEmptyOrOccupiedByOpponent } from "Rules/GeneralRules";
+import { getPiecesAttackingKing } from "Rules/CheckRules";
 
 export const checkIfPiecePinned = (piece, boardState) => {
   const currentBoardStatePiecesAttackingKing = getPiecesAttackingKing(piece.teamType, boardState);

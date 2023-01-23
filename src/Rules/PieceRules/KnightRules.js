@@ -3,8 +3,8 @@ import { samePosition } from "utilities/Position";
 
 // Rules
 import { tileIsEmptyOrOccupiedByOpponent, tileIsOccupiedByAlly, getPieceFromPosition } from "Rules/GeneralRules";
-import { kingIsChecked, getKingCheckPieceMoves } from "Rules/PieceRules/KingRules";
 import { checkIfPiecePinned, getPinnedPieceMoves } from "Rules/PinnedRules";
+import { kingIsChecked, getKingCheckPieceMoves } from "Rules/CheckRules";
 
 // Models
 import Position from "models/Position";

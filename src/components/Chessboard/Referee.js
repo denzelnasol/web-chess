@@ -11,7 +11,6 @@ import CheckmateModal from "components/CheckmateModal/CheckmateModal";
 
 // Models
 import Position from 'models/Position';
-import Player from "models/Player";
 
 // Utilities
 import { samePosition, getPositionPointDifference } from "utilities/Position";
@@ -26,11 +25,10 @@ import { isValidKnightPosition } from "Rules/PieceRules/KnightRules";
 import { isValidBishopPosition } from "Rules/PieceRules/BishopRules";
 import { isValidRookPosition } from "Rules/PieceRules/RookRules";
 import { isValidQueenPosition } from "Rules/PieceRules/QueenRules";
-import { isValidKingPosition, kingIsChecked } from "Rules/PieceRules/KingRules";
+import { isValidKingPosition } from "Rules/PieceRules/KingRules";
 import { tileIsOccupied } from "Rules/GeneralRules";
 import { getOppositeTeamType } from "utilities/TeamType";
-
-/** @TODO Add stalemate */
+import { kingIsChecked } from "Rules/CheckRules";
 
 /**
  * @description Renders the chessboard and handles game logic related to moves being made on the current board state
