@@ -22,7 +22,6 @@ import './style.scss';
  * @description Renders a chess board and updates the render on legal moves
  * @param {Array} pieces - List of Piece objects which contain information on its team, current position, and possible moves
  * @param {Function} playMove - Function which returns a boolean on the legality of a move. If true, re-render to update the board view
- * @param {Function} [playComputerMove] - Function which allows the AI to play a move as black once white has made a move
  *
  * @returns
  *
@@ -110,10 +109,6 @@ function Chessboard({ ...props }) {
     }
 
     setActivePiece(null);
-
-    // if (success) {
-    //   props.playComputerMove();
-    // }
   }
 
   let board = [];

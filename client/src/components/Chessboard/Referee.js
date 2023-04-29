@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 
 // Enums
 import { PieceType } from "enums/PieceType";
@@ -14,7 +14,6 @@ import Position from 'models/Position';
 
 // Utilities
 import { samePosition, getPositionPointDifference } from "utilities/Position";
-import { minimax } from "utilities/AI";
 
 // Constants
 import { initialBoard } from "constants/Constants";
@@ -54,11 +53,6 @@ function Referee() {
   }, []);
 
   // ** Functions ** //
-  const playComputerMove = () => {
-    const bestPieceMove = minimax(board.clone(), 3, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, false);
-    playMove(bestPieceMove.pieceMove.piece, bestPieceMove.pieceMove.move);
-  };
-
   const updatePossibleMoves = () => {
     board.calculateAllMoves(board.currentPlayer.teamType);
   };
@@ -212,9 +206,24 @@ function Referee() {
 
   return (
     <>
-      <PawnPromotionModal showPawnPromotionModal={showPawnPromotionModal} promotionPawn={promotionPawn} promotePawn={promotePawn} />
-      <CheckmateModal showCheckmateModal={showCheckmateModal} teamType={getOppositeTeamType(board.currentPlayer.teamType)} resetBoard={resetBoard} showStalemateModal={showStalemateModal} />
-      <Chessboard playMove={playMove} pieces={board.pieces} playComputerMove={playComputerMove} unplayMove={unplayMove} />
+      <PawnPromotionModal
+        showPawnPromotionModal={showPawnPromotionModal}
+        promotionPawn={promotionPawn}
+        promotePawn={promotePawn}
+      />
+
+      <CheckmateModal
+        showCheckmateModal={showCheckmateModal}
+        teamType={getOppositeTeamType(board.currentPlayer.teamType)}
+        resetBoard={resetBoard}
+        showStalemateModal={showStalemateModal}
+      />
+
+      <Chessboard
+        playMove={playMove}
+        pieces={board.pieces}
+        unplayMove={unplayMove}
+      />
     </>
   );
 }
