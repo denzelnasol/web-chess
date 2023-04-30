@@ -1,7 +1,7 @@
 import React from 'react';
 
 // Components
-import Referee from 'components/Chessboard/Referee';
+import Referee from 'components/Game/Chessboard/Referee';
 
 // Style
 import './App.scss'

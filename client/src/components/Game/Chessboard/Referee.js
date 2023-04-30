@@ -3,14 +3,16 @@ import React, { useState, useEffect } from "react";
 // Enums
 import { PieceType } from "enums/PieceType";
 import { TeamType } from 'enums/TeamType';
-
-// Components
-import Chessboard from "components/Chessboard/Chessboard";
-import PawnPromotionModal from "components/PawnPromotionModal/PawnPromotionModal";
-import CheckmateModal from "components/CheckmateModal/CheckmateModal";
+import { HORIZONTAL_AXIS, VERTICAL_AXIS } from "constants/Constants";
 
 // Models
 import Position from 'models/Position';
+
+// Components
+import Chessboard from "components/Game/Chessboard/Chessboard";
+import PawnPromotionModal from "components/Game/PawnPromotionModal/PawnPromotionModal";
+import CheckmateModal from "components/Game/CheckmateModal/CheckmateModal";
+
 
 // Utilities
 import { samePosition, getPositionPointDifference } from "utilities/Position";
@@ -46,6 +48,7 @@ function Referee() {
   const [showCheckmateModal, setShowCheckmmateModal] = useState(false);
   const [showStalemateModal, setShowStalemateModal] = useState(false);
   const [moveStack, setMoveStack] = useState([]);
+  const [moveHistory, setMoveHistory] = useState([]);
 
   // ** useEffects ** //
   useEffect(() => {
@@ -87,10 +90,28 @@ function Referee() {
       setMoveStack(moveStack => [...moveStack, move]);
       checkForCheckmate(piece.teamType);
       checkForStalemate(piece.teamType);
+      moveHistory.push(getChessNotationMove(piece, capturedPiece));
+      console.log(moveHistory, capturedPiece);
     }
 
     return isPlayedMoveValid;
   };
+
+  const getChessNotationMove = (piece, capturedPiece) => {
+    let notation;
+    let capturedPiecePostition;
+
+    if (capturedPiece) {
+      capturedPiecePostition = capturedPiece.position;
+    }
+
+    console.log(piece.pieceType)
+    if (piece.pieceType == PieceType.PAWN) {
+      notation = `${HORIZONTAL_AXIS[this.x]}${VERTICAL_AXIS[this.y]}`;
+    }
+
+    return notation;
+  }
 
   const moveIsValid = (grabPosition, newPosition, type, teamType, castleAvailable) => {
     let isValidPosition = false;
@@ -194,16 +215,6 @@ function Referee() {
     })
   }
 
-  const unplayMove = () => {
-    const move = moveStack.pop();
-    if (move) {
-      setBoard((previousBoard) => {
-        previousBoard.unplayMove(move);
-        return previousBoard.clone();
-      });
-    }
-  }
-
   return (
     <>
       <PawnPromotionModal
@@ -222,7 +233,6 @@ function Referee() {
       <Chessboard
         playMove={playMove}
         pieces={board.pieces}
-        unplayMove={unplayMove}
       />
     </>
   );

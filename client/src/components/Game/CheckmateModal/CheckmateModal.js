@@ -1,4 +1,5 @@
 import React from "react";
+import Position from "models/Position";
 
 // Enums
 import { PieceType } from "enums/PieceType";

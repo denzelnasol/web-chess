@@ -6,58 +6,34 @@ import { cloneBoardState } from "utilities/Board";
 import { getStandardPieceMoves, tileIsEmptyOrOccupiedByOpponent } from "Rules/GeneralRules";
 import { getPiecesAttackingKing } from "Rules/CheckRules";
 
-export const checkIfPiecePinned = (piece, boardState) => {
-  const currentBoardStatePiecesAttackingKing = getPiecesAttackingKing(piece.teamType, boardState);
-  const tempBoardState = boardState.filter((currentPiece) =>
-    !samePosition(currentPiece.position, piece.position)
-  );
+const checkIfPiecePinned = (piece, boardState) => {
+  const currentAttackingPieces = getPiecesAttackingKing(piece.teamType, boardState);
+  const tempBoardState = boardState.filter((p) => !samePosition(p.position, piece.position));
+  const attackingPieces = getPiecesAttackingKing(piece.teamType, tempBoardState);
+  return attackingPieces.length > 0 && attackingPieces.length > currentAttackingPieces.length;
+}
 
-  const piecesAttackingKing = getPiecesAttackingKing(piece.teamType, tempBoardState);
-  if (piecesAttackingKing.length > 0 && piecesAttackingKing.length > currentBoardStatePiecesAttackingKing.length) return true;
-
-  return false;
-};
-
-export const checkPinnedPiecePotentialMove = (move, piece, boardState) => {
+const checkPinnedPiecePotentialMove = (move, piece, boardState) => {
   let tempBoardState = cloneBoardState(boardState);
-  tempBoardState = tempBoardState.reduce((results, currentPiece) => {
-    if (samePosition(currentPiece.position, piece.position)) currentPiece.position = move;
-    results.push(currentPiece);
-    return results;
-  }, []);
+  tempBoardState = tempBoardState.filter((p) => !samePosition(p.position, piece.position));
+  tempBoardState = tempBoardState.filter((p) => !samePosition(move, p.position) || (piece.type === p.type && piece.teamType === p.teamType));
+  const attackingPieces = getPiecesAttackingKing(piece.teamType, tempBoardState);
+  return attackingPieces.length === 0 || attackingPieces === null ? move : undefined;
+}
 
-  // Remove piece from temp boardState if attacked
-  tempBoardState = tempBoardState.filter((currentPiece) => {
-    if (samePosition(move, currentPiece.position) && piece.type !== currentPiece.type && piece.teamType !== currentPiece.teamType) {
-      return false;
-    }
-    return true;
+const getPinnedPieceMoves = (piece, boardState) => {
+  return getStandardPieceMoves(piece, boardState).filter((move) => checkPinnedPiecePotentialMove(move, piece, boardState));
+}
+
+const validPinnedPieceMove = (piece, boardState, newPosition) => {
+  return getStandardPieceMoves(piece, boardState).some((move) => {
+    return tileIsEmptyOrOccupiedByOpponent(move, boardState, piece.teamType) && samePosition(move, newPosition) && checkPinnedPiecePotentialMove(move, piece, boardState);
   });
+}
 
-  const piecesAttackingKing = getPiecesAttackingKing(piece.teamType, tempBoardState);
-  if (piecesAttackingKing.length === 0 || !piecesAttackingKing) return move;
-};
-
-export const getPinnedPieceMoves = (piece, boardState) => {
-  const possibleMoves = [];
-  const standardPieceMoves = getStandardPieceMoves(piece, boardState);
-  standardPieceMoves.forEach((pieceMove) => {
-    const isMovePossible = checkPinnedPiecePotentialMove(pieceMove, piece, boardState);
-    if (isMovePossible) possibleMoves.push(pieceMove);
-  });
-
-  return possibleMoves;
-};
-
-export const validPinnedPieceMove = (piece, boardState, newPosition) => {
-  let isMoveValid = false;
-  const standardPieceMoves = getStandardPieceMoves(piece, boardState);
-  standardPieceMoves.forEach((pieceMove) => {
-    if (tileIsEmptyOrOccupiedByOpponent(pieceMove, boardState, piece.teamType) && samePosition(pieceMove, newPosition)) {
-      const isMovePossible = checkPinnedPiecePotentialMove(pieceMove, piece, boardState);
-      if (isMovePossible) isMoveValid = true;
-    }
-  });
-
-  return isMoveValid;
+export {
+  checkIfPiecePinned,
+  checkPinnedPiecePotentialMove,
+  getPinnedPieceMoves,
+  validPinnedPieceMove
 };

@@ -13,97 +13,98 @@ import { getPossibleQueenAttackMoves, getStandardQueenMoves } from "Rules/PieceR
 import { getPossibleKnightAttackMoves, getStandardKnightMoves } from "Rules/PieceRules/KnightRules";
 import { getStandardKingMoves } from "Rules/PieceRules/KingRules";
 
-export function tileIsEmptyOrOccupiedByOpponent(newPosition, boardState, teamType) {
+// *********************** PRIVATE FUNCTIONS *********************** //
+const moveIsAnAttack = (move, boardState, teamType) => {
+  const pieceAtPosition = boardState[move.row][move.col];
+  return pieceAtPosition && pieceAtPosition.teamType !== teamType;
+}
+
+// *********************** GENERAL RULE FUNCTIONS *********************** //
+const tileIsEmptyOrOccupiedByOpponent = (newPosition, boardState, teamType) => {
   return !tileIsOccupied(newPosition, boardState) || tileIsOccupiedByOpponent(newPosition, boardState, teamType);
 }
 
-export function tileIsOccupied(newPosition, boardState) {
-  const piece = boardState.find((p) => samePosition(p.position, newPosition));
-  return piece;
+const tileIsOccupied = (newPosition, boardState) => {
+  return boardState.some((p) => samePosition(p.position, newPosition));
 }
 
-export function tileIsOccupiedByOpponent(newPosition, boardState, teamType) {
-  const piece = boardState.find((p) => samePosition(p.position, newPosition) && p.teamType !== teamType);
-  return piece;
+const tileIsOccupiedByOpponent = (newPosition, boardState, teamType) => {
+  return boardState.some((p) => samePosition(p.position, newPosition) && p.teamType !== teamType);
 }
 
-export function tileIsOccupiedByAlly(newPosition, boardState, teamType) {
-  const piece = boardState.find((p) => samePosition(p.position, newPosition) && p.teamType === teamType);
-  return piece;
+const tileIsOccupiedByAlly = (newPosition, boardState, teamType) => {
+  return boardState.some((p) => samePosition(p.position, newPosition) && p.teamType === teamType);
 }
 
-export function tileIsOccupiedByOpponentKing(newPosition, boardState, teamType) {
-  const piece = boardState.find((p) => samePosition(p.position, newPosition) && p.teamType !== teamType && p.type === PieceType.KING);
-  return piece;
+const tileIsOccupiedByOpponentKing = (newPosition, boardState, teamType) => {
+  return boardState.some((p) => samePosition(p.position, newPosition) && p.teamType !== teamType && p.type === PieceType.KING);
 }
 
-export function getOpponentAttackMoves(teamType, boardState) {
+const getOpponentAttackMoves = (teamType, boardState) => {
   const opponentAttackMoves = [];
 
   boardState.forEach((piece) => {
     if (piece.teamType !== teamType) {
-      const attackMoves = getPieceAttackMoves(piece, boardState);
-      attackMoves.forEach((attackMove) => opponentAttackMoves.push(attackMove));
+      opponentAttackMoves.push(...getPieceAttackMoves(piece, boardState));
     }
   });
 
   return opponentAttackMoves;
 }
 
-export function getPieceAttackMoves(piece, boardState) {
-  let attackMoves = [];
+function getPieceAttackMoves(piece, boardState) {
   switch (piece.type) {
     case PieceType.PAWN:
-      attackMoves = getPossiblePawnAttackMoves(piece);
-      break;
+      return getPossiblePawnAttackMoves(piece);
     case PieceType.ROOK:
-      attackMoves = getPossibleRookAttackMoves(piece, boardState);
-      break;
+      return getPossibleRookAttackMoves(piece, boardState);
     case PieceType.BISHOP:
-      attackMoves = getPossibleBishopAttackMoves(piece, boardState);
-      break;
+      return getPossibleBishopAttackMoves(piece, boardState);
     case PieceType.QUEEN:
-      attackMoves = getPossibleQueenAttackMoves(piece, boardState);
-      break;
+      return getPossibleQueenAttackMoves(piece, boardState);
     case PieceType.KNIGHT:
-      attackMoves = getPossibleKnightAttackMoves(piece, boardState);
-      break;
+      return getPossibleKnightAttackMoves(piece, boardState);
     case PieceType.KING:
-      attackMoves = getStandardKingMoves(piece, boardState, true);
-      break;
+      return getStandardKingMoves(piece, boardState, true);
     default:
-      attackMoves = piece.possibleMoves;
+      return piece.possibleMoves;
   }
-
-  return attackMoves;
 }
 
-export function getPieceFromPosition(position, boardState) {
-  const piece = boardState.find((piece) =>
+const getPieceFromPosition = (position, boardState) => {
+  return boardState.find((piece) =>
     samePosition(piece.position, position)
   );
-  return piece;
 }
 
-export function addPieceToBoard(piece, boardState) {
-  const tempBoardState = boardState.push(piece);
-  return tempBoardState;
+const addPieceToBoard = (piece, boardState) => {
+  return boardState.concat(piece);
 }
 
-export const getStandardPieceMoves = (piece, boardState) => {
-  let standardMoves = [];
+const getStandardPieceMoves = (piece, boardState) => {
   switch (piece.type) {
     case PieceType.ROOK:
-      standardMoves = getStandardRookMoves(piece, boardState);
-      break;
+      return getStandardRookMoves(piece, boardState);
     case PieceType.BISHOP:
-      standardMoves = getStandardBishopMoves(piece, boardState);
-      break;
+      return getStandardBishopMoves(piece, boardState);
     case PieceType.QUEEN:
-      standardMoves = getStandardQueenMoves(piece, boardState);
-      break;
+      return getStandardQueenMoves(piece, boardState);
     case PieceType.KNIGHT:
-      standardMoves = getStandardKnightMoves(piece, boardState);
+      return getStandardKnightMoves(piece, boardState);
+    default:
+      return [];
   }
-  return standardMoves;
+};
+
+export {
+  tileIsEmptyOrOccupiedByOpponent,
+  tileIsOccupied,
+  tileIsOccupiedByOpponent,
+  tileIsOccupiedByAlly,
+  tileIsOccupiedByOpponentKing,
+  getOpponentAttackMoves,
+  getPieceAttackMoves,
+  getPieceFromPosition,
+  addPieceToBoard,
+  getStandardPieceMoves
 };

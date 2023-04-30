@@ -4,7 +4,7 @@ import React, { useRef, useState } from 'react';
 import Position from 'models/Position';
 
 // Components
-import Tile from 'components/Tile/Tile';
+import Tile from 'components/Game/Tile/Tile';
 
 // Constants
 import { VERTICAL_AXIS, HORIZONTAL_AXIS, GRID_SIZE } from 'constants/Constants';
@@ -142,7 +142,6 @@ function Chessboard({ ...props }) {
       >
         {board}
       </div>
-      <button onClick={() => props.unplayMove()}>Undo</button>
     </>
   );
 }
