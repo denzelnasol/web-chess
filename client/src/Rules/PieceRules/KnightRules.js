@@ -9,14 +9,14 @@ import { kingIsChecked, getKingCheckPieceMoves } from "Rules/CheckRules";
 // Models
 import Position from "models/Position";
 
-export function isValidKnightPosition(grabPosition, newPosition, teamType, board) {
+const isValidKnightPosition = (grabPosition, newPosition, teamType, board) => {
   if (teamType !== board.currentPlayer.teamType) return false;
   const knight = getPieceFromPosition(grabPosition, board.pieces);
   const isValidMove = knight.possibleMoves.find((move) => samePosition(move, newPosition));
   return isValidMove;
 }
 
-export function getPossibleKnightMoves(knight, boardState) {
+const getPossibleKnightMoves = (knight, boardState) => {
   // ** KING CHECK LOGIC ** //
   const isKingCheck = kingIsChecked(knight.teamType, boardState);
   if (isKingCheck) return getKingCheckPieceMoves(knight, boardState);
@@ -29,23 +29,23 @@ export function getPossibleKnightMoves(knight, boardState) {
   return getStandardKnightMoves(knight, boardState);
 }
 
-export const getPossibleKnightAttackMoves = (knight, boardState) => {
+const getPossibleKnightAttackMoves = (knight, boardState) => {
   const possibleMoves = [];
 
-  const knightMoves = [ [1, 2], [1, -2], [2, 1], [2, -1], [-2, -1], [-1, -2], [-1, 2], [-2, 1]];
+  const knightMoves = [[1, 2], [1, -2], [2, 1], [2, -1], [-2, -1], [-1, -2], [-1, 2], [-2, 1]];
 
   knightMoves.forEach((move) => {
     const newPos = new Position(knight.position.x + move[0], knight.position.y + move[1]);
     if (newPos.outOfBounds()) return;
-    if (tileIsEmptyOrOccupiedByOpponent(newPos, boardState, knight.teamType)  || tileIsOccupiedByAlly(newPos, boardState, knight.teamType)) possibleMoves.push(newPos);
+    if (tileIsEmptyOrOccupiedByOpponent(newPos, boardState, knight.teamType) || tileIsOccupiedByAlly(newPos, boardState, knight.teamType)) possibleMoves.push(newPos);
   })
   return possibleMoves;
 };
 
 // *********************** STANDARD KNIGHT MOVE FUNCTIONS *********************** //
-export const getStandardKnightMoves = (knight, boardState) => {
+const getStandardKnightMoves = (knight, boardState) => {
   const possibleMoves = [];
-  const knightMoves = [ [1, 2], [1, -2], [2, 1], [2, -1], [-2, -1], [-1, -2], [-1, 2], [-2, 1]];
+  const knightMoves = [[1, 2], [1, -2], [2, 1], [2, -1], [-2, -1], [-1, -2], [-1, 2], [-2, 1]];
 
   knightMoves.forEach((move) => {
     const newPos = new Position(knight.position.x + move[0], knight.position.y + move[1]);
@@ -53,4 +53,11 @@ export const getStandardKnightMoves = (knight, boardState) => {
     if (tileIsEmptyOrOccupiedByOpponent(newPos, boardState, knight.teamType)) possibleMoves.push(newPos);
   })
   return possibleMoves;
+};
+
+export {
+  isValidKnightPosition,
+  getPossibleKnightMoves,
+  getPossibleKnightAttackMoves,
+  getStandardKnightMoves
 };

@@ -12,14 +12,21 @@ import Position from "models/Position";
 // Enums
 import { Operator, operatorOperations } from "enums/Operator";
 
-export function isValidRookPosition(grabPosition, newPosition, teamType, board) {
+const directions = [
+  [undefined, Operator.ADDITION],
+  [undefined, Operator.SUBTRACTION],
+  [Operator.SUBTRACTION, undefined],
+  [Operator.ADDITION, undefined],
+];
+
+const isValidRookPosition = (grabPosition, newPosition, teamType, board) => {
   if (teamType !== board.currentPlayer.teamType) return false;
   const rook = getPieceFromPosition(grabPosition, board.pieces);
   const isValidMove = rook.possibleMoves.find((move) => samePosition(move, newPosition));
   return isValidMove;
 }
 
-export function getPossibleRookMoves(rook, boardState) {
+const getPossibleRookMoves = (rook, boardState) => {
   // ** KING CHECK LOGIC ** //
   const isKingCheck = kingIsChecked(rook.teamType, boardState);
   if (isKingCheck) return getKingCheckPieceMoves(rook, boardState);
@@ -33,21 +40,12 @@ export function getPossibleRookMoves(rook, boardState) {
 }
 
 // *********************** ROOK ATTACK FUNCTIONS *********************** //
-export const getPossibleRookAttackMoves = (rook, boardState) => {
+const getPossibleRookAttackMoves = (rook, boardState) => {
   const possibleMoves = [];
-
-  const upMoves = getRookLineAttackMoves(rook, boardState, undefined, Operator.ADDITION);
-  possibleMoves.push(...upMoves);
-
-  const bottomMoves = getRookLineAttackMoves(rook, boardState, undefined, Operator.SUBTRACTION);
-  possibleMoves.push(...bottomMoves);
-
-  const leftMoves = getRookLineAttackMoves(rook, boardState, Operator.SUBTRACTION, undefined);
-  possibleMoves.push(...leftMoves);
-
-  const rightMoves = getRookLineAttackMoves(rook, boardState, Operator.ADDITION, undefined);
-  possibleMoves.push(...rightMoves);
-
+  for (const [xOperator, yOperator] of directions) {
+    const moves = getRookLineAttackMoves(rook, boardState, xOperator, yOperator);
+    possibleMoves.push(...moves);
+  }
   return possibleMoves;
 }
 
@@ -73,21 +71,12 @@ const getRookLineAttackMoves = (rook, boardState, xOperator, yOperator) => {
 };
 
 // *********************** STANDARD ROOK MOVE FUNCTIONS *********************** //
-export const getStandardRookMoves = (rook, boardState) => {
+const getStandardRookMoves = (rook, boardState) => {
   const possibleMoves = [];
-
-  const upMoves = getPossibleRookLineMoves(rook, boardState, undefined, Operator.ADDITION);
-  possibleMoves.push(...upMoves);
-
-  const bottomMoves = getPossibleRookLineMoves(rook, boardState, undefined, Operator.SUBTRACTION);
-  possibleMoves.push(...bottomMoves);
-
-  const leftMoves = getPossibleRookLineMoves(rook, boardState, Operator.SUBTRACTION, undefined);
-  possibleMoves.push(...leftMoves);
-
-  const rightMoves = getPossibleRookLineMoves(rook, boardState, Operator.ADDITION, undefined);
-  possibleMoves.push(...rightMoves);
-
+  for (const [xOperator, yOperator] of directions) {
+    const moves = getPossibleRookLineMoves(rook, boardState, xOperator, yOperator);
+    possibleMoves.push(...moves);
+  }
   return possibleMoves
 };
 
@@ -110,4 +99,12 @@ const getPossibleRookLineMoves = (rook, boardState, xOperator, yOperator) => {
   }
 
   return possibleMoves;
+};
+
+export {
+  isValidRookPosition,
+  getPossibleRookMoves,
+  getPossibleRookAttackMoves,
+  getPossibleRookLineMoves,
+  getStandardRookMoves
 };

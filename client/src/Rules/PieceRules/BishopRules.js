@@ -12,14 +12,20 @@ import { Operator, operatorOperations } from "enums/Operator";
 // Objects
 import Position from "models/Position";
 
-export const isValidBishopPosition = (grabPosition, newPosition, teamType, board) => {
+const diagonalDirections = [
+  [Operator.ADDITION, Operator.ADDITION],
+  [Operator.ADDITION, Operator.SUBTRACTION],
+  [Operator.SUBTRACTION, Operator.SUBTRACTION],
+  [Operator.SUBTRACTION, Operator.ADDITIO]
+];
+
+const isValidBishopPosition = (grabPosition, newPosition, teamType, board) => {
   if (teamType !== board.currentPlayer.teamType) return false;
   const bishop = getPieceFromPosition(grabPosition, board.pieces);
-  const isValidMove = bishop.possibleMoves.find((move) => samePosition(move, newPosition));
-  return isValidMove;
-};
+  return bishop.possibleMoves.some((move) => samePosition(move, newPosition));
+}
 
-export const getPossibleBishopMoves = (bishop, boardState) => {
+const getPossibleBishopMoves = (bishop, boardState) => {
   // ** KING CHECK LOGIC ** //
   const isKingCheck = kingIsChecked(bishop.teamType, boardState);
   if (isKingCheck) return getKingCheckPieceMoves(bishop, boardState);
@@ -33,23 +39,15 @@ export const getPossibleBishopMoves = (bishop, boardState) => {
 };
 
 // *********************** BISHOP ATTACK FUNCTIONS *********************** //
-export const getPossibleBishopAttackMoves = (bishop, boardState) => {
+const getPossibleBishopAttackMoves = (bishop, boardState) => {
   const possibleMoves = [];
 
-  const upperRightMoves = getBishopDiagonalAttackMoves(bishop, boardState, Operator.ADDITION, Operator.ADDITION);
-  possibleMoves.push(...upperRightMoves);
-
-  const bottomRightMoves = getBishopDiagonalAttackMoves(bishop, boardState, Operator.ADDITION, Operator.SUBTRACTION);
-  possibleMoves.push(...bottomRightMoves);
-
-  const upperLeftMoves = getBishopDiagonalAttackMoves(bishop, boardState, Operator.SUBTRACTION, Operator.SUBTRACTION);
-  possibleMoves.push(...upperLeftMoves);
-
-  const bottomLeftMoves = getBishopDiagonalAttackMoves(bishop, boardState, Operator.SUBTRACTION, Operator.ADDITION);
-  possibleMoves.push(...bottomLeftMoves);
+  for (const [xOperator, yOperator] of diagonalDirections) {
+    possibleMoves.push(...getBishopDiagonalAttackMoves(bishop, boardState, xOperator, yOperator));
+  }
 
   return possibleMoves;
-};
+}
 
 const getBishopDiagonalAttackMoves = (bishop, boardState, xOperator, yOperator) => {
   const possibleMoves = [];
@@ -73,23 +71,16 @@ const getBishopDiagonalAttackMoves = (bishop, boardState, xOperator, yOperator) 
 };
 
 // *********************** STANDARD BISHOP MOVE FUNCTIONS *********************** //
-export const getStandardBishopMoves = (bishop, boardState) => {
+const getStandardBishopMoves = (bishop, boardState) => {
   const possibleMoves = [];
 
-  const upperRightMoves = getPossibleBishopDiagonalMoves(bishop, boardState, Operator.ADDITION, Operator.ADDITION);
-  possibleMoves.push(...upperRightMoves);
+  for (const [xOperator, yOperator] of diagonalDirections) {
+    const diagonalMoves = getPossibleBishopDiagonalMoves(bishop, boardState, xOperator, yOperator);
+    possibleMoves.push(...diagonalMoves);
+  }
 
-  const bottomRightMoves = getPossibleBishopDiagonalMoves(bishop, boardState, Operator.ADDITION, Operator.SUBTRACTION);
-  possibleMoves.push(...bottomRightMoves);
-
-  const upperLeftMoves = getPossibleBishopDiagonalMoves(bishop, boardState, Operator.SUBTRACTION, Operator.SUBTRACTION);
-  possibleMoves.push(...upperLeftMoves);
-
-  const bottomLeftMoves = getPossibleBishopDiagonalMoves(bishop, boardState, Operator.SUBTRACTION, Operator.ADDITION);
-  possibleMoves.push(...bottomLeftMoves);
-
-  return possibleMoves
-};
+  return possibleMoves;
+};  
 
 const getPossibleBishopDiagonalMoves = (bishop, boardState, xOperator, yOperator) => {
   const possibleMoves = [];
@@ -97,17 +88,25 @@ const getPossibleBishopDiagonalMoves = (bishop, boardState, xOperator, yOperator
     const positionX = operatorOperations[xOperator](bishop.position.x, i);
     const positionY = operatorOperations[yOperator](bishop.position.y, i);
     const passedPosition = new Position(positionX, positionY);
-    if (passedPosition.outOfBounds()) continue;
 
-    if (!tileIsOccupied(passedPosition, boardState)) {
+    if (passedPosition.outOfBounds()) break;
+
+    if (tileIsOccupiedByOpponent(passedPosition, boardState, bishop.teamType)) {
       possibleMoves.push(passedPosition);
-    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, bishop.teamType)) {
-      possibleMoves.push(passedPosition);
-      break;
-    } else {
       break;
     }
+
+    if (tileIsOccupied(passedPosition, boardState)) break;
+    
+    possibleMoves.push(passedPosition);
   }
 
   return possibleMoves;
+}
+
+export {
+  isValidBishopPosition,
+  getPossibleBishopMoves,
+  getPossibleBishopAttackMoves,
+  getStandardBishopMoves
 };

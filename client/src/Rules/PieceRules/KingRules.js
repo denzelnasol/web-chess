@@ -13,18 +13,16 @@ import { TeamType } from "enums/TeamType";
 import { PieceType } from "enums/PieceType";
 import { operatorOperations, Operator } from "enums/Operator";
 
-export function isValidKingPosition(grabPosition, passedPosition, teamType, board, castleAvailable) {
+const isValidKingPosition = (grabPosition, passedPosition, teamType, board) => {
   if (teamType !== board.currentPlayer.teamType) return false;
   const king = getPieceFromPosition(grabPosition, board.pieces);
   const isValidMove = king.possibleMoves.find((move) => samePosition(move, passedPosition));
   return isValidMove;
 }
 
-export function getPossibleKingMoves(king, boardState) {
-  let possibleMoves = [];
-  
-  possibleMoves = getStandardKingMoves(king, boardState);
-  
+const getPossibleKingMoves = (king, boardState) => {
+  const possibleMoves = getStandardKingMoves(king, boardState);
+
   const kingRow = king.teamType === TeamType.WHITE ? 0 : 7;
   const possibleAttackedMoves = getOpponentAttackMoves(king.teamType, boardState);
 
@@ -35,15 +33,11 @@ export function getPossibleKingMoves(king, boardState) {
   if (rightCastleMove) possibleMoves.push(rightCastleMove);
 
   // Filter out positions being attacked
-  possibleMoves = possibleMoves.filter((move) =>
-    !possibleAttackedMoves.some((attackMove) => samePosition(move, attackMove))
-  );
-
-  return possibleMoves;
+  return possibleMoves.filter((move) => !possibleAttackedMoves.some((attackMove) => samePosition(move, attackMove)));
 }
 
 // *********************** STANDARD KING MOVE FUNCTIONS *********************** //
-export const getStandardKingMoves = (king, boardState, attackMove) => {
+const getStandardKingMoves = (king, boardState, attackMove) => {
   const possibleMoves = [];
 
   const upMoves = getPossibleKingLineMoves(king, boardState, undefined, Operator.ADDITION, attackMove);
@@ -131,30 +125,19 @@ const getLeftCastleMove = (king, boardState, possibleAttackedMoves, kingRow) => 
   // Left Castle
   const leftKnightPosition = new Position(1, kingRow);
   const leftBishopPosition = new Position(2, kingRow);
+
   const isLeftKnightPositionEmpty = !tileIsOccupied(leftKnightPosition, boardState);
   const isLeftBishopPositionEmpty = !tileIsOccupied(leftBishopPosition, boardState);
 
-  const isLeftKnightPositionAttacked = possibleAttackedMoves.find((move) =>
-    samePosition(move, leftKnightPosition)
-  );
-
-  const isLeftBishopPositionAttacked = possibleAttackedMoves.find((move) =>
-    samePosition(move, leftBishopPosition)
-  );
+  const isLeftKnightPositionAttacked = possibleAttackedMoves.find((move) => samePosition(move, leftKnightPosition));
+  const isLeftBishopPositionAttacked = possibleAttackedMoves.find((move) => samePosition(move, leftBishopPosition));
 
   if (isLeftKnightPositionEmpty && isLeftBishopPositionEmpty && king.castleAvailable && !isLeftKnightPositionAttacked && !isLeftBishopPositionAttacked && !isKingChecked) {
-    const rook = boardState.find((piece) =>
-      samePosition(new Position(0, kingRow), piece.position) && piece.castleAvailable
-    );
-
-    if (rook) {
-      const passedPosition = new Position(1, kingRow);
-      return passedPosition;
-    }
+    const rook = boardState.find((piece) => samePosition(new Position(0, kingRow), piece.position) && piece.castleAvailable);
+    if (!rook) return null;
+    return new Position(1, kingRow);
   }
-
   return null;
-
 };
 
 const getRightCastleMove = (king, boardState, possibleAttackedMoves, kingRow) => {
@@ -168,36 +151,25 @@ const getRightCastleMove = (king, boardState, possibleAttackedMoves, kingRow) =>
   const isRightBishopPositionEmpty = !tileIsOccupied(rightBishopPosition, boardState);
   const isQueenPositionEmpty = !tileIsOccupied(queenPosition, boardState);
 
-  const isRightKnightPositionAttacked = possibleAttackedMoves.find((move) =>
-    samePosition(move, rightKnightPosition)
-  );
-
-  const isRightBishopPositionAttacked = possibleAttackedMoves.find((move) =>
-    samePosition(move, rightBishopPosition)
-  );
-
-  const isQueenPositionAttacked = possibleAttackedMoves.find((move) =>
-    samePosition(move, queenPosition)
-  );
+  const isRightKnightPositionAttacked = possibleAttackedMoves.find((move) => samePosition(move, rightKnightPosition));
+  const isRightBishopPositionAttacked = possibleAttackedMoves.find((move) => samePosition(move, rightBishopPosition));
+  const isQueenPositionAttacked = possibleAttackedMoves.find((move) => samePosition(move, queenPosition));
 
   if (isRightKnightPositionEmpty && isRightBishopPositionEmpty && isQueenPositionEmpty && king.castleAvailable && !isRightKnightPositionAttacked && !isRightBishopPositionAttacked && !isQueenPositionAttacked && !isKingChecked) {
-    const rook = boardState.find((piece) =>
-      samePosition(new Position(7, kingRow), piece.position) && piece.castleAvailable
-    );
-
-    if (rook) {
-      const passedPosition = new Position(5, kingRow);
-      return passedPosition;
-    }
+    const rook = boardState.find((piece) => samePosition(new Position(7, kingRow), piece.position) && piece.castleAvailable);
+    if (!rook) return null;
+    return new Position(5, kingRow);
   }
-
   return null;
-
 };
 
-export const getKing = (teamType, boardState) => {
-  const king = boardState.find((piece) =>
-    piece.type === PieceType.KING && piece.teamType === teamType
-  );
-  return king;
+const getKing = (teamType, boardState) => {
+  return boardState.find((piece) => piece.type === PieceType.KING && piece.teamType === teamType);
 }
+
+export {
+  isValidKingPosition,
+  getPossibleKingMoves,
+  getStandardKingMoves,
+  getKing
+};
