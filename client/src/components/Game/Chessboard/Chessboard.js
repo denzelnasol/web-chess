@@ -4,7 +4,7 @@ import React, { useRef, useState } from 'react';
 import Position from 'models/Position';
 
 // Components
-import Tile from 'components/Game/Tile/Tile';
+import Tile from '../Chessboard/Tile/Tile';
 
 // Constants
 import { VERTICAL_AXIS, HORIZONTAL_AXIS, GRID_SIZE } from 'constants/Constants';

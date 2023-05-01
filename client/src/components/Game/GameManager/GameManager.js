@@ -32,15 +32,18 @@ import { getOppositeTeamType } from "utilities/TeamType";
 import { kingIsChecked } from "Rules/CheckRules";
 import Move from "models/Move";
 
+// Styling
+import './style.scss';
+
 /**
  * @description Renders the chessboard and handles game logic related to moves being made on the current board state
  *
  * @returns
  *
  * @example
- * <Referee />
+ * <GameManager />
  */
-const Referee = () => {
+const GameManager = () => {
   // ** useStates ** //
   const [board, setBoard] = useState(initialBoard.clone());
   const [promotionPawn, setPromotionPawn] = useState();
@@ -193,7 +196,7 @@ const Referee = () => {
   
 
   return (
-    <>
+    <div className="game-manager">
       <PawnPromotionModal
         showPawnPromotionModal={showPawnPromotionModal}
         promotionPawn={promotionPawn}
@@ -211,8 +214,8 @@ const Referee = () => {
         playMove={playMove}
         pieces={board.pieces}
       />
-    </>
+    </div>
   );
 }
 
-export default Referee;
+export default GameManager;

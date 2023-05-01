@@ -1,16 +1,18 @@
 import React from 'react';
 
 // Components
-import Referee from 'components/Game/Chessboard/Referee';
+import GameManager from 'components/Game/GameManager/GameManager';
 
 // Style
 import './App.scss'
+import MainPage from 'components/MainPage/MainPage';
 
 function App() {
 
   return (
     <div className='app'>
-      <Referee />
+      <GameManager />
+      {/* <MainPage /> */}
     </div>
   );
 }
