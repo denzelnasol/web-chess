@@ -40,7 +40,7 @@ import Move from "models/Move";
  * @example
  * <Referee />
  */
-function Referee() {
+const Referee = () => {
   // ** useStates ** //
   const [board, setBoard] = useState(initialBoard.clone());
   const [promotionPawn, setPromotionPawn] = useState();
@@ -48,7 +48,7 @@ function Referee() {
   const [showCheckmateModal, setShowCheckmmateModal] = useState(false);
   const [showStalemateModal, setShowStalemateModal] = useState(false);
   const [moveStack, setMoveStack] = useState([]);
-  const [moveHistory, setMoveHistory] = useState([]);
+  const [moveHistory] = useState([]);
 
   // ** useEffects ** //
   useEffect(() => {
@@ -66,7 +66,7 @@ function Referee() {
 
   const playMove = (piece, newPosition) => {
     let isPlayedMoveValid = false;
-    let capturedPiece;
+    // let capturedPiece;
 
     const prevPosition = piece.position.clone();
     const isValidMove = moveIsValid(piece.position, newPosition, piece.type, piece.teamType, piece.castleAvailable);
@@ -74,24 +74,24 @@ function Referee() {
     const isPawnPromotionMove = moveIsPawnPromotion(newPosition, piece.type, piece.teamType);
     const isCastleMove = moveIsCastle(piece.position, newPosition, piece.type, piece.teamType, piece.castleAvailable);
     const isKingThreatened = kingIsChecked(piece.teamType, board.pieces);
+    let { success, capturedPiece } = board.playMove(isEnPassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened, piece, newPosition, updatePromotionPawn);
 
     setBoard((previousBoard) => {
-      const result = board.playMove(isEnPassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened, piece, newPosition, updatePromotionPawn);
-      isPlayedMoveValid = result.success;
-      if (result.capturedPiece) capturedPiece = result.capturedPiece.clone();
+      isPlayedMoveValid = success;
+      if (capturedPiece) capturedPiece = capturedPiece.clone();
       return board.clone();
     })
 
     if (isPawnPromotionMove && isPlayedMoveValid) {
       setShowPawnPromotionModal(true);
     }
+
     if (isPlayedMoveValid) {
       const move = new Move(piece, prevPosition, newPosition, capturedPiece);
       setMoveStack(moveStack => [...moveStack, move]);
       checkForCheckmate(piece.teamType);
       checkForStalemate(piece.teamType);
       moveHistory.push(getChessNotationMove(piece, capturedPiece));
-      console.log(moveHistory, capturedPiece);
     }
 
     return isPlayedMoveValid;
@@ -101,11 +101,8 @@ function Referee() {
     let notation;
     let capturedPiecePostition;
 
-    if (capturedPiece) {
-      capturedPiecePostition = capturedPiece.position;
-    }
+    if (capturedPiece) capturedPiecePostition = capturedPiece.position;
 
-    console.log(piece.pieceType)
     if (piece.pieceType == PieceType.PAWN) {
       notation = `${HORIZONTAL_AXIS[this.x]}${VERTICAL_AXIS[this.y]}`;
     }
@@ -113,74 +110,59 @@ function Referee() {
     return notation;
   }
 
-  const moveIsValid = (grabPosition, newPosition, type, teamType, castleAvailable) => {
-    let isValidPosition = false;
-    switch (type) {
-      case PieceType.PAWN:
-        isValidPosition = isValidPawnPosition(grabPosition, newPosition, teamType, board);
-        break;
-      case PieceType.KNIGHT:
-        isValidPosition = isValidKnightPosition(grabPosition, newPosition, teamType, board);
-        break;
-      case PieceType.BISHOP:
-        isValidPosition = isValidBishopPosition(grabPosition, newPosition, teamType, board);
-        break;
-      case PieceType.ROOK:
-        isValidPosition = isValidRookPosition(grabPosition, newPosition, teamType, board);
-        break;
-      case PieceType.QUEEN:
-        isValidPosition = isValidQueenPosition(grabPosition, newPosition, teamType, board);
-        break;
-      case PieceType.KING:
-        isValidPosition = isValidKingPosition(grabPosition, newPosition, teamType, board, castleAvailable);
-    }
-    return isValidPosition;
+  const pieceTypeValidations = {
+    [PieceType.PAWN]: isValidPawnPosition,
+    [PieceType.KNIGHT]: isValidKnightPosition,
+    [PieceType.BISHOP]: isValidBishopPosition,
+    [PieceType.ROOK]: isValidRookPosition,
+    [PieceType.QUEEN]: isValidQueenPosition,
+    [PieceType.KING]: isValidKingPosition,
   };
 
+  const moveIsValid = (grabPosition, newPosition, type, teamType, castleAvailable) => {
+    const validatePosition = pieceTypeValidations[type];
+    return validatePosition(grabPosition, newPosition, teamType, board, castleAvailable);
+  };
+
+
   const moveIsEnpassant = (grabPosition, newPosition, type, teamType) => {
+    if (type !== PieceType.PAWN) return false;
     const pawnDirection = teamType === TeamType.WHITE ? 1 : -1;
     const xDifference = getPositionPointDifference(newPosition.x, grabPosition.x);
     const yDifference = getPositionPointDifference(newPosition.y, grabPosition.y);
-    if (type !== PieceType.PAWN) return false;
 
     if ((xDifference === -1 || xDifference === 1) && yDifference === pawnDirection) {
-      const piece = board.pieces.find((piece) =>
-        samePosition(piece.position, new Position(newPosition.x, newPosition.y - pawnDirection)) && piece.enPassant
-      );
-      if (piece) return true;
+      return board.pieces.some((piece) => samePosition(piece.position, new Position(newPosition.x, newPosition.y - pawnDirection)) && piece.enPassant);
     }
     return false;
   };
 
   const moveIsCastle = (grabPosition, newPosition, type, teamType, castleAvailable) => {
+    if (type !== PieceType.KING || !castleAvailable) return false;
     const kingRow = teamType === TeamType.WHITE ? 0 : 7;
-    if (type !== PieceType.KING) return false;
-
     const isKingInPosition = samePosition(grabPosition, new Position(3, kingRow));
-    const isLeftKnightPositionEmpty = !tileIsOccupied(new Position(1, kingRow), board.pieces);
-    const isLeftBishopPositionEmpty = !tileIsOccupied(new Position(2, kingRow), board.pieces);
     const isLeftNewPositionCorrect = samePosition(newPosition, new Position(1, kingRow));
-
-    // Left Castle
-    if (isKingInPosition && isLeftKnightPositionEmpty && isLeftBishopPositionEmpty && isLeftNewPositionCorrect && castleAvailable) {
-      const rook = board.pieces.find((piece) =>
-        samePosition(new Position(0, kingRow), piece.position) && piece.castleAvailable
-      );
-
-      if (rook) return true;
-    }
-
-    const isRightKnightPositionEmpty = !tileIsOccupied(new Position(6, kingRow), board.pieces);
-    const isRightBishopPositionEmpty = !tileIsOccupied(new Position(5, kingRow), board.pieces);
-    const isQueenPositionEmpty = !tileIsOccupied(new Position(4, kingRow), board.pieces);
     const isRightNewPositionCorrect = samePosition(newPosition, new Position(5, kingRow));
 
+    // Left Castle
+    if (isKingInPosition && isLeftNewPositionCorrect) {
+      const isLeftKnightPositionEmpty = !tileIsOccupied(new Position(1, kingRow), board.pieces);
+      const isLeftBishopPositionEmpty = !tileIsOccupied(new Position(2, kingRow), board.pieces);
+      if (isLeftKnightPositionEmpty && isLeftBishopPositionEmpty) {
+        const rook = board.pieces.find((piece) => samePosition(new Position(0, kingRow), piece.position) && piece.castleAvailable);
+        if (rook) return true;
+      }
+    }
+
     // Right Castle
-    if (isKingInPosition && isRightKnightPositionEmpty && isRightBishopPositionEmpty && isQueenPositionEmpty && isRightNewPositionCorrect && castleAvailable) {
-      const rook = board.pieces.find((piece) =>
-        samePosition(new Position(7, kingRow), piece.position) && piece.castleAvailable
-      );
-      if (rook) return true;
+    if (isKingInPosition && isRightNewPositionCorrect) {
+      const isRightKnightPositionEmpty = !tileIsOccupied(new Position(6, kingRow), board.pieces);
+      const isRightBishopPositionEmpty = !tileIsOccupied(new Position(5, kingRow), board.pieces);
+      const isQueenPositionEmpty = !tileIsOccupied(new Position(4, kingRow), board.pieces);
+      if (isRightKnightPositionEmpty && isRightBishopPositionEmpty && isQueenPositionEmpty) {
+        const rook = board.pieces.find((piece) => samePosition(new Position(7, kingRow), piece.position) && piece.castleAvailable);
+        if (rook) return true;
+      }
     }
 
     return false;
@@ -198,22 +180,17 @@ function Referee() {
 
   const promotePawn = (pieceType) => {
     if (!promotionPawn) return;
-    setBoard((previousBoard) => {
-      board.promotePawn(pieceType, promotionPawn.clone(), board.currentPlayer.teamType);
-      return board.clone();
-    })
+    board.promotePawn(pieceType, promotionPawn.clone(), board.currentPlayer.teamType);
+    setBoard(board.clone());
     setShowPawnPromotionModal(false);
-  };
-
+  }
+  
   const resetBoard = () => {
     setShowCheckmmateModal(false);
     setShowStalemateModal(false);
-    setBoard((previousBoard) => {
-      const newboard = initialBoard.clone();
-      newboard.calculateAllMoves(newboard.currentPlayer.teamType);
-      return newboard;
-    })
+    setBoard(initialBoard.clone().calculateAllMoves(initialBoard.currentPlayer.teamType));
   }
+  
 
   return (
     <>

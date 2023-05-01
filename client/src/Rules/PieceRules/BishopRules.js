@@ -12,11 +12,11 @@ import { Operator, operatorOperations } from "enums/Operator";
 // Objects
 import Position from "models/Position";
 
-const diagonalDirections = [
+const directions = [
   [Operator.ADDITION, Operator.ADDITION],
   [Operator.ADDITION, Operator.SUBTRACTION],
   [Operator.SUBTRACTION, Operator.SUBTRACTION],
-  [Operator.SUBTRACTION, Operator.ADDITIO]
+  [Operator.SUBTRACTION, Operator.ADDITION]
 ];
 
 const isValidBishopPosition = (grabPosition, newPosition, teamType, board) => {
@@ -42,7 +42,7 @@ const getPossibleBishopMoves = (bishop, boardState) => {
 const getPossibleBishopAttackMoves = (bishop, boardState) => {
   const possibleMoves = [];
 
-  for (const [xOperator, yOperator] of diagonalDirections) {
+  for (const [xOperator, yOperator] of directions) {
     possibleMoves.push(...getBishopDiagonalAttackMoves(bishop, boardState, xOperator, yOperator));
   }
 
@@ -74,7 +74,7 @@ const getBishopDiagonalAttackMoves = (bishop, boardState, xOperator, yOperator) 
 const getStandardBishopMoves = (bishop, boardState) => {
   const possibleMoves = [];
 
-  for (const [xOperator, yOperator] of diagonalDirections) {
+  for (const [xOperator, yOperator] of directions) {
     const diagonalMoves = getPossibleBishopDiagonalMoves(bishop, boardState, xOperator, yOperator);
     possibleMoves.push(...diagonalMoves);
   }
