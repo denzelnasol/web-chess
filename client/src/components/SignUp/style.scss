@@ -1,0 +1,72 @@
+.sign-up {
+  display: flex;
+  flex-direction: column;
+  height: 90vh;
+  align-items: center;
+  justify-content: center;
+
+  background-image: url('../../../images/home-bg.jpg');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  color: black;
+
+  .register-title {
+    display: flex;
+    color: var(--primary);
+    justify-content: center;
+    align-items: center;
+    font-weight: 400;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .form-container {
+    border-radius: 5px;
+    padding: 2.5rem 2rem;
+    background-color: white;
+    width: 25%;
+
+
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        margin-bottom: 1rem;
+      }
+
+      input {
+        border: 1px solid #ced4da;
+        padding: 0.2rem;
+        width: 100%;
+        border-radius: 0.1rem;
+      }
+
+      label {
+        font-weight: bold;
+      }
+
+      .password-error {
+        font-size: small;
+        color: red;
+      }
+
+      .submit-button {
+        margin-top: 0.5rem;
+        height: 2.5rem;
+        background-color: rgb(6, 206, 6);
+        color: var(--primary);
+        transition: all 0.3s ease-out;
+
+        &:hover {
+          color: black;
+        }
+      }
+    }
+  }
+}
