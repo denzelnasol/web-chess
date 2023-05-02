@@ -12,7 +12,7 @@ const Home = () => {
           Welcome To Web Chess
         </div>
         <Button buttonStyle="btn--secondary" route="join-or-create">
-          Play a Game
+          Play
         </Button>
       </div>
     </div>

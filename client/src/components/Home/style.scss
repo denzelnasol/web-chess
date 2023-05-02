@@ -16,4 +16,11 @@
     padding: 5rem;
     border-radius: 1rem;
   }
+
+}
+
+@media screen and (max-width: 960px) {
+  .home {
+    font-size: 1.25rem;
+  }
 }

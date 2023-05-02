@@ -1,11 +1,15 @@
 import express from "express";
 import bodyParser from "body-parser";
 import accountRouter from "./routers/account.js";
+import cors from 'cors';
 
 const app = express();
 app.use(bodyParser.json());
+app.use(cors());
 
-app.use('api/account', accountRouter);
+const apiRouter = express.Router();
+apiRouter.use('/account', accountRouter);
+app.use('/api', apiRouter);
 
 const PORT = 8080;
 

@@ -69,4 +69,27 @@
       }
     }
   }
+
+  @media screen and (max-width: 960px) {
+    .register-title {
+      font-size: 1rem;
+    }
+
+    .form-container {
+      width: 90%;
+      padding: 1.5rem 1rem;
+    }
+
+    label {
+      font-size: 0.8rem;
+    }
+
+    input {
+      font-size: 0.9rem;
+    }
+
+    .form-group {
+      margin-bottom: 0.5rem;
+    }
+  }
 }

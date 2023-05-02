@@ -2,8 +2,11 @@ import React, { useState } from "react";
 
 // Styling
 import './style.scss';
+import { registerAccount } from "api/Account";
+import { useNavigate } from "react-router-dom";
 
 const SignUp = () => {
+  const navigate = useNavigate();
 
   const [isPasswordError, setIsPasswordError] = useState(false);
   const [formInfo, setFormInfo] = useState(
@@ -19,19 +22,23 @@ const SignUp = () => {
   const handleInputChange = (event) => {
     event.persist();
     if (event.target.value === formInfo.password || event.target.value === formInfo.passwordConfirmation) {
-      console.log("HII");
       setIsPasswordError(false);
     }
     setFormInfo(info => ({ ...info, [event.target.name]: event.target.value }));
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     if (event) {
       event.preventDefault();
 
       if (formInfo.password !== formInfo.passwordConfirmation) {
         setIsPasswordError(true);
+        return;
       }
+
+      console.log("CLICK")
+      await registerAccount(formInfo);
+       navigate('/');
     }
   }
 
