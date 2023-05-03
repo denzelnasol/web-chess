@@ -10,11 +10,13 @@ import Login from 'components/Login/Login';
 import Info from 'components/Info/Info';
 import Dashboard from 'components/Dashboard/Dashboard';
 import Private from 'components/Private/Private';
+import { useAuth } from 'components/AuthProvider/AuthProvider';
 
 // Style
 import './App.scss'
 
 function App() {
+  const { auth } = useAuth();
 
   return (
     <div className='app'>

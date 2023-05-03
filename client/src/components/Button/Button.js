@@ -28,7 +28,7 @@ const Button = ({ ...props }) => {
   return (
     <Link to={`/${props.route}`} className="btn-mobile">
       <button
-        className={`button ${checkButtonStyle} ${checkButtonSize}`}
+        className={`${props.className} button ${checkButtonStyle} ${checkButtonSize}`}
         onClick={props.onClick}
         type={props.type}
       >

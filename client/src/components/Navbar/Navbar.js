@@ -10,23 +10,18 @@ import { verifyAccount } from "api/Account";
 
 // Components
 import Button from "components/Button/Button";
+import { useAuth } from "components/AuthProvider/AuthProvider";
 
 // Styling
 import './style.scss';
 import Cookies from "js-cookie";
 
 const Navbar = () => {
+  const { setAuth, isLoggedIn } = useAuth();
   const [click, setClick] = useState(false);
   const [button, setButton] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const checkLoggedIn = async () => {
-      const isVerified = await verifyAccount();
-      setIsLoggedIn(isVerified);
-    };
-
-    checkLoggedIn();
     showButton();
   }, []);
 
@@ -34,7 +29,7 @@ const Navbar = () => {
   const closeMobileMenu = () => setClick(false);
 
   const signout = () => {
-    setIsLoggedIn(false);
+    setAuth(false);
     Cookies.remove('session');
     closeMobileMenu();
   }
@@ -109,7 +104,7 @@ const Navbar = () => {
               </li>
 
               <li className="nav-item">
-                <Link to="/login" className="nav-links" onClick={signout}>
+                <Link to="/" className="nav-links" onClick={signout}>
                   Sign Out
                 </Link>
               </li>

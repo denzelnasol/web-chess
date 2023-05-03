@@ -2,6 +2,7 @@ import React, { useState } from "react";
 
 import { loginAccount, verifyAccount } from "api/Account";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "components/AuthProvider/AuthProvider";
 
 // Styling
 import './style.scss';
@@ -9,6 +10,7 @@ import './style.scss';
 const Login = () => {
 
   const navigate = useNavigate();
+  const { setAuth } = useAuth();
 
   const [isPasswordError, setIsPasswordError] = useState(false);
   const [formInfo, setFormInfo] = useState(
@@ -33,6 +35,7 @@ const Login = () => {
       if (!result) {
         setIsPasswordError(true);
       } else {
+        setAuth(true);
         navigate('/dashboard');
       }
     }

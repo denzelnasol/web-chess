@@ -15,7 +15,8 @@
 .btn--secondary {
   background-color: rgb(38, 160, 27);
   color: var(--primary);
-  width: 7rem !important;
+  width: fit-content;
+  border-radius: 0.25rem;
 
   &:hover {
     background: rgb(21, 120, 12) !important;
