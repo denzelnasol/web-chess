@@ -76,7 +76,7 @@ accountRouter.post('/verify', async (req, res) => {
   const sessionCookie = req.cookies.session;
 
   if (!sessionCookie) {
-    res.status(404).send('Authentication failure');
+    res.status(401).send('Authentication failure');
     return;
   }
 

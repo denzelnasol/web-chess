@@ -1,8 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Route, Routes, Navigate } from 'react-router-dom';
-
-// API
-import { verifyAccount } from 'api/Account';
+import React from 'react';
+import { Route, Routes } from 'react-router-dom';
 
 // Components
 import GameManager from 'components/Game/GameManager/GameManager';
@@ -18,18 +15,7 @@ import Private from 'components/Private/Private';
 import './App.scss'
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  useEffect(() => {
-    const checkLoggedIn = async () => {
-      const isVerified = await verifyAccount();
-      console.log(isVerified);
-      setIsLoggedIn(isVerified);
-    }
-
-    checkLoggedIn();
-  }, []);
-  console.log(isLoggedIn)
   return (
     <div className='app'>
       <Navbar />

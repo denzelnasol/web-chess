@@ -27,7 +27,6 @@ const Login = () => {
   }
 
   const handleSubmit = async (event) => {
-    verifyAccount();
     if (event) {
       event.preventDefault();
       const result = await loginAccount(formInfo);
@@ -71,7 +70,7 @@ const Login = () => {
             </div>
           ) : <></>}
 
-          <input className="submit-button" type="submit" value="Submit" />
+          <input className="submit-button" type="submit" value="Login" />
 
         </form>
       </div>
