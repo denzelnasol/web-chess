@@ -1,6 +1,6 @@
 import express from "express";
 import pkg from "pg";
-import { addAccount, findUserByEmail, loginAccount } from "../services/account.js";
+import { addAccount, findAccountByEmail, loginAccount } from "../services/account.js";
 import cookieParser from "cookie-parser";
 import jwt from "jsonwebtoken";
 
@@ -39,37 +39,32 @@ accountRouter.get('/:id', (req, res) => {
 
 accountRouter.post('/register', async (req, res) => {
   const { first_name, last_name, email, password } = req.body;
-  await addAccount(first_name, last_name, email, password, (error, result) => {
-    if (error) {
-      console.error(error);
-      res.status(500).send('Error creating account');
-    } else {
-      res.json(result.rows[0]);
-    }
-  })
+  const account = await addAccount(first_name, last_name, email, password);
+  
+  if (!account) {
+    res.status(500).send('Error creating account');
+  } else {
+    res.json(result.rows[0]);
+  }
 });
 
 accountRouter.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
-  await loginAccount(email, password, ((error, results) => {
-    if (error) {
-      console.error(error);
-      res.status(500).send('Server error');
-    } else if (results.rows.length === 0) {
-      res.status(401).send('Invalid email or password');
-    } else {
-      const session = {
-        email: email,
-      };
+  const account = await loginAccount(email, password);
+  
+  if (!account) {
+    res.status(401).send('Invalid email or password');
+  } else {
+    const session = {
+      email
+    };
 
-      /** @todo: replace 'user-auth' with JWT_KEY env variable */
-      const token = jwt.sign(session, 'user-auth');
-      res.cookie('session', token, { httpOnly: false });
-      res.send({ success: true, token });
-    }
-  }));
-
+    /** @todo: replace 'user-auth' with JWT_KEY env variable */
+    const token = jwt.sign(session, 'user-auth');
+    res.cookie('session', token, { httpOnly: false });
+    res.send({ success: true, token });
+  }
 });
 
 accountRouter.post('/verify', async (req, res) => {
@@ -82,17 +77,13 @@ accountRouter.post('/verify', async (req, res) => {
 
   const decodedSessionCookie = jwt.decode(sessionCookie);
   const email = decodedSessionCookie.email;
-  await findUserByEmail(email, ((error, results) => {
-    if (error) {
-      console.error(error);
-      res.status(500).send('Server error');
-    } else if (results.rows.length === 0) {
-      res.status(401).send('Authentication failure');
-    } else {
-      res.status(200).send('Authentication success');
-    }
-  }));
 
+  const account = await findAccountByEmail(email);
+  if (!account) {
+    res.status(401).send('Authentication failure');
+  } else {
+    res.status(200).send('Authentication success');
+  }
 });
 
 export default accountRouter;

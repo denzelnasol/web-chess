@@ -3,7 +3,7 @@ import Cookies from "js-cookie";
 
 const accountAxios = axios.create({
   // baseURL: process.env.REACT_APP_NODE_URL,
-  baseURL: 'http://localhost:8080/api',
+  baseURL: 'http://localhost:8080/api/account',
 });
 
 const registerAccount = async (formInfo) => {
@@ -14,7 +14,7 @@ const registerAccount = async (formInfo) => {
       email: formInfo.email,
       password: formInfo.password
     };
-    const response = await accountAxios.post('/account/register', data);
+    const response = await accountAxios.post('/register', data);
     return response.data;
   } catch (error) {
     console.log(error);
@@ -29,7 +29,7 @@ const loginAccount = async (formInfo) => {
       password: formInfo.password
     };
 
-    const response = await accountAxios.post('/account/login', data, { withCredentials: true });
+    const response = await accountAxios.post('/login', data, { withCredentials: true });
     return response.data;
   } catch (error) {
     console.log(error);
@@ -38,7 +38,7 @@ const loginAccount = async (formInfo) => {
 
 const verifyAccount = async () => {
   try {
-    const response = await accountAxios.post('/account/verify', undefined, { withCredentials: true });
+    const response = await accountAxios.post('/verify', undefined, { withCredentials: true });
     return response.status === 200;
   } catch (error) {
     console.log(error);

@@ -8,6 +8,7 @@ dotenv.config();
 
 // Routers
 import accountRouter from "./routers/account.js";
+import gameRouter from "./routers/game.js";
 
 const app = express();
 app.use(bodyParser.json());
@@ -18,6 +19,7 @@ app.use(cors({
 
 const apiRouter = express.Router();
 apiRouter.use('/account', accountRouter);
+apiRouter.use('/game', gameRouter);
 
 app.use('/api', apiRouter);
 
