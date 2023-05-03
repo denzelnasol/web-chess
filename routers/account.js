@@ -1,5 +1,8 @@
 import express from "express";
 import pkg from "pg";
+import { addAccount, findUserByEmail, loginAccount } from "../services/account.js";
+import cookieParser from "cookie-parser";
+import jwt from "jsonwebtoken";
 
 const { Pool } = pkg;
 
@@ -9,6 +12,7 @@ const pool = new Pool({
 
 
 const accountRouter = express.Router();
+accountRouter.use(cookieParser());
 
 accountRouter.get('/', (req, res) => {
   pool.query('SELECT * FROM account', (error, result) => {
@@ -33,41 +37,62 @@ accountRouter.get('/:id', (req, res) => {
   });
 });
 
-accountRouter.post('/', (req, res) => {
+accountRouter.post('/register', async (req, res) => {
   const { first_name, last_name, email, password } = req.body;
-  pool.query('INSERT INTO account (first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING *', [first_name, last_name, email, password], (error, result) => {
+  await addAccount(first_name, last_name, email, password, (error, result) => {
     if (error) {
       console.error(error);
       res.status(500).send('Error creating account');
     } else {
       res.json(result.rows[0]);
     }
-  });
+  })
 });
 
-accountRouter.put('/:id', (req, res) => {
-  const accountId = req.params.id;
-  const { first_name, last_name, email, password } = req.body;
-  pool.query('UPDATE account SET first_name = $1, last_name = $2, email = $3, password = $4 WHERE id = $5 RETURNING *', [first_name, last_name, email, password, accountId], (error, result) => {
+accountRouter.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  await loginAccount(email, password, ((error, results) => {
     if (error) {
       console.error(error);
-      res.status(500).send(`Error updating account with ID ${accountId}`);
+      res.status(500).send('Server error');
+    } else if (results.rows.length === 0) {
+      res.status(401).send('Invalid email or password');
     } else {
-      res.json(result.rows[0]);
+      const session = {
+        email: email,
+      };
+
+      /** @todo: replace 'user-auth' with JWT_KEY env variable */
+      const token = jwt.sign(session, 'user-auth');
+      res.cookie('session', token, { httpOnly: false });
+      res.send({ success: true, token });
     }
-  });
+  }));
+
 });
 
-accountRouter.delete('/:id', (req, res) => {
-  const accountId = req.params.id;
-  pool.query('DELETE FROM account WHERE id = $1', [accountId], (error, result) => {
+accountRouter.post('/verify', async (req, res) => {
+  const sessionCookie = req.cookies.session;
+
+  if (!sessionCookie) {
+    res.status(404).send('Authentication failure');
+    return;
+  }
+
+  const decodedSessionCookie = jwt.decode(sessionCookie);
+  const email = decodedSessionCookie.email;
+  await findUserByEmail(email, ((error, results) => {
     if (error) {
       console.error(error);
-      res.status(500).send(`Error deleting account with ID ${accountId}`);
+      res.status(500).send('Server error');
+    } else if (results.rows.length === 0) {
+      res.status(401).send('Authentication failure');
     } else {
-      res.send(`Account with ID ${accountId} deleted`);
+      res.status(200).send('Authentication success');
     }
-  });
+  }));
+
 });
 
 export default accountRouter;

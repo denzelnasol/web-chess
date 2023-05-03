@@ -1,14 +1,24 @@
 import express from "express";
 import bodyParser from "body-parser";
-import accountRouter from "./routers/account.js";
 import cors from 'cors';
+
+// Environment Variables
+import * as dotenv from 'dotenv';
+dotenv.config();
+
+// Routers
+import accountRouter from "./routers/account.js";
 
 const app = express();
 app.use(bodyParser.json());
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true
+}));
 
 const apiRouter = express.Router();
 apiRouter.use('/account', accountRouter);
+
 app.use('/api', apiRouter);
 
 const PORT = 8080;

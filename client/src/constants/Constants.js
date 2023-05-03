@@ -18,9 +18,6 @@ export const HORIZONTAL_AXIS = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
 export const GRID_SIZE = 100;
 
-const pos = new Position(1,1);
-console.log(pos)
-
 export const initialBoard = new Board([
   new Pawn(new Position(0, 1), TeamType.WHITE),
   new Pawn(new Position(1, 1), TeamType.WHITE),

@@ -14,10 +14,11 @@ import './style.scss';
 const Navbar = () => {
   const [click, setClick] = useState(false);
   const [button, setButton] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     showButton();
-  }, [``]);
+  }, []);
 
   const handleClick = () => setClick(!click);
   const closeMobileMenu = () => setClick(false);

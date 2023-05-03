@@ -9,6 +9,7 @@ const SignUp = () => {
   const navigate = useNavigate();
 
   const [isPasswordError, setIsPasswordError] = useState(false);
+  const [isAccountExists, setIsAccountExists] = useState(false);
   const [formInfo, setFormInfo] = useState(
     {
       firstName: "",
@@ -21,9 +22,15 @@ const SignUp = () => {
 
   const handleInputChange = (event) => {
     event.persist();
-    if (event.target.value === formInfo.password || event.target.value === formInfo.passwordConfirmation) {
+
+    if (event.target.name === 'email') {
+      setIsAccountExists(false);
+    }
+
+    if (event.target.name === 'password' || event.target.name === 'passwordConfirmation') {
       setIsPasswordError(false);
     }
+
     setFormInfo(info => ({ ...info, [event.target.name]: event.target.value }));
   }
 
@@ -36,9 +43,12 @@ const SignUp = () => {
         return;
       }
 
-      console.log("CLICK")
-      await registerAccount(formInfo);
-       navigate('/');
+      const result = await registerAccount(formInfo);
+      if (!result) {
+        setIsAccountExists(true);
+      } else {
+        navigate('/');
+      }
     }
   }
 
@@ -96,6 +106,12 @@ const SignUp = () => {
             {isPasswordError ? (
               <div className="password-error">
                 Passwords are not the same
+              </div>
+            ) : <></>}
+
+            {isAccountExists ? (
+              <div className="password-error">
+                Email already exists
               </div>
             ) : <></>}
           </div>

@@ -1,4 +1,5 @@
 import axios from "axios";
+import Cookies from "js-cookie";
 
 const accountAxios = axios.create({
   // baseURL: process.env.REACT_APP_NODE_URL,
@@ -13,13 +14,40 @@ const registerAccount = async (formInfo) => {
       email: formInfo.email,
       password: formInfo.password
     };
-    const response = await accountAxios.post('/account', data);
-    console.log(response.data);
+    const response = await accountAxios.post('/account/register', data);
+    return response.data;
   } catch (error) {
     console.log(error);
+    return null;
+  }
+}
+
+const loginAccount = async (formInfo) => {
+  try {
+    const data = {
+      email: formInfo.email,
+      password: formInfo.password
+    };
+
+    const response = await accountAxios.post('/account/login', data, { withCredentials: true });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const verifyAccount = async () => {
+  try {
+    const response = await accountAxios.post('/account/verify', undefined, { withCredentials: true });
+    return response.status === 200;
+  } catch (error) {
+    console.log(error);
+    return false;
   }
 }
 
 export {
   registerAccount,
+  loginAccount,
+  verifyAccount,
 }
