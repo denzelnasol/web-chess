@@ -7,30 +7,42 @@ const pool = new Pool({
 });
 
 const addAccount = async (first_name, last_name, email, password) => {
-  const query = 'INSERT INTO account (first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING *'
-  const { rows } = await pool.query(query, [first_name, last_name, email, password]);
-  return rows[0];
+  try {
+    const query = 'INSERT INTO account (first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING *'
+    const { rows } = await pool.query(query, [first_name, last_name, email, password]);
+    return rows[0];
+  } catch (e) {
+    console.log(e);
+  }
 };
 
 const loginAccount = async (email, password) => {
-  const query = 'SELECT * FROM account WHERE email = $1 AND password = $2';
-  const { rows } = await pool.query(query, [email, password]);
-
-  if (rows.length === 0) {
-    return undefined;
-  } else {
-    return rows[0];
+  try {
+    const query = 'SELECT * FROM account WHERE email = $1 AND password = $2';
+    const { rows } = await pool.query(query, [email, password]);
+  
+    if (rows.length === 0) {
+      return undefined;
+    } else {
+      return rows[0];
+    }
+  } catch (e) {
+    console.log(e);
   }
 };
 
 const findAccountByEmail = async (email) => {
-  const query = 'SELECT * FROM account WHERE email = $1';
-  const { rows } = await pool.query(query, [email]);
-
-  if (rows.length === 0) {
-    return undefined;
-  } else {
-    return rows[0];
+  try {
+    const query = 'SELECT * FROM account WHERE email = $1';
+    const { rows } = await pool.query(query, [email]);
+  
+    if (rows.length === 0) {
+      return undefined;
+    } else {
+      return rows[0];
+    }
+  } catch (e) {
+    console.log(e);
   }
 }
 

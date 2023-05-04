@@ -60,17 +60,15 @@ const getQueenDirectionalAttackMoves = (queen, boardState, xOperator, yOperator)
     const positionX = xOperator ? operatorOperations[xOperator](queen.position.x, i) : queen.position.x;
     const positionY = yOperator ? operatorOperations[yOperator](queen.position.y, i) : queen.position.y;
     const passedPosition = new Position(positionX, positionY);
-    if (passedPosition.outOfBounds()) break;
+    if (passedPosition.outOfBounds()) continue;
 
-    if (tileIsOccupied(passedPosition, boardState)) {
-      if (tileIsOccupiedByAlly(passedPosition, boardState, queen.teamType)) {
-        break;
-      } else {
-        possibleMoves.push(passedPosition);
-        break;
-      }
-    } else {
+    if (!tileIsOccupied(passedPosition, boardState) || tileIsOccupiedByOpponentKing(passedPosition, boardState, queen.teamType)) {
       possibleMoves.push(passedPosition);
+    } else if (tileIsOccupiedByOpponent(passedPosition, boardState, queen.teamType) || tileIsOccupiedByAlly(passedPosition, boardState, queen.teamType)) {
+      possibleMoves.push(passedPosition);
+      break;
+    } else {
+      break;
     }
   }
 
@@ -91,7 +89,7 @@ const getStandardQueenMoves = (queen, boardState) => {
 const getPossibleQueenLineDiagonalMoves = (queen, boardState, xOperator, yOperator) => {
   const possibleMoves = [];
   let shouldStopAddingMoves = false;
-  
+
   for (let i = 1; i < 8 && !shouldStopAddingMoves; i++) {
     const positionX = xOperator ? operatorOperations[xOperator](queen.position.x, i) : queen.position.x;
     const positionY = yOperator ? operatorOperations[yOperator](queen.position.y, i) : queen.position.y;

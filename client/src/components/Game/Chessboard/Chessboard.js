@@ -43,12 +43,11 @@ function Chessboard({ ...props }) {
     const chessboard = chessboardRef.current;
     if (e.target.classList.contains('chess-piece') && chessboard) {
       const grabPositionX = Math.floor((e.clientX - chessboard.offsetLeft) / GRID_SIZE);
-      const grabPositionY = Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - 800) / 100));
-
+      const grabPositionY = Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - 800 + window.scrollY) / 100));
       setGrabPosition(new Position(grabPositionX, grabPositionY));
 
       const x = e.clientX - (GRID_SIZE / 2);
-      const y = e.clientY - (GRID_SIZE / 2);
+      const y = e.clientY - (GRID_SIZE / 2) + window.scrollY;
 
       element.style.position = "absolute";
       element.style.left = `${x}px`;
@@ -67,7 +66,7 @@ function Chessboard({ ...props }) {
     const maxX = chessboard.offsetLeft + chessboard.clientWidth - 75;
     const maxY = chessboard.offsetTop + chessboard.clientHeight - 75;
     const x = e.clientX - 50;
-    const y = e.clientY - 50;
+    const y = e.clientY - 50 + window.scrollY;
     activePiece.style.position = "absolute";
 
     if (x < minX) {
@@ -92,7 +91,7 @@ function Chessboard({ ...props }) {
     if (!activePiece || !chessboard) return;
 
     const x = Math.floor((e.clientX - chessboard.offsetLeft) / GRID_SIZE);
-    const y = Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - 800) / GRID_SIZE));
+    const y = Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - 800 + window.scrollY) / GRID_SIZE));
 
     const currentPiece = props.pieces.find((p) => samePosition(p.position, grabPosition));
     if (!currentPiece) {

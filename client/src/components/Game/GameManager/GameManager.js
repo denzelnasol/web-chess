@@ -22,7 +22,7 @@ import { initialBoard } from "constants/Constants";
 
 // Rules
 import { isValidPawnPosition, moveIsPawnPromotion } from "Rules/PieceRules/PawnRules";
-import { isValidKnightPosition } from "Rules/PieceRules/KnightRules";
+import { getPossibleKnightMoves, isValidKnightPosition } from "Rules/PieceRules/KnightRules";
 import { isValidBishopPosition } from "Rules/PieceRules/BishopRules";
 import { isValidRookPosition } from "Rules/PieceRules/RookRules";
 import { isValidQueenPosition } from "Rules/PieceRules/QueenRules";
@@ -70,7 +70,7 @@ const GameManager = () => {
   const playMove = (piece, newPosition) => {
     let isPlayedMoveValid = false;
     // let capturedPiece;
-
+    const prevBoard = board.clone();
     const prevPosition = piece.position.clone();
     const isValidMove = moveIsValid(piece.position, newPosition, piece.type, piece.teamType, piece.castleAvailable);
     const isEnPassantMove = moveIsEnpassant(piece.position, newPosition, piece.type, piece.teamType);
@@ -92,25 +92,104 @@ const GameManager = () => {
     if (isPlayedMoveValid) {
       const move = new Move(piece, prevPosition, newPosition, capturedPiece);
       setMoveStack(moveStack => [...moveStack, move]);
-      checkForCheckmate(piece.teamType);
+      const isCheckmate = checkForCheckmate(piece.teamType);
       checkForStalemate(piece.teamType);
-      moveHistory.push(getChessNotationMove(piece, capturedPiece));
+      moveHistory.push(getChessNotationMove(piece, newPosition, capturedPiece, prevBoard, isCheckmate, isCastleMove, isKingThreatened));
     }
 
     return isPlayedMoveValid;
   };
-
-  const getChessNotationMove = (piece, capturedPiece) => {
+  console.log(moveHistory)
+  const getChessNotationMove = (piece, newPosition, capturedPiece, prevBoard, isCheckmate, isCastleMove, isCheck) => {
+    const captured = capturedPiece ? "x" : "";
     let notation;
-    let capturedPiecePostition;
-
-    if (capturedPiece) capturedPiecePostition = capturedPiece.position;
-
-    if (piece.pieceType == PieceType.PAWN) {
-      notation = `${HORIZONTAL_AXIS[this.x]}${VERTICAL_AXIS[this.y]}`;
+    switch (piece.type) {
+      case PieceType.PAWN:
+        notation =
+          captured +
+          HORIZONTAL_AXIS[newPosition.x] +
+          VERTICAL_AXIS[newPosition.y];
+        break;
+      case PieceType.KNIGHT: {
+        const disambiguation = getDisambiguation(piece, newPosition, prevBoard);
+        notation =
+          "N" +
+          disambiguation +
+          captured +
+          HORIZONTAL_AXIS[newPosition.x] +
+          VERTICAL_AXIS[newPosition.y];
+        break;
+      }
+      case PieceType.BISHOP:
+        notation =
+          "B" +
+          getDisambiguation(piece, newPosition, prevBoard) +
+          captured +
+          HORIZONTAL_AXIS[newPosition.x] +
+          VERTICAL_AXIS[newPosition.y];
+        break;
+      case PieceType.ROOK:
+        notation =
+          "R" +
+          getDisambiguation(piece, newPosition, prevBoard) +
+          captured +
+          HORIZONTAL_AXIS[newPosition.x] +
+          VERTICAL_AXIS[newPosition.y];
+        break;
+      case PieceType.QUEEN:
+        notation =
+          "Q" +
+          getDisambiguation(piece, newPosition, prevBoard) +
+          captured +
+          HORIZONTAL_AXIS[newPosition.x] +
+          VERTICAL_AXIS[newPosition.y];
+        break;
+      case PieceType.KING:
+        if (isCastleMove) {
+          const isKingsideCastle = newPosition.x === 6;
+          const castleNotation = isKingsideCastle ? "O-O" : "O-O-O";
+          notation = castleNotation;
+        } else {
+          notation =
+            "K" +
+            getDisambiguation(piece, newPosition, prevBoard) +
+            captured +
+            HORIZONTAL_AXIS[newPosition.x] +
+            VERTICAL_AXIS[newPosition.y];
+        }
+        break;
+      default:
+        throw new Error(`Invalid piece type: ${piece.type}`);
     }
 
+    notation += isCheckmate ? "#" : isCheck ? "+" : "";
+
     return notation;
+  }
+
+  const checkForAmbiguousPieces = (newPosition, type, team, prevBoard) => {
+    const ambiguousPieces = prevBoard.pieces.filter((piece) => {
+      if (piece.type !== type || piece.teamType !== team) return;
+      let isAmbiguous = piece.possibleMoves.some((move) => move.x === newPosition.x && move.y === newPosition.y);
+      return isAmbiguous;
+    })
+    return !(ambiguousPieces.length === 1);
+  }
+
+  const getDisambiguation = (piece, newPosition, prevBoard) => {
+    const isAmbiguous = checkForAmbiguousPieces(newPosition, piece.type, piece.teamType, prevBoard);
+    if (!isAmbiguous) return '';
+
+    const samePieces = prevBoard.pieces.filter(p => p.type === piece.type && p.teamType === piece.teamType);
+
+    if (samePieces.length <= 1) return '';
+
+    const sameRow = samePieces.filter(p => p.position.y === piece.position.y);
+    const sameCol = samePieces.filter(p => p.position.x === piece.position.x);
+
+    if (sameRow.length > 1 && sameCol.length > 1) return HORIZONTAL_AXIS[piece.position.x];
+    else if (sameRow.length > 1) return HORIZONTAL_AXIS[piece.position.x];
+    else if (sameCol.length > 1) return VERTICAL_AXIS[piece.position.y];
   }
 
   const pieceTypeValidations = {
@@ -173,7 +252,9 @@ const GameManager = () => {
 
   const checkForCheckmate = () => {
     const pieceMoves = board.getAllPlayerPossiblePieceMoves(board.currentPlayer.teamType);
-    if ((pieceMoves.length === 0 || !pieceMoves) && kingIsChecked(board.currentPlayer.teamType, board.pieces)) setShowCheckmmateModal(true);
+    const isCheckmate = (pieceMoves.length === 0 || !pieceMoves) && kingIsChecked(board.currentPlayer.teamType, board.pieces);
+    if (isCheckmate) setShowCheckmmateModal(true);
+    return isCheckmate;
   }
 
   const checkForStalemate = () => {
@@ -187,13 +268,13 @@ const GameManager = () => {
     setBoard(board.clone());
     setShowPawnPromotionModal(false);
   }
-  
+
   const resetBoard = () => {
     setShowCheckmmateModal(false);
     setShowStalemateModal(false);
     setBoard(initialBoard.clone().calculateAllMoves(initialBoard.currentPlayer.teamType));
   }
-  
+
 
   return (
     <div className="game-manager">

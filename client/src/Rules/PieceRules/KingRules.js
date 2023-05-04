@@ -31,9 +31,14 @@ const getPossibleKingMoves = (king, boardState) => {
 
   const rightCastleMove = getRightCastleMove(king, boardState, possibleAttackedMoves, kingRow);
   if (rightCastleMove) possibleMoves.push(rightCastleMove);
-
+  
   // Filter out positions being attacked
-  return possibleMoves.filter((move) => !possibleAttackedMoves.some((attackMove) => samePosition(move, attackMove)));
+  return possibleMoves.filter((move) => {
+    // Check if the move is present in possibleAttackedMoves
+    const isAttacked = possibleAttackedMoves.some((attackMove) => samePosition(move, attackMove));
+    // If move is not attacked, keep it in the array
+    return !isAttacked;
+  });
 }
 
 // *********************** STANDARD KING MOVE FUNCTIONS *********************** //

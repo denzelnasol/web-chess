@@ -7,9 +7,7 @@ const accountAxios = axios.create({
 
 const createGame = async (formInfo) => {
   try {
-    const data = {
-    };
-    const response = await accountAxios.post('/create', data, { withCredentials: true });
+    const response = await accountAxios.post('/create', undefined, { withCredentials: true });
     return response.data;
   } catch (error) {
     console.log(error);

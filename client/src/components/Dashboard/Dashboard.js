@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 // Components
@@ -7,14 +7,17 @@ import Button from "components/Button/Button";
 // Styling
 import './style.scss';
 import { createGame } from "api/Game";
+import GameCreation from "./GameCreation";
 
 const Dashboard = () => {
   const navigate = useNavigate();
 
+  const [showGameCreation, setShowGameCreation] = useState(false);
+
   const generateGame = async () => {
     const game = await createGame();
     const gameId = game.id;
-    navigate(`/game:${gameId}`);
+    navigate(`/game/:${gameId}`);
   }
 
   return (
@@ -27,8 +30,8 @@ const Dashboard = () => {
       >
         Play A Game
       </Button>
-      <div>
-      </div>
+
+      {showGameCreation && <GameCreation />}
     </div>
   );
 }
