@@ -29,7 +29,7 @@ import { isValidQueenPosition } from "Rules/PieceRules/QueenRules";
 import { isValidKingPosition } from "Rules/PieceRules/KingRules";
 import { tileIsOccupied } from "Rules/GeneralRules";
 import { getOppositeTeamType } from "utilities/TeamType";
-import { kingIsChecked } from "Rules/CheckRules";
+import { kingIsChecked, kingIsThreatened } from "Rules/CheckRules";
 import Move from "models/Move";
 
 // Styling
@@ -76,8 +76,9 @@ const GameManager = () => {
     const isEnPassantMove = moveIsEnpassant(piece.position, newPosition, piece.type, piece.teamType);
     const isPawnPromotionMove = moveIsPawnPromotion(newPosition, piece.type, piece.teamType);
     const isCastleMove = moveIsCastle(piece.position, newPosition, piece.type, piece.teamType, piece.castleAvailable);
-    const isKingThreatened = kingIsChecked(piece.teamType, board.pieces);
+    const isKingThreatened = kingIsThreatened(piece.teamType, board.pieces);
     let { success, capturedPiece } = board.playMove(isEnPassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened, piece, newPosition, updatePromotionPawn);
+    const isCheckMove = kingIsChecked(board.currentPlayer.teamType, board.pieces);
 
     setBoard((previousBoard) => {
       isPlayedMoveValid = success;
@@ -92,9 +93,9 @@ const GameManager = () => {
     if (isPlayedMoveValid) {
       const move = new Move(piece, prevPosition, newPosition, capturedPiece);
       setMoveStack(moveStack => [...moveStack, move]);
-      const isCheckmate = checkForCheckmate(piece.teamType);
-      checkForStalemate(piece.teamType);
-      moveHistory.push(getChessNotationMove(piece, newPosition, capturedPiece, prevBoard, isCheckmate, isCastleMove, isKingThreatened));
+      const isCheckmate = checkForCheckmate();
+      checkForStalemate();
+      moveHistory.push(getChessNotationMove(piece, newPosition, capturedPiece, prevBoard, isCheckmate, isCastleMove, isCheckMove));
     }
 
     return isPlayedMoveValid;
@@ -146,7 +147,7 @@ const GameManager = () => {
         break;
       case PieceType.KING:
         if (isCastleMove) {
-          const isKingsideCastle = newPosition.x === 6;
+          const isKingsideCastle = newPosition.x === 1;
           const castleNotation = isKingsideCastle ? "O-O" : "O-O-O";
           notation = castleNotation;
         } else {

@@ -8,6 +8,7 @@ import { getKing } from "Rules/PieceRules/KingRules";
 
 // Enums
 import { PieceType } from "enums/PieceType";
+import { TeamType } from "enums/TeamType";
 
 // *********************** PRIVATE FUNCTIONS *********************** //
 const getVerticalCheckTiles = (piece, king) => {
@@ -58,6 +59,13 @@ const getDiagonalCheckTiles = (piece, king) => {
 
 // *********************** KING CHECK FUNCTIONS *********************** //
 const kingIsChecked = (teamType, boardState) => {
+  const king = getKing(teamType, boardState);
+  const attackedMoves = getOpponentAttackMoves(teamType, boardState);
+  const isKingThreatened = attackedMoves.some(move => samePosition(move, king.position));
+  return isKingThreatened;
+};
+
+const kingIsThreatened = (teamType, boardState) => {
   const king = getKing(teamType, boardState);
   const attackedMoves = getOpponentAttackMoves(teamType, boardState);
   const isKingThreatened = attackedMoves.find(move => samePosition(move, king.position));
@@ -146,6 +154,7 @@ const getKingCheckPieceMoves = (piece, boardState) => {
 };
 
 export {
+  kingIsThreatened,
   kingIsChecked,
   getPiecesAttackingKing,
   getPieceCheckPath,
