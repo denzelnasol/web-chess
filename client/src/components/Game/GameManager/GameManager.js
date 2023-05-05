@@ -60,6 +60,7 @@ const GameManager = ({ ...props }) => {
 
   useEffect(() => {
     const updateMoves = async () => {
+      if (moveHistory.length === 0 || !moveHistory) return;
       const stringifiedMoveHistory = moveHistory.join(' ');
       await updateMoveHistory(props.gameId, stringifiedMoveHistory);
     }

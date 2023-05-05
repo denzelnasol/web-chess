@@ -5,6 +5,21 @@ const accountAxios = axios.create({
   baseURL: 'http://localhost:8080/api/game',
 });
 
+const getGame = async (id) => {
+  console.log(id);
+  const options = {
+    withCredentials: true,
+  }
+
+  try {
+    const response = await accountAxios.get(`/${id}`, options);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+}
+
 const createGame = async (formInfo) => {
   try {
     const response = await accountAxios.post('/create', undefined, { withCredentials: true });
@@ -30,6 +45,7 @@ const updateMoveHistory = async (gameId, moveHistory) => {
 }
 
 export {
+  getGame,
   createGame,
   updateMoveHistory,
 };

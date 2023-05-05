@@ -15,6 +15,12 @@ const pool = new Pool({
 const gameRouter = express.Router();
 gameRouter.use(cookieParser());
 
+gameRouter.get('/:id', async (req, res) => {
+  const { id } = req.params;
+  const game = await getGame(id);
+  res.json(game);
+});
+
 gameRouter.get('/', (req, res) => {
   pool.query('SELECT * FROM game', (error, result) => {
     if (error) {
@@ -24,12 +30,6 @@ gameRouter.get('/', (req, res) => {
       res.json(result.rows);
     }
   });
-});
-
-gameRouter.get('/:id', async (req, res) => {
-  const { id } = req.params;
-  const game = await getGame(id);
-  res.json(game);
 });
 
 gameRouter.post('/create', async (req, res) => {
