@@ -27,7 +27,18 @@ const createGame = async (ownerId) => {
   }
 };
 
+const updateMoveHistory = async (gameId, moveHistory) => {
+  try {
+    const queryText = 'UPDATE game SET notation = $1 WHERE id = $2 RETURNING *';
+    const { rows } = await pool.query(queryText, [moveHistory, gameId]);
+    return rows[0];
+  } catch (e) {
+    console.log(e);
+  }
+};
+
 export {
   getGame,
   createGame,
+  updateMoveHistory,
 }

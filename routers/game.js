@@ -3,7 +3,7 @@ import pkg from "pg";
 import cookieParser from "cookie-parser";
 import jwt from "jsonwebtoken";
 import { findAccountByEmail } from "../services/account.js";
-import { createGame, getGame } from "../services/game.js";
+import { createGame, getGame, updateMoveHistory } from "../services/game.js";
 
 const { Pool } = pkg;
 
@@ -42,7 +42,6 @@ gameRouter.post('/create', async (req, res) => {
 
   const decodedSessionCookie = jwt.decode(sessionCookie);
   const email = decodedSessionCookie.email;
-  console.log(email)
   const account = await findAccountByEmail(email);
   if (!account) {
     res.status(401).send('Authentication failure');
@@ -50,9 +49,28 @@ gameRouter.post('/create', async (req, res) => {
   }
 
   const game = await createGame(account.id);
-
   res.json(game);
-  // 
+});
+
+gameRouter.post('/game', async (req, res) => {
+  const sessionCookie = req.cookies.session;
+  const { gameId, moveHistory } = req.body;
+
+  if (!sessionCookie) {
+    res.status(401).send('Authentication failure');
+    return;
+  }
+
+  const decodedSessionCookie = jwt.decode(sessionCookie);
+  const email = decodedSessionCookie.email;
+  const account = await findAccountByEmail(email);
+  if (!account) {
+    res.status(401).send('Authentication failure');
+    res.end();
+  }
+
+  const game = await updateMoveHistory(gameId, moveHistory)
+  res.json(game);
 });
 
 export default gameRouter;

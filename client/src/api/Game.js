@@ -15,6 +15,21 @@ const createGame = async (formInfo) => {
   }
 };
 
+const updateMoveHistory = async (gameId, moveHistory) => {
+  try {
+    const data = {
+      gameId,
+      moveHistory,
+    }
+    const response = await accountAxios.post('/game', data, { withCredentials: true });
+    return response.data; 
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+}
+
 export {
   createGame,
+  updateMoveHistory,
 };

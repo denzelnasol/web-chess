@@ -34,6 +34,7 @@ import Move from "models/Move";
 
 // Styling
 import './style.scss';
+import { updateMoveHistory } from "api/Game";
 
 /**
  * @description Renders the chessboard and handles game logic related to moves being made on the current board state
@@ -43,20 +44,28 @@ import './style.scss';
  * @example
  * <GameManager />
  */
-const GameManager = () => {
+const GameManager = ({ ...props }) => {
   // ** useStates ** //
   const [board, setBoard] = useState(initialBoard.clone());
   const [promotionPawn, setPromotionPawn] = useState();
   const [showPawnPromotionModal, setShowPawnPromotionModal] = useState(false);
   const [showCheckmateModal, setShowCheckmmateModal] = useState(false);
   const [showStalemateModal, setShowStalemateModal] = useState(false);
-  const [moveStack, setMoveStack] = useState([]);
-  const [moveHistory] = useState([]);
+  const [moveHistory, setMoveHistory] = useState([]);
 
   // ** useEffects ** //
   useEffect(() => {
     updatePossibleMoves();
   }, []);
+
+  useEffect(() => {
+    const updateMoves = async () => {
+      const stringifiedMoveHistory = moveHistory.join(' ');
+      await updateMoveHistory(props.gameId, stringifiedMoveHistory);
+    }
+
+    updateMoves();
+  }, [moveHistory]);
 
   // ** Functions ** //
   const updatePossibleMoves = () => {
@@ -69,9 +78,7 @@ const GameManager = () => {
 
   const playMove = (piece, newPosition) => {
     let isPlayedMoveValid = false;
-    // let capturedPiece;
     const prevBoard = board.clone();
-    const prevPosition = piece.position.clone();
     const isValidMove = moveIsValid(piece.position, newPosition, piece.type, piece.teamType, piece.castleAvailable);
     const isEnPassantMove = moveIsEnpassant(piece.position, newPosition, piece.type, piece.teamType);
     const isPawnPromotionMove = moveIsPawnPromotion(newPosition, piece.type, piece.teamType);
@@ -91,16 +98,14 @@ const GameManager = () => {
     }
 
     if (isPlayedMoveValid) {
-      const move = new Move(piece, prevPosition, newPosition, capturedPiece);
-      setMoveStack(moveStack => [...moveStack, move]);
       const isCheckmate = checkForCheckmate();
       checkForStalemate();
-      moveHistory.push(getChessNotationMove(piece, newPosition, capturedPiece, prevBoard, isCheckmate, isCastleMove, isCheckMove));
+      setMoveHistory([...moveHistory, getChessNotationMove(piece, newPosition, capturedPiece, prevBoard, isCheckmate, isCastleMove, isCheckMove)]);
     }
 
     return isPlayedMoveValid;
   };
-  console.log(moveHistory)
+
   const getChessNotationMove = (piece, newPosition, capturedPiece, prevBoard, isCheckmate, isCastleMove, isCheck) => {
     const captured = capturedPiece ? "x" : "";
     let notation;
