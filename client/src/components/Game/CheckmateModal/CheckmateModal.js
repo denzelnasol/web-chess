@@ -19,7 +19,7 @@ function CheckmateModal({ ...props }) {
     <div className={`checkmate-modal ${props.showCheckmateModal || props.showStalemateModal ? "" : "hidden"}`}>
       <div className="modal-body">
         <div className="game-end-text">
-          {props.showStalemateModal ? 'STALEMATE' : `VICTORY FOR ${props.teamType.toUpperCase()}!`}
+          {props.showStalemateModal ? 'STALEMATE' : `VICTORY FOR ${props.teamType ? props.teamType.toUpperCase() : ''}!`}
         </div>
         <div className="new-game-button">
           <button onClick={() => props.resetBoard()}>New Game</button>

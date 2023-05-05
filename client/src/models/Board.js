@@ -187,29 +187,6 @@ export default class Board {
     return { success: true, capturedPiece };
   }
 
-  unplayMove(move) {
-    this.pieces = this.pieces.reduce((results, currentPiece) => {
-      // Check if given piece is the same
-      if (samePosition(currentPiece.position, move.toPosition)) {
-        // Update piece position
-        currentPiece.position.x = move.fromPosition.x;
-        currentPiece.position.y = move.fromPosition.y;
-        currentPiece.castleAvailable = false;
-
-        results.push(currentPiece);
-      } else if (!samePosition(currentPiece.position, move.toPosition)) {
-        results.push(currentPiece);
-      }
-
-      return results;
-    }, []);
-
-    if (move.capturedPiece) {
-      const capturedPiece = move.capturedPiece.clone();
-      this.pieces.push(capturedPiece);
-    }
-  }
-
   updateCurrentPlayer() {
     this.currentPlayer = this.currentPlayer.teamType === TeamType.WHITE ? PLAYERS[1] : PLAYERS[0];
   }
@@ -246,6 +223,19 @@ export default class Board {
     }, []);
 
     this.calculateAllMoves(playerTeamType);
+  }
+
+  movePiece(fromPosition, toPosition) {
+    this.pieces = this.pieces.reduce((results, currentPiece) => {
+      if (samePosition(currentPiece.position, fromPosition)) {
+        currentPiece.position.x = toPosition.x;
+        currentPiece.position.y = toPosition.y;
+        currentPiece.castleAvailable = false;
+        this.updateCurrentPlayer();
+      }
+      results.push(currentPiece);
+      return results;
+    }, []);
   }
 
   clone() {

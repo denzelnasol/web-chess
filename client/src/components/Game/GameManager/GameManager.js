@@ -30,7 +30,6 @@ import { isValidKingPosition } from "Rules/PieceRules/KingRules";
 import { tileIsOccupied } from "Rules/GeneralRules";
 import { getOppositeTeamType } from "utilities/TeamType";
 import { kingIsChecked, kingIsThreatened } from "Rules/CheckRules";
-import Move from "models/Move";
 
 // Styling
 import './style.scss';
@@ -46,7 +45,7 @@ import { updateMoveHistory } from "api/Game";
  */
 const GameManager = ({ ...props }) => {
   // ** useStates ** //
-  const [board, setBoard] = useState(initialBoard.clone());
+  const [board, setBoard] = useState(props.board);
   const [promotionPawn, setPromotionPawn] = useState();
   const [showPawnPromotionModal, setShowPawnPromotionModal] = useState(false);
   const [showCheckmateModal, setShowCheckmmateModal] = useState(false);
@@ -55,8 +54,17 @@ const GameManager = ({ ...props }) => {
 
   // ** useEffects ** //
   useEffect(() => {
+    setBoard(props.board);
+  }, [props.board]);
+
+  useEffect(() => {
     updatePossibleMoves();
-  }, []);
+  }, [board]);
+
+  useEffect(() => {
+    if (!props.notation) return;
+    setMoveHistory(props.notation.split(' '));
+  }, [props.notation]);
 
   useEffect(() => {
     const updateMoves = async () => {
@@ -70,7 +78,8 @@ const GameManager = ({ ...props }) => {
 
   // ** Functions ** //
   const updatePossibleMoves = () => {
-    board.calculateAllMoves(board.currentPlayer.teamType);
+    if (!board) return;
+    board.calculateAllMoves(board ? board.currentPlayer.teamType : TeamType.WHITE);
   };
 
   const updatePromotionPawn = (pawn) => {
@@ -170,7 +179,7 @@ const GameManager = ({ ...props }) => {
     }
 
     notation += isCheckmate ? "#" : isCheck ? "+" : "";
-
+    notation = `${HORIZONTAL_AXIS[piece.position.x]}${VERTICAL_AXIS[piece.position.y]}->${notation}`;
     return notation;
   }
 
@@ -293,14 +302,14 @@ const GameManager = ({ ...props }) => {
 
       <CheckmateModal
         showCheckmateModal={showCheckmateModal}
-        teamType={getOppositeTeamType(board.currentPlayer.teamType)}
+        teamType={board ? getOppositeTeamType(board.currentPlayer.teamType) : undefined}
         resetBoard={resetBoard}
         showStalemateModal={showStalemateModal}
       />
 
       <Chessboard
         playMove={playMove}
-        pieces={board.pieces}
+        pieces={board ? board.pieces : []}
       />
     </div>
   );

@@ -6,7 +6,6 @@ const accountAxios = axios.create({
 });
 
 const getGame = async (id) => {
-  console.log(id);
   const options = {
     withCredentials: true,
   }
