@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const accountAxios = axios.create({
+const gameAxios = axios.create({
   // baseURL: process.env.REACT_APP_NODE_URL,
   baseURL: 'http://localhost:8080/api/game',
 });
@@ -11,7 +11,7 @@ const getGame = async (id) => {
   }
 
   try {
-    const response = await accountAxios.get(`/${id}`, options);
+    const response = await gameAxios.get(`/${id}`, options);
     return response.data;
   } catch (error) {
     console.log(error);
@@ -21,7 +21,7 @@ const getGame = async (id) => {
 
 const createGame = async (formInfo) => {
   try {
-    const response = await accountAxios.post('/create', undefined, { withCredentials: true });
+    const response = await gameAxios.post('/create', undefined, { withCredentials: true });
     return response.data;
   } catch (error) {
     console.log(error);
@@ -35,7 +35,7 @@ const updateMoveHistory = async (gameId, moveHistory) => {
       gameId,
       moveHistory,
     }
-    const response = await accountAxios.post('/game', data, { withCredentials: true });
+    const response = await gameAxios.post('/', data, { withCredentials: true });
     return response.data; 
   } catch (error) {
     console.log(error);

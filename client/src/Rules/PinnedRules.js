@@ -10,6 +10,7 @@ const checkIfPiecePinned = (piece, boardState) => {
   const currentAttackingPieces = getPiecesAttackingKing(piece.teamType, boardState);
   const tempBoardState = boardState.filter((p) => !samePosition(p.position, piece.position));
   const attackingPieces = getPiecesAttackingKing(piece.teamType, tempBoardState);
+  if (!attackingPieces) return;
   return attackingPieces.length > 0 && attackingPieces.length > currentAttackingPieces.length;
 }
 

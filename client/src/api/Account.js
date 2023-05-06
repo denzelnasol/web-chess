@@ -6,6 +6,21 @@ const accountAxios = axios.create({
   baseURL: 'http://localhost:8080/api/account',
 });
 
+const getSessionAccount = async () => {
+  const options = {
+    withCredentials: true,
+  }
+
+  try {
+    const response = await accountAxios.get('/session', options);
+    console.log(response);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+}
+
 const registerAccount = async (formInfo) => {
   try {
     const data = {
@@ -47,6 +62,7 @@ const verifyAccount = async () => {
 }
 
 export {
+  getSessionAccount,
   registerAccount,
   loginAccount,
   verifyAccount,

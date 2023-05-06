@@ -52,7 +52,7 @@ gameRouter.post('/create', async (req, res) => {
   res.json(game);
 });
 
-gameRouter.post('/game', async (req, res) => {
+gameRouter.post('/', async (req, res) => {
   const sessionCookie = req.cookies.session;
   const { gameId, moveHistory } = req.body;
 

@@ -78,6 +78,7 @@ const getPiecesAttackingKing = (teamType, boardState) => {
     if (teamType === piece.teamType) continue;
     const pieceAttackMoves = getPieceAttackMoves(piece, boardState);
     const king = getKing(teamType, boardState);
+    if (!king) return;
     const pieceAttackingKing = pieceAttackMoves.some(move => samePosition(king.position, move));
     if (pieceAttackingKing) pieces.push(piece);
   }

@@ -25,6 +25,25 @@ accountRouter.get('/', (req, res) => {
   });
 });
 
+accountRouter.get('/session', async (req, res) => {
+  const sessionCookie = req.cookies.session;
+
+  if (!sessionCookie) {
+    res.status(401).send('Authentication failure');
+    return;
+  }
+
+  const decodedSessionCookie = jwt.decode(sessionCookie);
+  const email = decodedSessionCookie.email;
+  const account = await findAccountByEmail(email);
+  if (!account) {
+    res.status(401).send('Authentication failure');
+    res.end();
+  }
+
+  res.json(account);
+})
+
 accountRouter.get('/:id', (req, res) => {
   const accountId = req.params.id;
   pool.query('SELECT * FROM account WHERE id = $1', [accountId], (error, result) => {

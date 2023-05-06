@@ -10,6 +10,10 @@ dotenv.config();
 import accountRouter from "./routers/account.js";
 import gameRouter from "./routers/game.js";
 
+// Socket
+import { createServer } from 'http';
+import { initializeSocket } from "./socket.js";
+
 const app = express();
 app.use(bodyParser.json());
 app.use(cors({
@@ -20,12 +24,12 @@ app.use(cors({
 const apiRouter = express.Router();
 apiRouter.use('/account', accountRouter);
 apiRouter.use('/game', gameRouter);
-
 app.use('/api', apiRouter);
 
 const PORT = 8080;
-
-app.listen(PORT, () => {
+const server = createServer(app);
+const io = initializeSocket(server);
+server.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`);
 });
 

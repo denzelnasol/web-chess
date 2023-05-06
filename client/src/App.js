@@ -14,7 +14,7 @@ import { useAuth } from 'components/AuthProvider/AuthProvider';
 
 // Style
 import './App.scss'
-import GameCreation from 'components/Dashboard/GameCreation';
+import Lobby from 'components/Dashboard/Lobby';
 
 function App() {
   const { auth } = useAuth();
@@ -32,7 +32,7 @@ function App() {
 
         {/* Login restricted routes */}
         <Route path='/dashboard' element={<Private componentToRender={Dashboard} />} />
-        <Route path='/game/:id' element={<Private componentToRender={GameCreation} />} />
+        <Route path='/game/:id' element={<Private componentToRender={Lobby} />} />
       </Routes>
     </div>
   );

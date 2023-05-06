@@ -7,7 +7,7 @@ import Button from "components/Button/Button";
 // Styling
 import './style.scss';
 import { createGame } from "api/Game";
-import GameCreation from "./GameCreation";
+import Lobby from "./Lobby";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -31,7 +31,7 @@ const Dashboard = () => {
         Play A Game
       </Button>
 
-      {showGameCreation && <GameCreation />}
+      {showGameCreation && <Lobby />}
     </div>
   );
 }
