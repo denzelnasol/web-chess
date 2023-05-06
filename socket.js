@@ -63,10 +63,10 @@ function initializeSocket(server) {
     });
 
     // Handle move in a game
-    socket.on('move', (gameId, move) => {
-      console.log(`Socket ${socket.id} sent move ${move} for game ${gameId}`);
+    socket.on('playMove', (move) => {
+      console.log(`Socket ${socket.id} sent move ${move} for game ${socket.gameId}`);
       // Broadcast the move to other players in the game
-      socket.to(`game_${gameId}`).emit('move', move);
+      socket.broadcast.to(`game_${socket.gameId}`).emit('playMove', move);
     });
   });
 

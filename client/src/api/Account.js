@@ -13,7 +13,6 @@ const getSessionAccount = async () => {
 
   try {
     const response = await accountAxios.get('/session', options);
-    console.log(response);
     return response.data;
   } catch (error) {
     console.log(error);

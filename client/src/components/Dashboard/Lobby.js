@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams } from 'react-router-dom';
 
 // import { socket as mainSocket } from "socket/socket";
@@ -22,10 +22,14 @@ const Lobby = () => {
   let { id } = useParams();
   id = id.substring(1);
 
+  const boardRef = useRef(undefined);
+  const notationRef = useRef(undefined);
+
   const [game, setGame] = useState(undefined);
   const [board, setBoard] = useState(undefined);
   const [players, setPlayers] = useState([]);
   const [socket, setSocket] = useState(undefined);
+  const [notation, setNotation] = useState(undefined);
 
   useEffect(() => {
     const mainSocket = io('http://localhost:8080/game');
@@ -33,20 +37,20 @@ const Lobby = () => {
     const setupBoard = async () => {
       const game = await getGame(id)
       setGame(game);
-
       let board = initialBoard.clone();
       if (game.notation && game.notation.length !== 0) {
         const notations = game.notation.split(' ');
-        notations.forEach(notation => {
+        for (const notation of notations) {
           parseMove(notation, board);
-        });
+        }
+        setNotation(game.notation);
       }
-
       setBoard(board);
     }
 
     const setupSocket = async () => {
       const account = await getSessionAccount();
+      // const board = await setupBoard();
       const onConnectData = {
         account,
         gameId: id,
@@ -61,19 +65,40 @@ const Lobby = () => {
         setPlayers(playerList);
       });
 
+      mainSocket.on('playMove', onMove);
       setSocket(mainSocket);
     };
 
     setupBoard();
     setupSocket();
+
+    return () => {
+      if (mainSocket) {
+        mainSocket.disconnect();
+      }
+    }
   }, []);
 
+  useEffect(() => {
+    boardRef.current = board;
+  }, [board]);
+
+  useEffect(() => {
+    notationRef.current = notation;
+  }, [notation]);
+
+  const onMove = (move) => {
+    const combinedNotation = notationRef.current ? notationRef.current.concat(" ", move) : move; 
+    setNotation(combinedNotation);
+    parseMove(move, boardRef.current);
+  }
+
   const parseMove = (notation, board) => {
-    if (!notation) return;
+    if (!notation || !board) return;
     const startAndEndPositions = notation.split('->');
     const startPosition = startAndEndPositions[0];
     let endPosition = startAndEndPositions[1];
-    endPosition = endPosition.replace(/[xO\-+#]/g, "");
+    endPosition = endPosition.replace(/[xO\-+#A-Z]/g, "");
 
     const startHorizontalIndex = HORIZONTAL_AXIS.indexOf(startPosition[0]);
     const startVerticalIndex = VERTICAL_AXIS.indexOf(startPosition[1]);
@@ -86,7 +111,12 @@ const Lobby = () => {
     const endPos = new Position(endHorizontalIndex, endVerticalIndex);
 
     board.movePiece(startPos, endPos);
+    setBoard(board.clone());
   };
+
+  const emitMove = (move) => {
+    socket.emit('playMove', move);
+  }
 
   return (
     <div className="game-creation">
@@ -100,7 +130,12 @@ const Lobby = () => {
         </ul>
       )}
       {/* {game && board && */}
-      <GameManager gameId={id} board={board} notation={game && game.notation} />
+      <GameManager
+        gameId={id}
+        board={board}
+        notation={notation}
+        emitMove={emitMove}
+      />
       {/* } */}
     </div>
   );

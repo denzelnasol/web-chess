@@ -110,7 +110,9 @@ const GameManager = ({ ...props }) => {
     if (isPlayedMoveValid) {
       const isCheckmate = checkForCheckmate();
       checkForStalemate();
-      setMoveHistory([...moveHistory, getChessNotationMove(piece, newPosition, capturedPiece, prevBoard, isCheckmate, isCastleMove, isCheckMove)]);
+      const notationMove = getChessNotationMove(piece, newPosition, capturedPiece, prevBoard, isCheckmate, isCastleMove, isCheckMove);
+      setMoveHistory([...moveHistory, notationMove]);
+      props.emitMove(notationMove);
     }
 
     return isPlayedMoveValid;
