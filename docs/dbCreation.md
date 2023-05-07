@@ -14,7 +14,8 @@ CREATE TABLE account (
 CREATE TABLE game (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   owner_id UUID NOT NULL,
-  player_two_id UUID,
+  white_player_id UUID,
+  black_player_id UUID,
   notation TEXT,
   date_created TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   date_updated TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -22,10 +23,14 @@ CREATE TABLE game (
     REFERENCES account(id)
     ON DELETE CASCADE
     ON UPDATE CASCADE,
-  CONSTRAINT fk_game_player_two FOREIGN KEY (player_two_id)
+  CONSTRAINT fk_game_white_player FOREIGN KEY (white_player_id)
     REFERENCES account(id)
     ON DELETE CASCADE
-    ON UPDATE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT fk_game_black_player FOREIGN KEY (black_player_id)
+    REFERENCES account(id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
 );
 
 # Set to DB UTC time

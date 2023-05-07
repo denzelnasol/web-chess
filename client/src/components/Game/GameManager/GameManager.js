@@ -44,7 +44,7 @@ import './style.scss';
  */
 const GameManager = ({ ...props }) => {
 
-  const { board, notation } = props;
+  const { board, notation, account, players } = props;
 
   // ** useStates ** //
   const [promotionPawn, setPromotionPawn] = useState();
@@ -52,12 +52,18 @@ const GameManager = ({ ...props }) => {
   const [showCheckmateModal, setShowCheckmmateModal] = useState(false);
   const [showStalemateModal, setShowStalemateModal] = useState(false);
   const [moveHistory, setMoveHistory] = useState([]);
+  const [playerColor, setPlayerColor] = useState(undefined);
 
   // ** useEffects ** //
   useEffect(() => {
     updatePossibleMoves();
-  }, [board]);
-
+    for (const player of players) {
+      if (account.id === player.id) {
+        setPlayerColor(player.color)
+      }
+    }
+  }, [board, account, players, moveHistory]);
+  console.log(playerColor)
   useEffect(() => {
     if (!notation) return;
 
@@ -77,7 +83,7 @@ const GameManager = ({ ...props }) => {
 
     updateMoves();
   }, [moveHistory]);
-
+  console.log(account)
   // ** Functions ** //
   const updatePossibleMoves = () => {
     if (!board) return;
@@ -95,12 +101,17 @@ const GameManager = ({ ...props }) => {
     const [endX, endY] = endNotation.split('');
     const startPosition = new Position(HORIZONTAL_AXIS.indexOf(startX), VERTICAL_AXIS.indexOf(startY));
     const endPosition = new Position(HORIZONTAL_AXIS.indexOf(endX), VERTICAL_AXIS.indexOf(endY));
-  
+
     const piece = board.getPieceFromPosition(startPosition);
     if (piece) playMove(piece, endPosition, true);
   };
 
   const playMove = (piece, newPosition, isHistoryMove) => {
+    if (!isHistoryMove) {
+      if (board.currentPlayer.teamType !== playerColor) {
+        return false;
+      }
+    }
     let isPlayedMoveValid = false;
     const prevBoard = board.clone();
     const isValidMove = moveIsValid(piece.position, newPosition, piece.type, piece.teamType, piece.castleAvailable);
@@ -204,7 +215,7 @@ const GameManager = ({ ...props }) => {
     if (type !== PieceType.KING || !castleAvailable) return false;
     const kingRow = teamType === TeamType.WHITE ? 0 : 7;
     const isKingInPosition = samePosition(grabPosition, new Position(3, kingRow));
-    
+
     const isLeftNewPositionCorrect = samePosition(newPosition, new Position(1, kingRow));
     const isRightNewPositionCorrect = samePosition(newPosition, new Position(5, kingRow));
 
@@ -275,6 +286,8 @@ const GameManager = ({ ...props }) => {
       <Chessboard
         playMove={playMove}
         pieces={board ? board.pieces : []}
+        playerColor={playerColor}
+        currentPlayer = {board ? board.currentPlayer: undefined}
       />
     </div>
   );

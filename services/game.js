@@ -19,8 +19,9 @@ const getGame = async (id) => {
 
 const createGame = async (ownerId) => {
   try {
-    const query = 'INSERT INTO game (owner_id) VALUES ($1) RETURNING *'
-    const { rows } = await pool.query(query, [ownerId]);
+    const isWhitePlayer = Math.random() < 0.5; // Randomly determine if owner is white or black
+    const query = 'INSERT INTO game (owner_id, white_player_id, black_player_id) VALUES ($1, $2, $3) RETURNING *';
+    const { rows } = await pool.query(query, [ownerId, isWhitePlayer ? ownerId : null, !isWhitePlayer ? ownerId : null]);
     return rows[0];
   } catch (e) {
     console.log(e);

@@ -26,6 +26,7 @@ const Lobby = () => {
   const [players, setPlayers] = useState([]);
   const [socket, setSocket] = useState(undefined);
   const [notation, setNotation] = useState(undefined);
+  const [account, setAccount] = useState(undefined);
 
   useEffect(() => {
     const mainSocket = io('http://localhost:8080/game');
@@ -41,6 +42,8 @@ const Lobby = () => {
         account,
         gameId: id,
       }
+
+      setAccount(account);
 
       mainSocket.on("connect", () => {
         console.log(`Connected to lobby for game ${id}`);
@@ -100,7 +103,10 @@ const Lobby = () => {
       {players && (
         <ul>
           {players.map((player) => (
-            <li key={player.email}>{player.email}</li>
+            player && player.email && 
+            <li key={player.email}>
+              {player.email} ({player.color})
+            </li>
           ))}
         </ul>
       )}
@@ -112,6 +118,8 @@ const Lobby = () => {
           notation={notation}
           emitMove={emitMove}
           updateNotation={updateNotation}
+          players={players}
+          account={account}
         />
       }
     </div>
