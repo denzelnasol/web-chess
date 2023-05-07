@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 
+// API
+import { updateMoveHistory } from "api/Game";
+
 // Enums
-import { PieceType } from "enums/PieceType";
+import { PieceType, PIECE_TYPE_TO_LETTER } from "enums/PieceType";
 import { TeamType } from 'enums/TeamType';
 import { HORIZONTAL_AXIS, VERTICAL_AXIS } from "constants/Constants";
 
@@ -16,6 +19,7 @@ import CheckmateModal from "components/Game/CheckmateModal/CheckmateModal";
 
 // Utilities
 import { samePosition, getPositionPointDifference } from "utilities/Position";
+import { getOppositeTeamType } from "utilities/TeamType";
 
 // Rules
 import { isValidPawnPosition, moveIsPawnPromotion } from "Rules/PieceRules/PawnRules";
@@ -25,12 +29,10 @@ import { isValidRookPosition } from "Rules/PieceRules/RookRules";
 import { isValidQueenPosition } from "Rules/PieceRules/QueenRules";
 import { isValidKingPosition } from "Rules/PieceRules/KingRules";
 import { tileIsOccupied } from "Rules/GeneralRules";
-import { getOppositeTeamType } from "utilities/TeamType";
 import { kingIsChecked, kingIsThreatened } from "Rules/CheckRules";
 
 // Styling
 import './style.scss';
-import { updateMoveHistory } from "api/Game";
 
 /**
  * @description Renders the chessboard and handles game logic related to moves being made on the current board state
@@ -91,7 +93,8 @@ const GameManager = ({ ...props }) => {
     const startAndEndPositions = notation.split('->');
     const startPosition = startAndEndPositions[0];
     let endPosition = startAndEndPositions[1];
-    endPosition = endPosition.replace(/[xO\-+#A-Z]/g, "");
+    endPosition = endPosition.replace(/.*x|[xO\-+#\W]/g, "");
+    console.log(endPosition);
 
     const startHorizontalIndex = HORIZONTAL_AXIS.indexOf(startPosition[0]);
     const startVerticalIndex = VERTICAL_AXIS.indexOf(startPosition[1]);
@@ -141,65 +144,15 @@ const GameManager = ({ ...props }) => {
   const getChessNotationMove = (piece, newPosition, capturedPiece, prevBoard, isCheckmate, isCastleMove, isCheck) => {
     const captured = capturedPiece ? "x" : "";
     let notation;
-    switch (piece.type) {
-      case PieceType.PAWN:
-        notation =
-          captured +
-          HORIZONTAL_AXIS[newPosition.x] +
-          VERTICAL_AXIS[newPosition.y];
-        break;
-      case PieceType.KNIGHT: {
-        const disambiguation = getDisambiguation(piece, newPosition, prevBoard);
-        notation =
-          "N" +
-          disambiguation +
-          captured +
-          HORIZONTAL_AXIS[newPosition.x] +
-          VERTICAL_AXIS[newPosition.y];
-        break;
-      }
-      case PieceType.BISHOP:
-        notation =
-          "B" +
-          getDisambiguation(piece, newPosition, prevBoard) +
-          captured +
-          HORIZONTAL_AXIS[newPosition.x] +
-          VERTICAL_AXIS[newPosition.y];
-        break;
-      case PieceType.ROOK:
-        notation =
-          "R" +
-          getDisambiguation(piece, newPosition, prevBoard) +
-          captured +
-          HORIZONTAL_AXIS[newPosition.x] +
-          VERTICAL_AXIS[newPosition.y];
-        break;
-      case PieceType.QUEEN:
-        notation =
-          "Q" +
-          getDisambiguation(piece, newPosition, prevBoard) +
-          captured +
-          HORIZONTAL_AXIS[newPosition.x] +
-          VERTICAL_AXIS[newPosition.y];
-        break;
-      case PieceType.KING:
-        if (isCastleMove) {
-          const isKingsideCastle = newPosition.x === 1;
-          const castleNotation = isKingsideCastle ? "O-O" : "O-O-O";
-          notation = castleNotation;
-        } else {
-          notation =
-            "K" +
-            getDisambiguation(piece, newPosition, prevBoard) +
-            captured +
-            HORIZONTAL_AXIS[newPosition.x] +
-            VERTICAL_AXIS[newPosition.y];
-        }
-        break;
-      default:
-        throw new Error(`Invalid piece type: ${piece.type}`);
+    if (piece.type === PieceType.KING && isCastleMove) {
+      const isKingsideCastle = newPosition.x === 1;
+      notation = isKingsideCastle ? "O-O" : "O-O-O";
+    } else {
+      const disambiguation = getDisambiguation(piece, newPosition, prevBoard);
+      const type = PIECE_TYPE_TO_LETTER[piece.type];
+      const pawnStartPosLetter = (piece.type === PieceType.PAWN && captured) ? HORIZONTAL_AXIS[piece.position.x] : '';
+      notation = type + disambiguation + pawnStartPosLetter + captured + HORIZONTAL_AXIS[newPosition.x] + VERTICAL_AXIS[newPosition.y];
     }
-
     notation += isCheckmate ? "#" : isCheck ? "+" : "";
     notation = `${HORIZONTAL_AXIS[piece.position.x]}${VERTICAL_AXIS[piece.position.y]}->${notation}`;
     return notation;

@@ -1,4 +1,4 @@
-export const PieceType = 
+export const PieceType =
   Object.freeze({
     PAWN: 'PAWN',
     BISHOP: 'BISHOP',
@@ -7,3 +7,12 @@ export const PieceType =
     QUEEN: 'QUEEN',
     KING: 'KING',
   });
+
+export const PIECE_TYPE_TO_LETTER = {
+  [PieceType.PAWN]: "",
+  [PieceType.KNIGHT]: "N",
+  [PieceType.BISHOP]: "B",
+  [PieceType.ROOK]: "R",
+  [PieceType.QUEEN]: "Q",
+  [PieceType.KING]: "K"
+};
