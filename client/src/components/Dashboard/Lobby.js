@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams } from 'react-router-dom';
 
-// import { socket as mainSocket } from "socket/socket";
 import io from 'socket.io-client';
 
 // API
@@ -21,7 +20,6 @@ const Lobby = () => {
   let { id } = useParams();
   id = id.substring(1);
 
-  const boardRef = useRef(undefined);
   const notationRef = useRef(undefined);
 
   const [board, setBoard] = useState(initialBoard.clone());
@@ -39,7 +37,6 @@ const Lobby = () => {
 
     const setupSocket = async () => {
       const account = await getSessionAccount();
-      // const board = await setupBoard();
       const onConnectData = {
         account,
         gameId: id,
@@ -54,7 +51,7 @@ const Lobby = () => {
         setPlayers(playerList);
       });
 
-      mainSocket.on('playMove', onMove);
+      mainSocket.on('playMove', onSocketPlayMove);
       setSocket(mainSocket);
     };
 
@@ -62,29 +59,21 @@ const Lobby = () => {
     setupSocket();
 
     return () => {
-      if (mainSocket) {
-        mainSocket.disconnect();
-      }
+      if (mainSocket) mainSocket.disconnect();
     }
   }, []);
-
-  useEffect(() => {
-    boardRef.current = board;
-  }, [board]);
 
   useEffect(() => {
     notationRef.current = notation;
   }, [notation]);
 
-  const onMove = (move) => {
+  const onSocketPlayMove = (move) => {
     const combinedNotation = notationRef.current ? notationRef.current.concat(" ", move) : move;
     setNotation(combinedNotation);
   }
 
   const updateBoard = () => {
-    setBoard((previousBoard) => {
-      return board.clone();
-    })
+    setBoard(board.clone());
   }
 
   const updateNotation = (notationMove) => {
