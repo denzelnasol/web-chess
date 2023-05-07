@@ -44,8 +44,10 @@ import { updateMoveHistory } from "api/Game";
  * <GameManager />
  */
 const GameManager = ({ ...props }) => {
+
+  const { board, notation } = props;
+
   // ** useStates ** //
-  const [board, setBoard] = useState(props.board);
   const [promotionPawn, setPromotionPawn] = useState();
   const [showPawnPromotionModal, setShowPawnPromotionModal] = useState(false);
   const [showCheckmateModal, setShowCheckmmateModal] = useState(false);
@@ -54,17 +56,18 @@ const GameManager = ({ ...props }) => {
 
   // ** useEffects ** //
   useEffect(() => {
-    setBoard(props.board);
-  }, [props.board]);
-
-  useEffect(() => {
     updatePossibleMoves();
   }, [board]);
 
   useEffect(() => {
-    if (!props.notation) return;
-    setMoveHistory(props.notation.split(' '));
-  }, [props.notation]);
+    if (!notation) return;
+
+    const notations = notation.split(' ');
+    for (const notation of notations) {
+      parseMove(notation);
+    }
+    setMoveHistory(notation.split(' '));
+  }, [notation]);
 
   useEffect(() => {
     const updateMoves = async () => {
@@ -86,7 +89,28 @@ const GameManager = ({ ...props }) => {
     setPromotionPawn(pawn);
   };
 
-  const playMove = (piece, newPosition) => {
+  const parseMove = (notation) => {
+    if (!notation || !board) return;
+    const startAndEndPositions = notation.split('->');
+    const startPosition = startAndEndPositions[0];
+    let endPosition = startAndEndPositions[1];
+    endPosition = endPosition.replace(/[xO\-+#A-Z]/g, "");
+
+    const startHorizontalIndex = HORIZONTAL_AXIS.indexOf(startPosition[0]);
+    const startVerticalIndex = VERTICAL_AXIS.indexOf(startPosition[1]);
+
+    const startPos = new Position(startHorizontalIndex, startVerticalIndex);
+
+    const endHorizontalIndex = HORIZONTAL_AXIS.indexOf(endPosition[0]);
+    const endVerticalIndex = VERTICAL_AXIS.indexOf(endPosition[1]);
+
+    const endPos = new Position(endHorizontalIndex, endVerticalIndex);
+
+    const piece = board.getPieceFromPosition(startPos);
+    if (piece) playMove(piece, endPos, true);
+  };
+
+  const playMove = (piece, newPosition, isHistoryMove) => {
     let isPlayedMoveValid = false;
     const prevBoard = board.clone();
     const isValidMove = moveIsValid(piece.position, newPosition, piece.type, piece.teamType, piece.castleAvailable);
@@ -94,25 +118,24 @@ const GameManager = ({ ...props }) => {
     const isPawnPromotionMove = moveIsPawnPromotion(newPosition, piece.type, piece.teamType);
     const isCastleMove = moveIsCastle(piece.position, newPosition, piece.type, piece.teamType, piece.castleAvailable);
     const isKingThreatened = kingIsThreatened(piece.teamType, board.pieces);
-    let { success, capturedPiece } = board.playMove(isEnPassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened, piece, newPosition, updatePromotionPawn);
     const isCheckMove = kingIsChecked(board.currentPlayer.teamType, board.pieces);
+    let { success, capturedPiece } = board.playMove(isEnPassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened, piece, newPosition, updatePromotionPawn);
 
-    setBoard((previousBoard) => {
-      isPlayedMoveValid = success;
-      if (capturedPiece) capturedPiece = capturedPiece.clone();
-      return board.clone();
-    })
+    props.updateBoard();
+    isPlayedMoveValid = success;
+    if (capturedPiece) capturedPiece = capturedPiece.clone();
 
-    if (isPawnPromotionMove && isPlayedMoveValid) {
-      setShowPawnPromotionModal(true);
-    }
+    if (isPawnPromotionMove && isPlayedMoveValid) setShowPawnPromotionModal(true);
 
     if (isPlayedMoveValid) {
       const isCheckmate = checkForCheckmate();
       checkForStalemate();
       const notationMove = getChessNotationMove(piece, newPosition, capturedPiece, prevBoard, isCheckmate, isCastleMove, isCheckMove);
-      setMoveHistory([...moveHistory, notationMove]);
-      props.emitMove(notationMove);
+
+      if (!isHistoryMove) {
+        props.updateNotation(notationMove);
+        props.emitMove(notationMove);
+      }
     }
 
     return isPlayedMoveValid;
@@ -283,14 +306,15 @@ const GameManager = ({ ...props }) => {
   const promotePawn = (pieceType) => {
     if (!promotionPawn) return;
     board.promotePawn(pieceType, promotionPawn.clone(), board.currentPlayer.teamType);
-    setBoard(board.clone());
+    props.updateBoard();
+    // setBoard(board.clone());
     setShowPawnPromotionModal(false);
   }
 
   const resetBoard = () => {
     setShowCheckmmateModal(false);
     setShowStalemateModal(false);
-    setBoard(initialBoard.clone().calculateAllMoves(initialBoard.currentPlayer.teamType));
+    // setBoard(initialBoard.clone().calculateAllMoves(initialBoard.currentPlayer.teamType));
   }
 
 

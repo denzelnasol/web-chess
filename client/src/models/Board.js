@@ -225,6 +225,10 @@ export default class Board {
     this.calculateAllMoves(playerTeamType);
   }
 
+  getPieceFromPosition = (position) => {
+    return this.pieces.find((piece) => samePosition(piece.position, position));
+  }
+
   movePiece(fromPosition, toPosition) {
     this.pieces = this.pieces.reduce((results, currentPiece) => {
       if (samePosition(currentPiece.position, fromPosition)) {

@@ -6,6 +6,7 @@ import io from 'socket.io-client';
 
 // API
 import { getGame } from "api/Game";
+import { getSessionAccount } from "api/Account";
 
 // Constants
 import { HORIZONTAL_AXIS, VERTICAL_AXIS, initialBoard } from "constants/Constants";
@@ -15,8 +16,6 @@ import GameManager from "components/Game/GameManager/GameManager";
 
 // Styling
 import './style.scss';
-import Position from "models/Position";
-import { getSessionAccount } from "api/Account";
 
 const Lobby = () => {
   let { id } = useParams();
@@ -25,8 +24,7 @@ const Lobby = () => {
   const boardRef = useRef(undefined);
   const notationRef = useRef(undefined);
 
-  const [game, setGame] = useState(undefined);
-  const [board, setBoard] = useState(undefined);
+  const [board, setBoard] = useState(initialBoard.clone());
   const [players, setPlayers] = useState([]);
   const [socket, setSocket] = useState(undefined);
   const [notation, setNotation] = useState(undefined);
@@ -34,18 +32,9 @@ const Lobby = () => {
   useEffect(() => {
     const mainSocket = io('http://localhost:8080/game');
 
-    const setupBoard = async () => {
-      const game = await getGame(id)
-      setGame(game);
-      let board = initialBoard.clone();
-      if (game.notation && game.notation.length !== 0) {
-        const notations = game.notation.split(' ');
-        for (const notation of notations) {
-          parseMove(notation, board);
-        }
-        setNotation(game.notation);
-      }
-      setBoard(board);
+    const setupGame = async () => {
+      const game = await getGame(id);
+      setNotation(game.notation);
     }
 
     const setupSocket = async () => {
@@ -69,7 +58,7 @@ const Lobby = () => {
       setSocket(mainSocket);
     };
 
-    setupBoard();
+    setupGame();
     setupSocket();
 
     return () => {
@@ -88,34 +77,31 @@ const Lobby = () => {
   }, [notation]);
 
   const onMove = (move) => {
-    const combinedNotation = notationRef.current ? notationRef.current.concat(" ", move) : move; 
+    const combinedNotation = notationRef.current ? notationRef.current.concat(" ", move) : move;
     setNotation(combinedNotation);
-    parseMove(move, boardRef.current);
   }
 
-  const parseMove = (notation, board) => {
-    if (!notation || !board) return;
-    const startAndEndPositions = notation.split('->');
-    const startPosition = startAndEndPositions[0];
-    let endPosition = startAndEndPositions[1];
-    endPosition = endPosition.replace(/[xO\-+#A-Z]/g, "");
+  const updateBoard = () => {
+    setBoard((previousBoard) => {
+      return board.clone();
+    })
+  }
 
-    const startHorizontalIndex = HORIZONTAL_AXIS.indexOf(startPosition[0]);
-    const startVerticalIndex = VERTICAL_AXIS.indexOf(startPosition[1]);
-
-    const startPos = new Position(startHorizontalIndex, startVerticalIndex);
-
-    const endHorizontalIndex = HORIZONTAL_AXIS.indexOf(endPosition[0]);
-    const endVerticalIndex = VERTICAL_AXIS.indexOf(endPosition[1]);
-
-    const endPos = new Position(endHorizontalIndex, endVerticalIndex);
-
-    board.movePiece(startPos, endPos);
-    setBoard(board.clone());
-  };
+  const updateNotation = (notationMove) => {
+    if (notation) {
+      const updatedNotation = notation.concat(" ", notationMove);
+      setNotation(updatedNotation);
+    } else {
+      setNotation(notationMove);
+    }
+  }
 
   const emitMove = (move) => {
-    socket.emit('playMove', move);
+    try {
+      socket.emit('playMove', move);
+    } catch (e) {
+      console.log('Socket does not exist')
+    }
   }
 
   return (
@@ -133,8 +119,10 @@ const Lobby = () => {
       <GameManager
         gameId={id}
         board={board}
+        updateBoard={updateBoard}
         notation={notation}
         emitMove={emitMove}
+        updateNotation={updateNotation}
       />
       {/* } */}
     </div>
