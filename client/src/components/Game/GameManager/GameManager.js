@@ -90,24 +90,14 @@ const GameManager = ({ ...props }) => {
 
   const parseMove = (notation) => {
     if (!notation || !board) return;
-    const startAndEndPositions = notation.split('->');
-    const startPosition = startAndEndPositions[0];
-    let endPosition = startAndEndPositions[1];
-    endPosition = endPosition.replace(/.*x|[xO\-+#\W]/g, "");
-    console.log(endPosition);
-
-    const startHorizontalIndex = HORIZONTAL_AXIS.indexOf(startPosition[0]);
-    const startVerticalIndex = VERTICAL_AXIS.indexOf(startPosition[1]);
-
-    const startPos = new Position(startHorizontalIndex, startVerticalIndex);
-
-    const endHorizontalIndex = HORIZONTAL_AXIS.indexOf(endPosition[0]);
-    const endVerticalIndex = VERTICAL_AXIS.indexOf(endPosition[1]);
-
-    const endPos = new Position(endHorizontalIndex, endVerticalIndex);
-
-    const piece = board.getPieceFromPosition(startPos);
-    if (piece) playMove(piece, endPos, true);
+    const [startNotation, endNotation] = notation.split('->').map((pos) => pos.replace(/.*x|[xO\-+#\W]/g, ""));
+    const [startX, startY] = startNotation.split('');
+    const [endX, endY] = endNotation.split('');
+    const startPosition = new Position(HORIZONTAL_AXIS.indexOf(startX), VERTICAL_AXIS.indexOf(startY));
+    const endPosition = new Position(HORIZONTAL_AXIS.indexOf(endX), VERTICAL_AXIS.indexOf(endY));
+  
+    const piece = board.getPieceFromPosition(startPosition);
+    if (piece) playMove(piece, endPosition, true);
   };
 
   const playMove = (piece, newPosition, isHistoryMove) => {
@@ -214,6 +204,7 @@ const GameManager = ({ ...props }) => {
     if (type !== PieceType.KING || !castleAvailable) return false;
     const kingRow = teamType === TeamType.WHITE ? 0 : 7;
     const isKingInPosition = samePosition(grabPosition, new Position(3, kingRow));
+    
     const isLeftNewPositionCorrect = samePosition(newPosition, new Position(1, kingRow));
     const isRightNewPositionCorrect = samePosition(newPosition, new Position(5, kingRow));
 
@@ -257,14 +248,12 @@ const GameManager = ({ ...props }) => {
     if (!promotionPawn) return;
     board.promotePawn(pieceType, promotionPawn.clone(), board.currentPlayer.teamType);
     props.updateBoard();
-    // setBoard(board.clone());
     setShowPawnPromotionModal(false);
   }
 
   const resetBoard = () => {
     setShowCheckmmateModal(false);
     setShowStalemateModal(false);
-    // setBoard(initialBoard.clone().calculateAllMoves(initialBoard.currentPlayer.teamType));
   }
 
 
