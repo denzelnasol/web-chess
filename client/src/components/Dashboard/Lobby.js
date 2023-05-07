@@ -9,7 +9,7 @@ import { getGame } from "api/Game";
 import { getSessionAccount } from "api/Account";
 
 // Constants
-import { HORIZONTAL_AXIS, VERTICAL_AXIS, initialBoard } from "constants/Constants";
+import { initialBoard } from "constants/Constants";
 
 // Components
 import GameManager from "components/Game/GameManager/GameManager";
@@ -115,16 +115,16 @@ const Lobby = () => {
           ))}
         </ul>
       )}
-      {/* {game && board && */}
-      <GameManager
-        gameId={id}
-        board={board}
-        updateBoard={updateBoard}
-        notation={notation}
-        emitMove={emitMove}
-        updateNotation={updateNotation}
-      />
-      {/* } */}
+      {board &&
+        <GameManager
+          gameId={id}
+          board={board}
+          updateBoard={updateBoard}
+          notation={notation}
+          emitMove={emitMove}
+          updateNotation={updateNotation}
+        />
+      }
     </div>
   );
 }

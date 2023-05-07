@@ -17,12 +17,9 @@ import CheckmateModal from "components/Game/CheckmateModal/CheckmateModal";
 // Utilities
 import { samePosition, getPositionPointDifference } from "utilities/Position";
 
-// Constants
-import { initialBoard } from "constants/Constants";
-
 // Rules
 import { isValidPawnPosition, moveIsPawnPromotion } from "Rules/PieceRules/PawnRules";
-import { getPossibleKnightMoves, isValidKnightPosition } from "Rules/PieceRules/KnightRules";
+import { isValidKnightPosition } from "Rules/PieceRules/KnightRules";
 import { isValidBishopPosition } from "Rules/PieceRules/BishopRules";
 import { isValidRookPosition } from "Rules/PieceRules/RookRules";
 import { isValidQueenPosition } from "Rules/PieceRules/QueenRules";
