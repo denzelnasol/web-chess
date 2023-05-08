@@ -150,11 +150,11 @@ const GameManager = ({ ...props }) => {
       const isKingsideCastle = newPosition.x === 1;
       notation = isKingsideCastle ? "O-O" : "O-O-O";
     } else {
-      const disambiguation = getDisambiguation(piece, newPosition, prevBoard);
+      // const disambiguation = getDisambiguation(piece, newPosition, prevBoard);
+      const disambiguation = ''; // leave blank for now as we already keep track of original position
       let type = PIECE_TYPE_TO_LETTER[piece.type];
       if (type === PIECE_TYPE_TO_LETTER[PieceType.PAWN]) type = captured ? HORIZONTAL_AXIS[piece.position.x] : '';
-      const pawnStartPosLetter = '';
-      notation = type + disambiguation + pawnStartPosLetter + captured + HORIZONTAL_AXIS[newPosition.x] + VERTICAL_AXIS[newPosition.y];
+      notation = type + disambiguation + captured + HORIZONTAL_AXIS[newPosition.x] + VERTICAL_AXIS[newPosition.y];
     }
     notation += isCheckmate ? "#" : isCheck ? "+" : "";
     notation = `${HORIZONTAL_AXIS[piece.position.x]}${VERTICAL_AXIS[piece.position.y]}->${notation}`;

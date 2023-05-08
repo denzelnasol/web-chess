@@ -96,20 +96,26 @@ const Lobby = () => {
     }
   }
 
-  return (
-    <div className="game-creation">
+
+  const gameInfo = (
+    <div className="game-info">
       <h2>Game Lobby</h2>
       <p>Players in lobby: {players.length}</p>
       {players && (
         <ul>
           {players.map((player) => (
-            player && player.email && 
+            player && player.email &&
             <li key={player.email}>
               {player.email} ({player.color})
             </li>
           ))}
         </ul>
       )}
+    </div>
+  );
+
+  const gameManager = (
+    <div className="game-board">
       {board &&
         <GameManager
           gameId={id}
@@ -122,6 +128,13 @@ const Lobby = () => {
           account={account}
         />
       }
+    </div>
+  );
+
+  return (
+    <div className="game-creation">
+      {gameInfo}
+      {gameManager}
     </div>
   );
 }
