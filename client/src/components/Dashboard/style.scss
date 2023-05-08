@@ -17,13 +17,17 @@
 }
 
 .game-creation {
-  height: 91vh;
   background-color: #262421;
   color: #fff;
   display: flex;
-
+  
   .game-info {
+    margin-right: 2rem;
+    margin-left: 1rem;
 
+    .invite-button {
+
+    }
   }
 
   .game-board {

@@ -15,6 +15,7 @@ import GameManager from "components/Game/GameManager/GameManager";
 
 // Styling
 import './style.scss';
+import Button from "components/Button/Button";
 
 const Lobby = () => {
   let { id } = useParams();
@@ -111,6 +112,15 @@ const Lobby = () => {
           ))}
         </ul>
       )}
+
+      <Button
+        className = "invite-button"
+        buttonStyle = "btn--secondary"
+        buttonSize = "btn--small"
+        noLink = {true}
+      >
+        Send Invite
+      </Button>
     </div>
   );
 

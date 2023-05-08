@@ -11,6 +11,7 @@ const STYLES = [
 ];
 
 const SIZES = [
+  'btn--small',
   'btn--medium',
   'btn--large'
 ];
@@ -25,15 +26,19 @@ const Button = ({ ...props }) => {
     ? props.buttonSize
     : SIZES[0];
 
-  return (
+  const button = (
+    <button
+      className={`${props.className} button ${checkButtonStyle} ${checkButtonSize}`}
+      onClick={props.onClick}
+      type={props.type}
+    >
+      {props.children}
+    </button>
+  );
+
+  return props.noLink ? button : (
     <Link to={`/${props.route}`} className="btn-mobile">
-      <button
-        className={`${props.className} button ${checkButtonStyle} ${checkButtonSize}`}
-        onClick={props.onClick}
-        type={props.type}
-      >
-        {props.children}
-      </button>
+      {button}
     </Link>
   );
 }
