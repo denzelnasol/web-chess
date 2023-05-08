@@ -96,7 +96,7 @@ const GameManager = ({ ...props }) => {
 
   const parseMove = (notation) => {
     if (!notation || !board) return;
-    const [startNotation, endNotation] = notation.split('->').map((pos) => pos.replace(/.*x|[xO\-+#\W]/g, ""));
+    const [startNotation, endNotation] = notation.split('->').map((pos) => pos.replace(/[A-ZxO+#\-\W]/g, ''));
     const [startX, startY] = startNotation.split('');
     const [endX, endY] = endNotation.split('');
     const startPosition = new Position(HORIZONTAL_AXIS.indexOf(startX), VERTICAL_AXIS.indexOf(startY));

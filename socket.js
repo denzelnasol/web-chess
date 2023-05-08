@@ -34,9 +34,9 @@ function initializeSocket(server) {
       const accountEmail = data?.account?.email ?? "unknown email";
       const accountId = data?.account?.id;
 
-      console.log(`Socket ${socket.id} with email ${accountEmail} joined game ${data.gameId}`);
       socket.join(`game_${data.gameId}`);
       socket.gameId = data.gameId;
+      console.log(`Socket ${socket.id} with email ${accountEmail} joined game ${data.gameId}`);
 
       const room = gameNamespace.adapter.rooms.get(`game_${data.gameId}`);
       // if (room && room.size > 2 && room.has(socket.id)) {
@@ -54,7 +54,7 @@ function initializeSocket(server) {
           id: accountId,
           email: accountEmail,
           color: white_player_id === owner_id ? 'white' : 'black',
-          
+
         };
       } else {
         playerMap[socket.id] = {
@@ -69,8 +69,6 @@ function initializeSocket(server) {
       // Update the game with the new player
       const updateQuery = `UPDATE game SET ${color}_player_id = $1 WHERE id = $2`;
       await pool.query(updateQuery, [accountId, data.gameId]);
-
-      console.log(`Updated game with: accountId-${accountId}, gameId-${data.gameId}`);
 
       const players = [...room].map((socketId) => {
         return {
@@ -91,7 +89,6 @@ function initializeSocket(server) {
       const room = gameNamespace.adapter.rooms.get(`game_${gameId}`);
       if (room) {
         const remainingPlayers = [...room].filter((socketId) => socketId !== leavingPlayer);
-        delete playerMap[socket.id];
         const updatedPlayers = remainingPlayers.map((socketId) => {
           return {
             id: playerMap[socketId].id,
