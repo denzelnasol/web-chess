@@ -39,17 +39,9 @@ const Lobby = () => {
 
     const setupSocket = async () => {
       const account = await getSessionAccount();
-      const onConnectData = {
-        account,
-        gameId: id,
-      }
-
       setAccount(account);
 
-      mainSocket.on("connect", () => {
-        console.log(`Connected to lobby for game ${id}`);
-        mainSocket.emit("joinGame", onConnectData);
-      });
+      mainSocket.on("connect", onSocketJoinGame);
 
       mainSocket.on("players", (playerList) => {
         setPlayers(playerList);
@@ -68,12 +60,27 @@ const Lobby = () => {
   }, []);
 
   useEffect(() => {
+    if (!socket) return;
+    onSocketJoinGame();
+  }, [socket]);
+
+  useEffect(() => {
     notationRef.current = notation;
   }, [notation]);
 
   const onSocketPlayMove = (move) => {
     const combinedNotation = notationRef.current ? notationRef.current.concat(" ", move) : move;
     setNotation(combinedNotation);
+  }
+
+  const onSocketJoinGame = () => {
+    if (!socket) return;
+    console.log(`Connected to lobby for game ${id}`);
+    socket.emit("joinGame",
+      {
+        account,
+        gameId: id
+      });
   }
 
   const updateBoard = () => {
@@ -114,10 +121,10 @@ const Lobby = () => {
       )}
 
       <Button
-        className = "invite-button"
-        buttonStyle = "btn--secondary"
-        buttonSize = "btn--small"
-        noLink = {true}
+        className="invite-button"
+        buttonStyle="btn--secondary"
+        buttonSize="btn--small"
+        noLink={true}
       >
         Send Invite
       </Button>
