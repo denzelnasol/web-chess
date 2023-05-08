@@ -9,7 +9,7 @@ export const PieceType =
   });
 
 export const PIECE_TYPE_TO_LETTER = {
-  [PieceType.PAWN]: "",
+  [PieceType.PAWN]: "P",
   [PieceType.KNIGHT]: "N",
   [PieceType.BISHOP]: "B",
   [PieceType.ROOK]: "R",

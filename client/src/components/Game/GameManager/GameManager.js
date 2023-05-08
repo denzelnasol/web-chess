@@ -63,7 +63,7 @@ const GameManager = ({ ...props }) => {
       }
     }
   }, [board, account, players, moveHistory]);
-  console.log(playerColor)
+
   useEffect(() => {
     if (!notation) return;
 
@@ -83,7 +83,7 @@ const GameManager = ({ ...props }) => {
 
     updateMoves();
   }, [moveHistory]);
-  console.log(account)
+
   // ** Functions ** //
   const updatePossibleMoves = () => {
     if (!board) return;
@@ -96,7 +96,8 @@ const GameManager = ({ ...props }) => {
 
   const parseMove = (notation) => {
     if (!notation || !board) return;
-    const [startNotation, endNotation] = notation.split('->').map((pos) => pos.replace(/[A-ZxO+#\-\W]/g, ''));
+    let refactoredNotation = notation.split('->').map(pos => pos.replace(/.*?(?=x)/, ''));
+    const [startNotation, endNotation] = refactoredNotation.map((pos) => pos.replace(/[A-ZxO+#\-\W]/g, ''));
     const [startX, startY] = startNotation.split('');
     const [endX, endY] = endNotation.split('');
     const startPosition = new Position(HORIZONTAL_AXIS.indexOf(startX), VERTICAL_AXIS.indexOf(startY));
@@ -119,14 +120,14 @@ const GameManager = ({ ...props }) => {
     const isPawnPromotionMove = moveIsPawnPromotion(newPosition, piece.type, piece.teamType);
     const isCastleMove = moveIsCastle(piece.position, newPosition, piece.type, piece.teamType, piece.castleAvailable);
     const isKingThreatened = kingIsThreatened(piece.teamType, board.pieces);
-    const isCheckMove = kingIsChecked(board.currentPlayer.teamType, board.pieces);
     let { success, capturedPiece } = board.playMove(isEnPassantMove, isValidMove, isPawnPromotionMove, isCastleMove, isKingThreatened, piece, newPosition, updatePromotionPawn);
+    const isCheckMove = kingIsChecked(board.currentPlayer.teamType, board.pieces);
 
     props.updateBoard();
     isPlayedMoveValid = success;
     if (capturedPiece) capturedPiece = capturedPiece.clone();
 
-    if (isPawnPromotionMove && isPlayedMoveValid) setShowPawnPromotionModal(true);
+    if (isPawnPromotionMove && isPlayedMoveValid && playerColor === piece.teamType) setShowPawnPromotionModal(true);
 
     if (isPlayedMoveValid) {
       const isCheckmate = checkForCheckmate();
@@ -150,8 +151,9 @@ const GameManager = ({ ...props }) => {
       notation = isKingsideCastle ? "O-O" : "O-O-O";
     } else {
       const disambiguation = getDisambiguation(piece, newPosition, prevBoard);
-      const type = PIECE_TYPE_TO_LETTER[piece.type];
-      const pawnStartPosLetter = (piece.type === PieceType.PAWN && captured) ? HORIZONTAL_AXIS[piece.position.x] : '';
+      let type = PIECE_TYPE_TO_LETTER[piece.type];
+      if (type === PIECE_TYPE_TO_LETTER[PieceType.PAWN]) type = captured ? HORIZONTAL_AXIS[piece.position.x] : '';
+      const pawnStartPosLetter = '';
       notation = type + disambiguation + pawnStartPosLetter + captured + HORIZONTAL_AXIS[newPosition.x] + VERTICAL_AXIS[newPosition.y];
     }
     notation += isCheckmate ? "#" : isCheck ? "+" : "";

@@ -24,10 +24,10 @@ function PawnPromotionModal({ ...props }) {
   return (
     <div className={`pawn-promotion-modal ${props.showPawnPromotionModal ? "" : "hidden"}`}>
       <div className="modal-body">
-        <img onClick={() => props.promotePawn(PieceType.ROOK)} src={`images/${promotionTeamType()}-rook.png`} />
-        <img onClick={() => props.promotePawn(PieceType.BISHOP)} src={`images/${promotionTeamType()}-bishop.png`} />
-        <img onClick={() => props.promotePawn(PieceType.KNIGHT)} src={`images/${promotionTeamType()}-knight.png`} />
-        <img onClick={() => props.promotePawn(PieceType.QUEEN)} src={`images/${promotionTeamType()}-queen.png`} />
+        <img onClick={() => props.promotePawn(PieceType.ROOK)} src={`/images/${promotionTeamType()}-rook.png`} />
+        <img onClick={() => props.promotePawn(PieceType.BISHOP)} src={`/images/${promotionTeamType()}-bishop.png`} />
+        <img onClick={() => props.promotePawn(PieceType.KNIGHT)} src={`/images/${promotionTeamType()}-knight.png`} />
+        <img onClick={() => props.promotePawn(PieceType.QUEEN)} src={`/images/${promotionTeamType()}-queen.png`} />
       </div>
     </div>
   );
