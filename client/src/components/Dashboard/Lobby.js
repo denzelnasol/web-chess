@@ -12,10 +12,11 @@ import { initialBoard } from "constants/Constants";
 
 // Components
 import GameManager from "components/Game/GameManager/GameManager";
+import Button from "components/Button/Button";
+import InviteDialog from "components/InviteDialog/InviteDialog";
 
 // Styling
 import './style.scss';
-import Button from "components/Button/Button";
 
 const Lobby = () => {
   let { id } = useParams();
@@ -28,6 +29,7 @@ const Lobby = () => {
   const [socket, setSocket] = useState(undefined);
   const [notation, setNotation] = useState(undefined);
   const [account, setAccount] = useState(undefined);
+  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
 
   useEffect(() => {
     const mainSocket = io('http://localhost:8080/game');
@@ -124,6 +126,7 @@ const Lobby = () => {
         className="invite-button"
         buttonStyle="btn--secondary"
         buttonSize="btn--small"
+        onClick={() => setIsInviteDialogOpen(!isInviteDialogOpen)}
         noLink={true}
       >
         Send Invite
@@ -133,6 +136,10 @@ const Lobby = () => {
 
   const gameManager = (
     <div className="game-board">
+      <InviteDialog
+        isInviteDialogOpen={isInviteDialogOpen}
+        updateInviteDialog={() => setIsInviteDialogOpen(!isInviteDialogOpen)}
+      />
       {board &&
         <GameManager
           gameId={id}
