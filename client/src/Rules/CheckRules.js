@@ -61,6 +61,7 @@ const getDiagonalCheckTiles = (piece, king) => {
 const kingIsChecked = (teamType, boardState) => {
   const king = getKing(teamType, boardState);
   const attackedMoves = getOpponentAttackMoves(teamType, boardState);
+  if (!attackedMoves || !king) return false;
   const isKingThreatened = attackedMoves.some(move => samePosition(move, king.position));
   return isKingThreatened;
 };

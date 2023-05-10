@@ -12,6 +12,9 @@ import { VERTICAL_AXIS, HORIZONTAL_AXIS, GRID_SIZE } from 'constants/Constants';
 // Rules
 import { tileIsOccupiedByOpponent } from 'Rules/GeneralRules';
 
+// Enums
+import { TeamType } from 'enums/TeamType';
+
 // Utilities
 import { samePosition } from 'utilities/Position';
 
@@ -44,7 +47,8 @@ function Chessboard({ ...props }) {
     if (e.target.classList.contains('chess-piece') && chessboard) {
       const grabPositionX = Math.floor((e.clientX - chessboard.offsetLeft + window.scrollX) / GRID_SIZE);
       const grabPositionY = Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - 800 + window.scrollY) / 100));
-      setGrabPosition(new Position(grabPositionX, grabPositionY));
+      const grabPosition = props.playerColor === TeamType.BLACK ? new Position(7 - grabPositionX, 7 - grabPositionY) : new Position(grabPositionX, grabPositionY);
+      setGrabPosition(grabPosition);
 
       const x = e.clientX - (GRID_SIZE / 2) + window.scrollX;
       const y = e.clientY - (GRID_SIZE / 2) + window.scrollY;
@@ -92,14 +96,14 @@ function Chessboard({ ...props }) {
 
     const x = Math.floor((e.clientX - chessboard.offsetLeft + window.scrollX) / GRID_SIZE);
     const y = Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - 800 + window.scrollY) / GRID_SIZE));
-
+    const newPosition = props.playerColor === TeamType.BLACK ? new Position(7 - x, 7 - y) : new Position(x, y);
     const currentPiece = props.pieces.find((p) => samePosition(p.position, grabPosition));
     if (!currentPiece) {
       setActivePiece(null);
       return;
     }
 
-    const success = props.playMove(currentPiece.clone(), new Position(x, y));
+    const success = props.playMove(currentPiece.clone(), newPosition);
     if (!success) {
       // Reset the piece position
       activePiece.style.position = 'relative';
@@ -111,22 +115,41 @@ function Chessboard({ ...props }) {
   }
 
   let board = [];
+  if (props.playerColor === TeamType.BLACK) {
+    for (let j = 0; j < VERTICAL_AXIS.length; j++) {
+      for (let i = HORIZONTAL_AXIS.length - 1; i >= 0; i--) {
+        const number = j + i + 2;
+        const piece = props.pieces.find((piece) => (samePosition(piece.position, new Position(i, j))));
+        const image = piece ? piece.image : undefined;
+        const currentPiece = activePiece !== null ? props.pieces.find((piece) => samePosition(piece.position, grabPosition)) : undefined;
+        const highlight = currentPiece?.possibleMoves ? (
+          currentPiece.possibleMoves.some((piece) => samePosition(piece, new Position(i, j)))
+        ) && !currentPiece.isImmovable && props.playerColor === currentPiece.teamType : false;
 
-  for (let j = VERTICAL_AXIS.length - 1; j >= 0; j--) {
-    for (let i = 0; i < HORIZONTAL_AXIS.length; i++) {
-      const number = j + i + 2;
-      const piece = props.pieces.find((piece) => (samePosition(piece.position, new Position(i, j))));
-      const image = piece ? piece.image : undefined;
-      const currentPiece = activePiece !== null ? props.pieces.find((piece) => samePosition(piece.position, grabPosition)) : undefined;
-      const highlight = currentPiece?.possibleMoves ? (
-        currentPiece.possibleMoves.some((piece) => samePosition(piece, new Position(i, j)))
-      ) && !currentPiece.isImmovable && props.playerColor === currentPiece.teamType : false;
+        const enemyHighlight = currentPiece?.possibleMoves ? (
+          currentPiece.possibleMoves.some((piece) => samePosition(piece, new Position(i, j))) && tileIsOccupiedByOpponent(new Position(i, j), props.pieces, currentPiece.teamType)
+        ) && !currentPiece.isImmovable && props.playerColor === currentPiece.teamType : false;
 
-      const enemyHighlight = currentPiece?.possibleMoves ? (
-        currentPiece.possibleMoves.some((piece) => samePosition(piece, new Position(i, j))) && tileIsOccupiedByOpponent(new Position(i, j), props.pieces, currentPiece.teamType)
-      ) && !currentPiece.isImmovable && props.playerColor === currentPiece.teamType : false;
+        board.push(<Tile key={`${j},${i}`} number={number} image={image} highlight={highlight} enemyHighlight={enemyHighlight} />);
+      }
+    }
+  } else if ((props.playerColor === TeamType.WHITE) ) {
+    for (let j = VERTICAL_AXIS.length - 1; j >= 0; j--) {
+      for (let i = 0; i < HORIZONTAL_AXIS.length; i++) {
+        const number = j + i + 2;
+        const piece = props.pieces.find((piece) => (samePosition(piece.position, new Position(i, j))));
+        const image = piece ? piece.image : undefined;
+        const currentPiece = activePiece !== null ? props.pieces.find((piece) => samePosition(piece.position, grabPosition)) : undefined;
+        const highlight = currentPiece?.possibleMoves ? (
+          currentPiece.possibleMoves.some((piece) => samePosition(piece, new Position(i, j)))
+        ) && !currentPiece.isImmovable && props.playerColor === currentPiece.teamType : false;
 
-      board.push(<Tile key={`${j},${i}`} number={number} image={image} highlight={highlight} enemyHighlight={enemyHighlight} />);
+        const enemyHighlight = currentPiece?.possibleMoves ? (
+          currentPiece.possibleMoves.some((piece) => samePosition(piece, new Position(i, j))) && tileIsOccupiedByOpponent(new Position(i, j), props.pieces, currentPiece.teamType)
+        ) && !currentPiece.isImmovable && props.playerColor === currentPiece.teamType : false;
+
+        board.push(<Tile key={`${j},${i}`} number={number} image={image} highlight={highlight} enemyHighlight={enemyHighlight} />);
+      }
     }
   }
 
