@@ -122,12 +122,18 @@ const GameManager = ({ ...props }) => {
   };
 
   const playMove = (piece, newPosition, isHistoryMove, promotionPieceType) => {
-    if (!isHistoryMove) {
-      if (board.currentPlayer.teamType !== playerColor) {
-        return false;
-      }
+    if (!isHistoryMove && board.currentPlayer.teamType !== playerColor) {
+      return false;
     }
-    let isPlayedMoveValid = false;
+
+    const handlePawnPromotion = () => {
+      if (isPawnPromotionMove && isPlayedMoveValid && playerColorRef.current === piece.teamType && !isHistoryMove) {
+        setShowPawnPromotionModal(true);
+      } else if (isPawnPromotionMove && isPlayedMoveValid && isHistoryMove && promotionPieceType) {
+        promotePawn(promotionPieceType, isHistoryMove, piece);
+      }
+    };
+  
     const prevBoard = board.clone();
     const isValidMove = moveIsValid(piece.position, newPosition, piece.type, piece.teamType, piece.castleAvailable);
     const isEnPassantMove = moveIsEnpassant(piece.position, newPosition, piece.type, piece.teamType);
@@ -138,19 +144,15 @@ const GameManager = ({ ...props }) => {
     const isCheckMove = kingIsChecked(board.currentPlayer.teamType, board.pieces);
 
     props.updateBoard();
-    isPlayedMoveValid = success;
-    if (capturedPiece) capturedPiece = capturedPiece.clone();
+    const isPlayedMoveValid = success;
+    const captured = capturedPiece ? capturedPiece.clone() : null;
 
-    if (isPawnPromotionMove && isPlayedMoveValid && playerColorRef.current === piece.teamType && !isHistoryMove) {
-      setShowPawnPromotionModal(true);
-    } else if (isPawnPromotionMove && isPlayedMoveValid && isHistoryMove && promotionPieceType) {
-      promotePawn(promotionPieceType, isHistoryMove, piece);
-    }
+    handlePawnPromotion();
 
     if (isPlayedMoveValid) {
       const isCheckmate = checkForCheckmate();
       checkForStalemate();
-      const notationMove = getChessNotationMove(piece, newPosition, capturedPiece, isCheckmate, isCastleMove, isCheckMove);
+      const notationMove = getChessNotationMove(piece, newPosition, captured, isCheckmate, isCastleMove, isCheckMove);
 
       if (!isHistoryMove) {
         props.updateNotation(notationMove);
@@ -163,21 +165,13 @@ const GameManager = ({ ...props }) => {
 
   const getChessNotationMove = (piece, newPosition, capturedPiece, isCheckmate, isCastleMove, isCheckMove) => {
     const captured = capturedPiece ? "x" : "";
-    let notation;
-    if (piece.type === PieceType.KING && isCastleMove) {
-      const isKingsideCastle = newPosition.x === 1;
-      notation = isKingsideCastle ? `O-O${HORIZONTAL_AXIS[newPosition.x]}${VERTICAL_AXIS[newPosition.y]}`
-        : `O-O-O${HORIZONTAL_AXIS[newPosition.x]}${VERTICAL_AXIS[newPosition.y]}`;
-    } else {
-      let type = PIECE_TYPE_TO_LETTER[piece.type];
-      if (type === PIECE_TYPE_TO_LETTER[PieceType.PAWN]) type = captured ? HORIZONTAL_AXIS[piece.position.x] : '';
-      notation = type + captured + HORIZONTAL_AXIS[newPosition.x] + VERTICAL_AXIS[newPosition.y];
-    }
+    let type = PIECE_TYPE_TO_LETTER[piece.type];
+    if (type === PIECE_TYPE_TO_LETTER[PieceType.PAWN]) type = captured ? HORIZONTAL_AXIS[piece.position.x] : '';
+    let notation = isCastleMove ? (newPosition.x === 1 ? 'O-O' : 'O-O-O') : `${type}${captured}${HORIZONTAL_AXIS[newPosition.x]}${VERTICAL_AXIS[newPosition.y]}`;
     notation += isCheckmate ? "#" : isCheckMove ? "+" : "";
-    notation = `${HORIZONTAL_AXIS[piece.position.x]}${VERTICAL_AXIS[piece.position.y]}->${notation}`;
-    return notation;
+    return `${HORIZONTAL_AXIS[piece.position.x]}${VERTICAL_AXIS[piece.position.y]}->${notation}`;
   }
-
+  
   const pieceTypeValidations = {
     [PieceType.PAWN]: isValidPawnPosition,
     [PieceType.KNIGHT]: isValidKnightPosition,
@@ -253,22 +247,23 @@ const GameManager = ({ ...props }) => {
     if (!promotionPawn) return;
 
     if (!isHistoryMove) {
-      let newPawnPromotionNotation = notation.split(' ');
-      newPawnPromotionNotation = newPawnPromotionNotation[newPawnPromotionNotation.length - 1];
-      newPawnPromotionNotation = newPawnPromotionNotation.concat(`=${pieceType.substring(0, 1)}`);
-
-      props.updateNotation(undefined, `=${pieceType.substring(0, 1)}`);
-      const data = {
-        type: pieceType,
-        position: promotionPawn.position,
-        promotionNotation: newPawnPromotionNotation,
-      }
-      props.emitPawnPromotion(data);
+      updateNotationAndEmitPawnPromotion(pieceType);
     }
     board.promotePawn(pieceType, promotionPawn.clone(), board.currentPlayer.teamType);
     props.updateBoard();
 
     setShowPawnPromotionModal(false);
+  }
+
+  const updateNotationAndEmitPawnPromotion = (pieceType) => {
+    const newPawnPromotionNotation = `${notation.split(' ').pop()}=${pieceType.substring(0, 1)}`;
+    props.updateNotation(undefined, `=${pieceType.substring(0, 1)}`);
+    const data = {
+      type: pieceType,
+      position: promotionPawn.position,
+      promotionNotation: newPawnPromotionNotation,
+    }
+    props.emitPawnPromotion(data);
   }
 
   const resetBoard = () => {

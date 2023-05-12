@@ -55,7 +55,7 @@ const Lobby = () => {
       mainSocket.on('pawnPromotion', onSocketPawnPromotion);
       setSocket(mainSocket);
     };
-    
+
     setupGame();
     setupSocket();
 
@@ -78,22 +78,19 @@ const Lobby = () => {
   }, [board]);
 
   const onSocketPlayMove = (move) => {
-    console.log('SOCKET TRIGGERD BY:', move)
-    const combinedNotation = notationRef.current ? notationRef.current.concat(" ", move) : move;
-    setNotation(combinedNotation);
+    setNotation(notationRef.current ? `${notationRef.current} ${move}` : move);
   }
 
   const onSocketJoinGame = () => {
     if (!socket) return;
     console.log(`Connected to lobby for game ${id}`);
-    socket.emit("joinGame",
-      {
-        account,
-        gameId: id
-      });
+    const data = {
+      account,
+      gameId: id
+    }
+    socket.emit("joinGame", data);
   }
-  // console.log(notation)
-  console.log(board);
+
   const onSocketPawnPromotion = (data) => {
     const pawnPosition = new Position(data.position.x, data.position.y);
     const pawn = boardRef.current.pieces.find((piece) => samePosition(pawnPosition, piece.position));
@@ -107,34 +104,23 @@ const Lobby = () => {
   }
 
   const updateNotation = (notationMove, pawnPromotionNotation) => {
-    if (pawnPromotionNotation) {
-      const updatedNotation = notation.concat(pawnPromotionNotation);
-      setNotation(updatedNotation);
-    } else {
-      if (notation) {
-        const updatedNotation = notation.concat(" ", notationMove);
-        setNotation(updatedNotation);
-      } else {
-        setNotation(notationMove);
-      }
+    let updatedNotation = pawnPromotionNotation ? notation.concat(pawnPromotionNotation) : notationMove;
+    if (notation) {
+      updatedNotation = notation.concat(" ", updatedNotation);
+    }
+    setNotation(updatedNotation);
+  }
+
+  const createEmitEventFunction = (eventName) => (data) => {
+    try {
+      socket.emit(eventName, data);
+    } catch (e) {
+      console.log(`Socket Error: ${eventName} - Socket does not exist`);
     }
   }
 
-  const emitMove = (move) => {
-    try {
-      socket.emit('playMove', move);
-    } catch (e) {
-      console.log('Socket does not exist')
-    }
-  }
-
-  const emitPawnPromotion = (data) => {
-    try {
-      socket.emit('pawnPromotion', data);
-    } catch (e) {
-      console.log('Socket Error: Socket does not exist');
-    }
-  }
+  const emitMove = createEmitEventFunction('playMove');
+  const emitPawnPromotion = createEmitEventFunction('pawnPromotion');
 
   const gameInfo = (
     <div className="game-info">
@@ -142,8 +128,7 @@ const Lobby = () => {
       <p>Players in lobby: {players.length}</p>
       {players && (
         <ul>
-          {players.map((player) => (
-            player && player.email &&
+          {players.filter(player => player && player.email).map(player => (
             <li key={player.email}>
               {player.email} ({player.color})
             </li>
