@@ -229,19 +229,6 @@ export default class Board {
     return this.pieces.find((piece) => samePosition(piece.position, position));
   }
 
-  movePiece(fromPosition, toPosition) {
-    this.pieces = this.pieces.reduce((results, currentPiece) => {
-      if (samePosition(currentPiece.position, fromPosition)) {
-        currentPiece.position.x = toPosition.x;
-        currentPiece.position.y = toPosition.y;
-        currentPiece.castleAvailable = false;
-        this.updateCurrentPlayer();
-      }
-      results.push(currentPiece);
-      return results;
-    }, []);
-  }
-
   clone() {
     return new Board(this.pieces.map((piece) => piece.clone()), this.currentPlayer);
   }

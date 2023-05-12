@@ -16,3 +16,7 @@ export const PIECE_TYPE_TO_LETTER = {
   [PieceType.QUEEN]: "Q",
   [PieceType.KING]: "K"
 };
+
+export const LETTER_TO_PIECE_TYPE = Object.fromEntries(
+  Object.entries(PIECE_TYPE_TO_LETTER).map(([key, value]) => [value, key])
+);

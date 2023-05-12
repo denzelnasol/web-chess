@@ -1,6 +1,6 @@
 export default class Piece {
   constructor(position, type, teamType, possibleMoves = [], isImmovable = false) {
-    this.image = `/images/${teamType}-${type.toLowerCase()}.png`;
+    this.image = `/images/${teamType}-${type ? type.toLowerCase() : ''}.png`;
     this.position = position;
     this.type = type;
     this.teamType = teamType;

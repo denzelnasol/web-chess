@@ -70,14 +70,18 @@ function initializeSocket(server) {
       const updateQuery = `UPDATE game SET ${color}_player_id = $1 WHERE id = $2`;
       await pool.query(updateQuery, [accountId, data.gameId]);
 
-      const players = [...room].map((socketId) => {
-        return {
-          id: playerMap[socketId].id,
-          email: playerMap[socketId].email,
-          color: playerMap[socketId].color,
-        };
-      });
-      gameNamespace.to(`game_${data.gameId}`).emit("players", players);
+      try {
+        const players = [...room].map((socketId) => {
+          return {
+            id: playerMap[socketId].id,
+            email: playerMap[socketId].email,
+            color: playerMap[socketId].color,
+          };
+        });
+        gameNamespace.to(`game_${data.gameId}`).emit("players", players);
+      } catch (e) {
+        console.log(e);
+      }
     });
 
     // Handle leaving a game
@@ -108,6 +112,12 @@ function initializeSocket(server) {
       // Broadcast the move to other players in the game
       socket.broadcast.to(`game_${socket.gameId}`).emit('playMove', move);
     });
+
+    socket.on('pawnPromotion', (data) => {
+      console.log(`Socket ${socket.id} sent pawn promotion data for game ${socket.gameId}`);
+      // Broadcast pawn promotion data to other players in the game
+      socket.broadcast.to(`game_${socket.gameId}`).emit('pawnPromotion', data);
+    })
   });
 
 

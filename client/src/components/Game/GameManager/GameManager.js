@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 // API
 import { updateMoveHistory } from "api/Game";
 
 // Enums
-import { PieceType, PIECE_TYPE_TO_LETTER } from "enums/PieceType";
+import { PieceType, PIECE_TYPE_TO_LETTER, LETTER_TO_PIECE_TYPE } from "enums/PieceType";
 import { TeamType } from 'enums/TeamType';
 import { HORIZONTAL_AXIS, VERTICAL_AXIS } from "constants/Constants";
 
@@ -46,6 +46,8 @@ const GameManager = ({ ...props }) => {
 
   const { board, notation, account, players } = props;
 
+  const playerColorRef = useRef(undefined);
+
   // ** useStates ** //
   const [promotionPawn, setPromotionPawn] = useState();
   const [showPawnPromotionModal, setShowPawnPromotionModal] = useState(false);
@@ -56,23 +58,31 @@ const GameManager = ({ ...props }) => {
 
   // ** useEffects ** //
   useEffect(() => {
+    if (!board || !account || !players || !moveHistory) return;
     updatePossibleMoves();
     for (const player of players) {
       if (account.id === player.id) {
-        setPlayerColor(player.color)
+        playerColorRef.current = player.color;
+        setPlayerColor(player.color);
       }
     }
   }, [board, account, players, moveHistory]);
 
   useEffect(() => {
-    if (!notation) return;
+    if (!notation || notation.length === 0 || !players || players.length === 0) return;
+    for (const player of players) {
+      if (account.id === player.id) {
+        playerColorRef.current = player.color;
+        setPlayerColor(player.color);
+      }
+    }
 
     const notations = notation.split(' ');
     for (const notation of notations) {
       parseMove(notation);
     }
     setMoveHistory(notation.split(' '));
-  }, [notation]);
+  }, [notation, players]);
 
   useEffect(() => {
     const updateMoves = async () => {
@@ -97,6 +107,10 @@ const GameManager = ({ ...props }) => {
   const parseMove = (notation) => {
     if (!notation || !board) return;
     let refactoredNotation = notation.split('->').map(pos => pos.replace(/.*?(?=x)/, ''));
+    let promotionPieceType = notation.includes('=') ? notation.substring(notation.length - 1) : undefined;
+
+    if (promotionPieceType) promotionPieceType = LETTER_TO_PIECE_TYPE[promotionPieceType];
+    promotionPieceType = promotionPieceType === PieceType.KING ? PieceType.KNIGHT : promotionPieceType;
     const [startNotation, endNotation] = refactoredNotation.map((pos) => pos.replace(/[A-ZxO+#\-\W]/g, ''));
     const [startX, startY] = startNotation.split('');
     const [endX, endY] = endNotation.split('');
@@ -104,10 +118,10 @@ const GameManager = ({ ...props }) => {
     const endPosition = new Position(HORIZONTAL_AXIS.indexOf(endX), VERTICAL_AXIS.indexOf(endY));
 
     const piece = board.getPieceFromPosition(startPosition);
-    if (piece) playMove(piece, endPosition, true);
+    if (piece) playMove(piece, endPosition, true, promotionPieceType);
   };
 
-  const playMove = (piece, newPosition, isHistoryMove) => {
+  const playMove = (piece, newPosition, isHistoryMove, promotionPieceType) => {
     if (!isHistoryMove) {
       if (board.currentPlayer.teamType !== playerColor) {
         return false;
@@ -127,12 +141,16 @@ const GameManager = ({ ...props }) => {
     isPlayedMoveValid = success;
     if (capturedPiece) capturedPiece = capturedPiece.clone();
 
-    if (isPawnPromotionMove && isPlayedMoveValid && playerColor === piece.teamType) setShowPawnPromotionModal(true);
+    if (isPawnPromotionMove && isPlayedMoveValid && playerColorRef.current === piece.teamType && !isHistoryMove) {
+      setShowPawnPromotionModal(true);
+    } else if (isPawnPromotionMove && isPlayedMoveValid && isHistoryMove && promotionPieceType) {
+      promotePawn(promotionPieceType, isHistoryMove, piece);
+    }
 
     if (isPlayedMoveValid) {
       const isCheckmate = checkForCheckmate();
       checkForStalemate();
-      const notationMove = getChessNotationMove(piece, newPosition, capturedPiece, prevBoard, isCheckmate, isCastleMove, isCheckMove);
+      const notationMove = getChessNotationMove(piece, newPosition, capturedPiece, isCheckmate, isCastleMove, isCheckMove);
 
       if (!isHistoryMove) {
         props.updateNotation(notationMove);
@@ -143,47 +161,21 @@ const GameManager = ({ ...props }) => {
     return isPlayedMoveValid;
   };
 
-  const getChessNotationMove = (piece, newPosition, capturedPiece, prevBoard, isCheckmate, isCastleMove, isCheck) => {
+  const getChessNotationMove = (piece, newPosition, capturedPiece, isCheckmate, isCastleMove, isCheckMove) => {
     const captured = capturedPiece ? "x" : "";
     let notation;
     if (piece.type === PieceType.KING && isCastleMove) {
       const isKingsideCastle = newPosition.x === 1;
-      notation = isKingsideCastle ? "O-O" : "O-O-O";
+      notation = isKingsideCastle ? `O-O${HORIZONTAL_AXIS[newPosition.x]}${VERTICAL_AXIS[newPosition.y]}`
+        : `O-O-O${HORIZONTAL_AXIS[newPosition.x]}${VERTICAL_AXIS[newPosition.y]}`;
     } else {
-      // const disambiguation = getDisambiguation(piece, newPosition, prevBoard);
-      const disambiguation = ''; // leave blank for now as we already keep track of original position
       let type = PIECE_TYPE_TO_LETTER[piece.type];
       if (type === PIECE_TYPE_TO_LETTER[PieceType.PAWN]) type = captured ? HORIZONTAL_AXIS[piece.position.x] : '';
-      notation = type + disambiguation + captured + HORIZONTAL_AXIS[newPosition.x] + VERTICAL_AXIS[newPosition.y];
+      notation = type + captured + HORIZONTAL_AXIS[newPosition.x] + VERTICAL_AXIS[newPosition.y];
     }
-    notation += isCheckmate ? "#" : isCheck ? "+" : "";
+    notation += isCheckmate ? "#" : isCheckMove ? "+" : "";
     notation = `${HORIZONTAL_AXIS[piece.position.x]}${VERTICAL_AXIS[piece.position.y]}->${notation}`;
     return notation;
-  }
-
-  const checkForAmbiguousPieces = (newPosition, type, team, prevBoard) => {
-    const ambiguousPieces = prevBoard.pieces.filter((piece) => {
-      if (piece.type !== type || piece.teamType !== team) return;
-      let isAmbiguous = piece.possibleMoves.some((move) => move.x === newPosition.x && move.y === newPosition.y);
-      return isAmbiguous;
-    })
-    return !(ambiguousPieces.length === 1);
-  }
-
-  const getDisambiguation = (piece, newPosition, prevBoard) => {
-    const isAmbiguous = checkForAmbiguousPieces(newPosition, piece.type, piece.teamType, prevBoard);
-    if (!isAmbiguous) return '';
-
-    const samePieces = prevBoard.pieces.filter(p => p.type === piece.type && p.teamType === piece.teamType);
-
-    if (samePieces.length <= 1) return '';
-
-    const sameRow = samePieces.filter(p => p.position.y === piece.position.y);
-    const sameCol = samePieces.filter(p => p.position.x === piece.position.x);
-
-    if (sameRow.length > 1 && sameCol.length > 1) return HORIZONTAL_AXIS[piece.position.x];
-    else if (sameRow.length > 1) return HORIZONTAL_AXIS[piece.position.x];
-    else if (sameCol.length > 1) return VERTICAL_AXIS[piece.position.y];
   }
 
   const pieceTypeValidations = {
@@ -257,10 +249,25 @@ const GameManager = ({ ...props }) => {
     if ((pieceMoves.length === 0 || !pieceMoves) && !kingIsChecked(board.currentPlayer.teamType, board.pieces)) setShowStalemateModal(true);
   }
 
-  const promotePawn = (pieceType) => {
+  const promotePawn = (pieceType, isHistoryMove, promotionPawn) => {
     if (!promotionPawn) return;
+
+    if (!isHistoryMove) {
+      let newPawnPromotionNotation = notation.split(' ');
+      newPawnPromotionNotation = newPawnPromotionNotation[newPawnPromotionNotation.length - 1];
+      newPawnPromotionNotation = newPawnPromotionNotation.concat(`=${pieceType.substring(0, 1)}`);
+
+      props.updateNotation(undefined, `=${pieceType.substring(0, 1)}`);
+      const data = {
+        type: pieceType,
+        position: promotionPawn.position,
+        promotionNotation: newPawnPromotionNotation,
+      }
+      props.emitPawnPromotion(data);
+    }
     board.promotePawn(pieceType, promotionPawn.clone(), board.currentPlayer.teamType);
     props.updateBoard();
+
     setShowPawnPromotionModal(false);
   }
 
@@ -289,7 +296,7 @@ const GameManager = ({ ...props }) => {
         playMove={playMove}
         pieces={board ? board.pieces : []}
         playerColor={playerColor}
-        currentPlayer = {board ? board.currentPlayer: undefined}
+        currentPlayer={board ? board.currentPlayer : undefined}
       />
     </div>
   );

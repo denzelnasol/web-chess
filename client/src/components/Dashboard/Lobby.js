@@ -17,12 +17,15 @@ import InviteDialog from "components/InviteDialog/InviteDialog";
 
 // Styling
 import './style.scss';
+import Position from "models/Position";
+import { samePosition } from "utilities/Position";
 
 const Lobby = () => {
   let { id } = useParams();
   id = id.substring(1);
 
   const notationRef = useRef(undefined);
+  const boardRef = useRef(undefined);
 
   const [board, setBoard] = useState(initialBoard.clone());
   const [players, setPlayers] = useState([]);
@@ -44,15 +47,15 @@ const Lobby = () => {
       setAccount(account);
 
       mainSocket.on("connect", onSocketJoinGame);
-
       mainSocket.on("players", (playerList) => {
         setPlayers(playerList);
       });
 
       mainSocket.on('playMove', onSocketPlayMove);
+      mainSocket.on('pawnPromotion', onSocketPawnPromotion);
       setSocket(mainSocket);
     };
-
+    
     setupGame();
     setupSocket();
 
@@ -70,7 +73,12 @@ const Lobby = () => {
     notationRef.current = notation;
   }, [notation]);
 
+  useEffect(() => {
+    boardRef.current = board;
+  }, [board]);
+
   const onSocketPlayMove = (move) => {
+    console.log('SOCKET TRIGGERD BY:', move)
     const combinedNotation = notationRef.current ? notationRef.current.concat(" ", move) : move;
     setNotation(combinedNotation);
   }
@@ -84,17 +92,31 @@ const Lobby = () => {
         gameId: id
       });
   }
+  // console.log(notation)
+  console.log(board);
+  const onSocketPawnPromotion = (data) => {
+    const pawnPosition = new Position(data.position.x, data.position.y);
+    const pawn = boardRef.current.pieces.find((piece) => samePosition(pawnPosition, piece.position));
+    boardRef.current.promotePawn(data.type, pawn.clone(), boardRef.current.currentPlayer.teamType);
+    updateNotation(data.promotionNotation);
+    setBoard(boardRef.current.clone());
+  }
 
   const updateBoard = () => {
     setBoard(board.clone());
   }
 
-  const updateNotation = (notationMove) => {
-    if (notation) {
-      const updatedNotation = notation.concat(" ", notationMove);
+  const updateNotation = (notationMove, pawnPromotionNotation) => {
+    if (pawnPromotionNotation) {
+      const updatedNotation = notation.concat(pawnPromotionNotation);
       setNotation(updatedNotation);
     } else {
-      setNotation(notationMove);
+      if (notation) {
+        const updatedNotation = notation.concat(" ", notationMove);
+        setNotation(updatedNotation);
+      } else {
+        setNotation(notationMove);
+      }
     }
   }
 
@@ -106,6 +128,13 @@ const Lobby = () => {
     }
   }
 
+  const emitPawnPromotion = (data) => {
+    try {
+      socket.emit('pawnPromotion', data);
+    } catch (e) {
+      console.log('Socket Error: Socket does not exist');
+    }
+  }
 
   const gameInfo = (
     <div className="game-info">
@@ -147,6 +176,7 @@ const Lobby = () => {
           updateBoard={updateBoard}
           notation={notation}
           emitMove={emitMove}
+          emitPawnPromotion={emitPawnPromotion}
           updateNotation={updateNotation}
           players={players}
           account={account}
