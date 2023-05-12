@@ -9,6 +9,7 @@ dotenv.config();
 // Routers
 import accountRouter from "./routers/account.js";
 import gameRouter from "./routers/game.js";
+import emailRouter from "./routers/email.js";
 
 // Socket
 import { createServer } from 'http';
@@ -24,6 +25,7 @@ app.use(cors({
 const apiRouter = express.Router();
 apiRouter.use('/account', accountRouter);
 apiRouter.use('/game', gameRouter);
+apiRouter.use('/email', emailRouter);
 app.use('/api', apiRouter);
 
 const PORT = 8080;

@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 
-// Emailing
-import emailjs from "emailjs-com";
-import { serviceId, templateId, publicKey } from "emailkey";
+// API
+import { sendEmail } from "api/Email";
 
 // Components
 import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
@@ -15,20 +14,22 @@ const InviteDialog = ({ ...props }) => {
 
   const [email, setEmail] = useState('');
 
-  const sendEmail = async (event) => {
-    event.preventDefault();
-    await emailjs.sendForm(serviceId, templateId, event.target, publicKey);
+  const onSubmit = async (event) => {
+    // event.preventDefault();
+    console.log('submitted!', email, props.gameId)
+    await sendEmail(email, props.gameId);
+    props.updateInviteDialog();
   }
-
+  console.log('email: ', email)
   const handleEmailChange = (event) => {
     setEmail(event.target.value);
   }
   return (
     <div className="invite-dialog">
       <Dialog open={props.isInviteDialogOpen} onClose={props.updateInviteDialog}>
-        <DialogTitle>Modal Dialog Title</DialogTitle>
+        <DialogTitle>Invite a friend</DialogTitle>
         <DialogContent>
-          <form onSubmit={sendEmail}>
+          <form>
             <label>
               <input
                 type="text"
@@ -50,7 +51,7 @@ const InviteDialog = ({ ...props }) => {
           </Button>
 
           <Button
-            onClick={sendEmail}
+            onClick={onSubmit}
             noLink={true}
           >
             Send

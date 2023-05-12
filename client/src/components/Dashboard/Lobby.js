@@ -153,6 +153,7 @@ const Lobby = () => {
       <InviteDialog
         isInviteDialogOpen={isInviteDialogOpen}
         updateInviteDialog={() => setIsInviteDialogOpen(!isInviteDialogOpen)}
+        gameId={id}
       />
       {board &&
         <GameManager
